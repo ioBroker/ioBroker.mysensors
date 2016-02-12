@@ -39,10 +39,10 @@ var adapter = utils.adapter('mysensors');
 var timer =     null;
 var stopTimer = null;
 
-
+var Sensors = require('sensors')
 var serialport = require('serialport');			
 var SerialPort  = serialport.SerialPort;		
-var	portName = "com17";				
+var	portName = "com5";				
 var portConfig = {baudRate: 115200,	parser: serialport.parsers.readline('\n')};
 
 
@@ -255,14 +255,22 @@ function main() {
     syncConfig();
 //------------------------------------------------------------------	
 	portName=adapter.config.com_num;	
-		// open the serial port:
+	adapter.log.debug("Def_port"+portName);
+	// open the serial port:
+	if (portName !=""){
 	var myPort = new SerialPort(portName, portConfig);
 // ловим события порта
 	myPort.on('data', function(data) {
-	adapter.log.info('mySens ' + data);
+	var result = Sensors.parse(data.toString());
+	for(var i in result) {
+ //for( var i = 0; result.length > i; i ++)  {
+      adapter.log.info('__'+result[i].id+'_|_'+result[i].childId+'_|_'+result[i].type+'_|_'+result[i].ack+'_|_'+result[i].subType+'_|_'+result[i].payload);  
+   }
+	//adapter.log.info('mySens ' + data);
 	});
+	}
 //-----------------------------------------------------------------
-//	myPort.write("2;1;1;1;2;0\n");	
+//	myPort.write("1;1;1;1;3;0\n");	
 //	myPort.write("2;1;1;1;2;1\n");	
 //    pingAll();
   //  timer = setInterval(pingAll, adapter.config.interval);
