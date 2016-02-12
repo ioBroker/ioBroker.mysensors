@@ -1,4 +1,4 @@
-<html>
+<html> 
 
 <link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
 <link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
@@ -24,7 +24,7 @@
     }
 </style>
 
-
+ 
 
 <script type="text/javascript">
 
@@ -52,21 +52,26 @@
 	
 	
 	
+	function test1(){
+	document.getElementById('com_num').value=document.getElementById('comlst').value
+	document.getElementById('com_num').style="display: block";
+	document.getElementById('comlst').style="display: none";		
 	
+	}
 	
-	
-	//проверка запущен ли адаптер
+
 	function test(){
 	  sendTo(null, 'list_uart', null, function(list) {
 	    //alert("запрос отправлен")
 		$('#comlst').empty();
+		$('#comlst').append('<option value="select"></option>');
 			for (var j = 0; j < list.length; j++) {
 			$('#comlst').append('<option value="' + list[j].comName + '">' + list[j].comName + '</option>');
-	//		$('#comlst.value').val(settings.comlst);
-			//alert(list[j].comName)
 			}
 		});
-	
+	document.getElementById( 'com_num' ).style="display: none";
+	document.getElementById( 'comlst' ).style="display: block";	
+		//проверка запущен ли адаптер
 			getIsAdapterAlive(function (isAlive) {
          //      if (isAlive) alert("adater_run")
                });
@@ -144,21 +149,19 @@
 
 <!-- you have to put your config page in a div with id adapter-container -->
 <div id="adapter-container">
-		<input class="value number" id="com_num" type="input" size="6"/>
-		<select class="value" id="comlst"  onchange="document.getElementById( "test1" ).value=document.getElementById( "comlst" ).text" ></select>
-
-		<br>
+	<table><tr>
+			<td><button id="selport" onclick='test()'>Select port</button></td>
+			<td><input class="value" id="com_num" type="input" size="10" disabled /><select style='display: none; width:150px' class="value" id="comlst"  onchange="test1()" ></select></td>
+			</tr></table>		
 		
-        <span class="translate">test1</span> <input class="value" id="test1"/><br>
-        <span class="translate">test2</span> <input class="value" id="test2"/><br>
-      
+              
 	  <table id="devices"></table>
-	  <div id="pager-devices"></div>
+	  <!-- div id="pager-devices"></div> \--> 
 
  
 
     <p class="translate">on save adapter restarts with new config immediately</p>
 
 </div>
-<button value ="refrash" onclick='test()'>
+
 </html>

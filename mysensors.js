@@ -34,53 +34,47 @@
 // you have to require the utils module and call adapter function
 var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
 
-// you have to call the adapter function and pass a options object
-// name has to be set and has to be equal to adapters folder name and main file name excluding extension
-// adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
+
 var adapter = utils.adapter('mysensors');
 var timer =     null;
 var stopTimer = null;
 
 
-var serialport = require('serialport'),			// include the serialport library
-	SerialPort  = serialport.SerialPort,			// make a local instance of serial
-	portName = "com5",// + adapter.config.interval,//"com17",								// get the port name from the command line
-	portConfig = {
-		baudRate: 115200,
-		// call myPort.on('data') when a newline is received:
-		parser: serialport.parsers.readline('\n')
-	};
-// open the serial port:
-var myPort = new SerialPort(portName, portConfig);
+var serialport = require('serialport');			
+var SerialPort  = serialport.SerialPort;		
+var	portName = "com17";				
+var portConfig = {baudRate: 115200,	parser: serialport.parsers.readline('\n')};
 
 
 
-	// this function runs if there's input from the serialport:
-myPort.on('data', function(data) {
-	//	socket.emit('message', data);		// send the data to the client
-adapter.log.debug('mySens ' + data);
-});
+
+
+
+
+
+
 
 //принимаем и обрабатываем сообщения 
 adapter.on('message', function (obj) {
     var wait = false;
-    if (obj) {
+    
+	if (obj) {
         switch (obj.command) {
 
 		case 'list_uart':												//ToDo отдать список портов
+
 				serialport.list(function (err, ports) {		
 					if (obj.callback) {adapter.log.info('obj.callback...ToDo выслать список СОМ портов');adapter.sendTo(obj.from, obj.command, ports, obj.callback);}			
-					
-					ports.forEach(function(port) {
-					adapter.log.info(port.comName);
-					adapter.log.info(port.pnpId);
-					adapter.log.info(port.manufacturer);
-					});
+					//ports.forEach(function(port) {adapter.log.info(port.comName);adapter.log.info(port.pnpId);adapter.log.info(port.manufacturer);});
 				});
-			break;
-				
-		
-		
+		break;
+		case 'start_uart':	
+	
+
+
+	
+
+		break;
 		
 		}
 	}
@@ -236,15 +230,15 @@ adapter.on('stateChange', function (id, state) {
  //   }
 //});
 
-
-
-
-
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
     main();
-});
+}); 
+
+
+
+
 
 
 function main() {
@@ -254,13 +248,22 @@ function main() {
         mysdevs.push(adapter.config.devices[i].name);
     }
     if (adapter.config.interval < 5000) {
-        adapter.config.interval = 5000;
+       adapter.config.interval = 5000;
     
 	}
 
     syncConfig();
+//------------------------------------------------------------------	
+	portName=adapter.config.com_num;	
+		// open the serial port:
+	var myPort = new SerialPort(portName, portConfig);
+// ловим события порта
+	myPort.on('data', function(data) {
+	adapter.log.info('mySens ' + data);
+	});
+//-----------------------------------------------------------------
 //	myPort.write("2;1;1;1;2;0\n");	
 //	myPort.write("2;1;1;1;2;1\n");	
-    pingAll();
+//    pingAll();
   //  timer = setInterval(pingAll, adapter.config.interval);
 }
