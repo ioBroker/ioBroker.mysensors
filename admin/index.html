@@ -117,7 +117,7 @@
             setValue(key, settings[key], onChange);
         }
 
-        editTable('devices', ['name', 'node_id','child_id', 'type','room'], devices, 350);
+        editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 350);
         onChange(false);
     }
 
@@ -135,8 +135,8 @@
             }
         });
 
-        // Get edited table
-        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'type','room']);
+        // Get edited table  node-id;child-sensor-id;message-type;ack;sub-type;payload\n
+        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room']);
 
         callback(obj);
     }
