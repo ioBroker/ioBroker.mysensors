@@ -1,28 +1,27 @@
 {
     "common": {
         "name":                     "mysensors",
-        "version":                  "0.5.0",
+        "version":                  "0.0.1",
         "title":                    "mysensors adapter",
         "desc":                     {
- 			             "en": "ioBroker mysensors Adapter",
- 			             "de": "ioBroker Mysensors Adapter",
- 			             "ru": "ioBroker Mysensors драйвер "
-	},
+             "en": "ioBroker mysensors Adapter",
+             "de": "ioBroker Mysensors Adapter",
+             "ru": "ioBroker Mysensors драйвер "
+	    },
         "platform":                 "js",
         "mode":                     "daemon",
         "icon":                     "mysensors.png",
         "enabled":                  true,
         "messagebox":               true,		
-	"extIcon":                  "https://ioBroker/ioBroker.mysensors/master/admin/mysensors.png",
-	"keywords":                 ["mysensors", "vis", "GUI", "graphical", "scada"],
-        "readme":                   "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
-	"loglevel":                 "info",
-        "type":                     "communication",
-        "restartAdapters":          ["vis"]
+        "extIcon":                  "https://raw.githubusercontent.com/DJONvl/ioBroker.mqtt/master/admin//mysensors.png",
+        "keywords":                 ["mysensors", "arduino"],
+        "readme":                   "https://github.com/DJONvl/ioBroker.mysensors/blob/master/README.md",
+        "loglevel":                 "info",
+        "type":                     "communication"
     },
     "native": {
-        "test1": true,
-        "test2": 42
+        "comName": "",
+        "interval": 5000
     },
     "objects": [
 

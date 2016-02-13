@@ -13,19 +13,6 @@
 <script type="text/javascript" src="../../js/translate.js"></script>
 <script type="text/javascript" src="../../js/adapter-settings.js"></script>
 
-<style>
-    .table_header {
-        background-color: green;
-        color: white;
-    }
-    .ip {
-        width: 150px;
-        text-align: right;
-    }
-</style>
-
- 
-
 <script type="text/javascript">
 
     // Dictionary (systemDictionary is global variable from adapter-settings.js)
@@ -38,49 +25,25 @@
         }
     };
 
+    var devices;
+
    //   getIPs(function(ips) {
    //         for (var i = 0; i < ips.length; i++) {
    //             $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
    //         }
    //       //  $('#bind.value').val(settings.bind);
    //     });
-	
-	
-	
-	
-	
-	
-	
-	
-	function test1(){
-	document.getElementById('com_num').value=document.getElementById('comlst').value
-	document.getElementById('com_num').style="display: block";
-	document.getElementById('comlst').style="display: none";		
-	
-	}
-	
 
-	function test(){
-	  sendTo(null, 'list_uart', null, function(list) {
-	    //alert("запрос отправлен")
-		$('#comlst').empty();
-		$('#comlst').append('<option value="select"></option>');
-			for (var j = 0; j < list.length; j++) {
-			$('#comlst').append('<option value="' + list[j].comName + '">' + list[j].comName + '</option>');
-			}
-		});
-	document.getElementById( 'com_num' ).style="display: none";
-	document.getElementById( 'comlst' ).style="display: block";	
-		//проверка запущен ли адаптер
-			getIsAdapterAlive(function (isAlive) {
-         //      if (isAlive) alert("adater_run")
-               });
-	};
-	
-	
-	
-	
-	
+	function getComPorts(actualValue) {
+        sendTo(null, 'list_uart', null, function(list) {
+            var text = '<option value="">' + _('Select port') + '</option>';
+            for (var j = 0; j < list.length; j++) {
+                text += '<option value="' + list[j].comName + '" ' + ((actualValue == list[j].comName) ? 'selected' : '') + '>' + list[j].comName + '</option>';
+            }
+
+            $('#comName').html(text);
+        });
+	}
 	
     function setValue(id, value, onChange) {
         // example: select elements with id=key and class=value and insert value
@@ -122,7 +85,12 @@
             setValue(key, settings[key], onChange);
         }
 
+        getIsAdapterAlive(function (isAlive) {
+            if (isAlive) getComPorts(settings.comName);
+        });
+
         editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 350);
+
         onChange(false);
     }
 
@@ -150,18 +118,9 @@
 <!-- you have to put your config page in a div with id adapter-container -->
 <div id="adapter-container">
 	<table><tr>
-			<td><button id="selport" onclick='test()'>Select port</button></td>
-			<td><input class="value" id="com_num" type="input"  size="10" disabled /><select style='display: none; width:150px' class="value" id="comlst"  onchange="test1()" ></select></td>
-			</tr></table>		
-		
-              
-	  <table id="devices"></table>
-	  <!-- div id="pager-devices"></div> \--> 
-
- 
-
-    <p class="translate">on save adapter restarts with new config immediately</p>
-
+        <td><select class="value" id="comName"></select></td>
+    </tr></table>
+    <table id="devices"></table>
 </div>
 
 </html>
