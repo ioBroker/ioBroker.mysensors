@@ -9,7 +9,8 @@ var adapter   = utils.adapter('mysensors');
 var stopTimer = null;
 
 var Sensors    = require('sensors');
-var SerialPort = require('serialport').SerialPort;
+var serialport = require('serialport');//.SerialPort;
+var SerialPort  = serialport.SerialPort;
 var portConfig = {baudRate: 115200,	parser: serialport.parsers.readline('\n')};
 
 //принимаем и обрабатываем сообщения 
@@ -118,7 +119,7 @@ function syncConfig() {
                     configToDelete.push(ip);
                 }
             }
-        }
+        } 
 
         if (configToAdd.length) {
             for (var r = 0; r < adapter.config.devices.length; r++) {

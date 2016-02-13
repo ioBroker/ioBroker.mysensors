@@ -13,8 +13,8 @@
 <script type="text/javascript" src="../../js/translate.js"></script>
 <script type="text/javascript" src="../../js/adapter-settings.js"></script>
 
-<script type="text/javascript">
 
+<script type="text/javascript">
     // Dictionary (systemDictionary is global variable from adapter-settings.js)
     systemDictionary = {
         "mysensors adapter settings": { "ru": "Настройки"},
@@ -24,23 +24,19 @@
         "ru": "После сохранения драйвер перезапуститься"
         }
     };
-
     var devices;
-
    //   getIPs(function(ips) {
    //         for (var i = 0; i < ips.length; i++) {
    //             $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
    //         }
    //       //  $('#bind.value').val(settings.bind);
    //     });
-
 	function getComPorts(actualValue) {
         sendTo(null, 'list_uart', null, function(list) {
             var text = '<option value="">' + _('Select port') + '</option>';
             for (var j = 0; j < list.length; j++) {
                 text += '<option value="' + list[j].comName + '" ' + ((actualValue == list[j].comName) ? 'selected' : '') + '>' + list[j].comName + '</option>';
             }
-
             $('#comName').html(text);
         });
 	}
@@ -65,35 +61,26 @@
                                 newVal += val[i];
                             }
                         }
-
                         if (val != newVal) $(this).val(newVal);
                     }
                 }
-
                 onChange();
             });
         }
     }
-
     // the function loadSettings has to exist ...
-    function load(settings, onChange) {
+    function load(settings, onChange) { 
         if (!settings) return;
-
         devices = settings.devices || [];
-
         for (var key in settings) {
             setValue(key, settings[key], onChange);
         }
-
         getIsAdapterAlive(function (isAlive) {
             if (isAlive) getComPorts(settings.comName);
         });
-
-        editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 350);
-
+        editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 250);
         onChange(false);
     }
-
     // ... and the function save has to exist.
     // you have to make sure the callback is called with the settings object as first param!
     function save(callback) {
@@ -107,10 +94,8 @@
                 obj[$this.attr('id')] = $this.val();
             }
         });
-
         // Get edited table  node-id;child-sensor-id;message-type;ack;sub-type;payload\n
         obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room']);
-
         callback(obj);
     }
 </script>
@@ -121,6 +106,8 @@
         <td><select class="value" id="comName"></select></td>
     </tr></table>
     <table id="devices"></table>
+	
+	<div id="pager-devices"></div>
 </div>
 
 </html>
