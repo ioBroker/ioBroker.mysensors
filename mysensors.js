@@ -1,32 +1,3 @@
-/**
- *
- * template adapter
- *
- *
- *  file io-package.json comments:
- *
- *  {
- *      "common": {
- *          "name":         "template",                  // name has to be set and has to be equal to adapters folder name and main file name excluding extension
- *          "version":      "0.0.0",                    // use "Semantic Versioning"! see http://semver.org/
- *          "title":        "Node.js template Adapter",  // Adapter title shown in User Interfaces
- *          "authors":  [                               // Array of authord
- *              "name <mail@template.com>"
- *          ]
- *          "desc":         "template adapter",          // Adapter description shown in User Interfaces. Can be a language object {de:"...",ru:"..."} or a string
- *          "platform":     "Javascript/Node.js",       // possible values "javascript", "javascript/Node.js" - more coming
- *          "mode":         "daemon",                   // possible values "daemon", "schedule", "subscribe"
- *          "schedule":     "0 0 * * *"                 // cron-style schedule. Only needed if mode=schedule
- *          "loglevel":     "info"                      // Adapters Log Level
- *      },
- *      "native": {                                     // the native object is available via adapter.config in your adapters code - use it for configuration
- *          "test1": true,
- *          "test2": 42
- *      }
- *  }
- *
- */
-
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
 "use strict";
@@ -34,48 +5,30 @@
 // you have to require the utils module and call adapter function
 var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
 
-
-var adapter = utils.adapter('mysensors');
-var timer =     null;
+var adapter   = utils.adapter('mysensors');
 var stopTimer = null;
 
-var Sensors = require('sensors')
-var serialport = require('serialport');			
-var SerialPort  = serialport.SerialPort;		
-var	portName = "com5";				
+var Sensors    = require('sensors');
+var SerialPort = require('serialport').SerialPort;
 var portConfig = {baudRate: 115200,	parser: serialport.parsers.readline('\n')};
-
-
-
-
-
-
-
-
-
 
 //принимаем и обрабатываем сообщения 
 adapter.on('message', function (obj) {
-    var wait = false;
-    
 	if (obj) {
         switch (obj.command) {
+            case 'list_uart':
+                //ToDo отдать список портов
+                serialport.list(function (err, ports) {
+                    if (obj.callback) {
+                        adapter.log.info('obj.callback...ToDo выслать список СОМ портов');
+                        adapter.sendTo(obj.from, obj.command, ports, obj.callback);
+                    }
+                });
+                break;
 
-		case 'list_uart':												//ToDo отдать список портов
+            case 'start_uart':
 
-				serialport.list(function (err, ports) {		
-					if (obj.callback) {adapter.log.info('obj.callback...ToDo выслать список СОМ портов');adapter.sendTo(obj.from, obj.command, ports, obj.callback);}			
-					//ports.forEach(function(port) {adapter.log.info(port.comName);adapter.log.info(port.pnpId);adapter.log.info(port.manufacturer);});
-				});
-		break;
-		case 'start_uart':	
-	
-
-
-	
-
-		break;
-		
+		        break;
 		}
 	}
 });
@@ -84,15 +37,15 @@ var host  = ''; // название машины где подключен шл�
 var mysdevs = []; // список устройств mysensor
 
 function pingAll() {
-   adapter.log.debug('Ping-all' + adapter.config.comlst );
+   adapter.log.debug('Ping-all' + adapter.config.comlst);
+    
    if (stopTimer) clearTimeout(stopTimer);
 
     var count = mysdevs.length;
     adapter.log.debug('count-' + mysdevs.length);
 
-   mysdevs.forEach(function (_mysdevice) {
-        adapter.log.debug('tada-- ' + _mysdevice);      
- 
+    mysdevs.forEach(function (_mysdevice) {
+        adapter.log.debug('tada-- ' + _mysdevice);
     });
 }
 
@@ -116,8 +69,6 @@ function createState(name, ip, room, callback) {
     // }, callback);
 }
 
-
-
 function addState(name, ip, room, callback) {
     adapter.getObject(host, function (err, obj) {
         if (err || !obj) {
@@ -130,8 +81,6 @@ function addState(name, ip, room, callback) {
         }
     });
 }
-
-
 
 function syncConfig() {
     adapter.getStatesOf('', host, function (err, _states) {
@@ -188,8 +137,6 @@ function syncConfig() {
     });
 }
 
-
-
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
@@ -217,29 +164,11 @@ adapter.on('stateChange', function (id, state) {
     }
 });
 
-// Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-//adapter.on('message', function (obj) {
-//    if (typeof obj == 'object' && obj.message) {
-//        if (obj.command == 'send') {
-            // e.g. send email or pushover or whatever
-//            console.log('send command');
-
-            // Send response in callback if required
- //           if (obj.callback) adapter.sendTo(obj.from, obj.command, 'Message received', obj.callback);
- //       }
- //   }
-//});
-
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
     main();
 }); 
-
-
-
-
-
 
 function main() {
     host = adapter.host;
@@ -247,31 +176,38 @@ function main() {
     for (var i = 0; i < adapter.config.devices.length; i++) {
         mysdevs.push(adapter.config.devices[i].name);
     }
-    if (adapter.config.interval < 5000) {
-       adapter.config.interval = 5000;
-    
-	}
+
+    if (adapter.config.interval < 5000) adapter.config.interval = 5000;
 
     syncConfig();
-//------------------------------------------------------------------	
-	portName=adapter.config.com_num;	
-	adapter.log.debug("Def_port"+portName);
+
+    //------------------------------------------------------------------	
+    
+	adapter.log.debug('Communication port:' + adapter.config.comName);
+
 	// open the serial port:
-	if (portName !=""){
-	var myPort = new SerialPort(portName, portConfig);
-// ловим события порта
-	myPort.on('data', function(data) {
-	var result = Sensors.parse(data.toString());
-	for(var i in result) {
- //for( var i = 0; result.length > i; i ++)  {
-      adapter.log.info('__'+result[i].id+'_|_'+result[i].childId+'_|_'+result[i].type+'_|_'+result[i].ack+'_|_'+result[i].subType+'_|_'+result[i].payload);  
-   }
-	//adapter.log.info('mySens ' + data);
-	});
+	if (adapter.config.comName) {
+        var myPort = new SerialPort(adapter.config.comName, portConfig);
+
+        // ловим события порта
+        myPort.on('data', function(data) {
+            var result = Sensors.parse(data.toString());
+
+            for(var i in result) {
+                adapter.log.info('__' +
+                    result[i].id      + '_|_' +
+                    result[i].childId + '_|_' +
+                    result[i].type    + '_|_' +
+                    result[i].ack     + '_|_' +
+                    result[i].subType + '_|_' +
+                    result[i].payload);
+            }
+        });
 	}
-//-----------------------------------------------------------------
-//	myPort.write("1;1;1;1;3;0\n");	
-//	myPort.write("2;1;1;1;2;1\n");	
-//    pingAll();
-  //  timer = setInterval(pingAll, adapter.config.interval);
+
+    //-----------------------------------------------------------------
+    //	myPort.write("1;1;1;1;3;0\n");
+    //	myPort.write("2;1;1;1;2;1\n");
+    //    pingAll();
+    //  timer = setInterval(pingAll, adapter.config.interval);
 }

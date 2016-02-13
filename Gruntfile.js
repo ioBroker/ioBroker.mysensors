@@ -5,66 +5,33 @@
 /*jslint node: true */
 "use strict";
 
+function getAppName() {
+    var parts = __dirname.replace(/\\/g, '/').split('/');
+    return parts[parts.length - 1].split('.')[0].toLowerCase();
+}
+
 module.exports = function (grunt) {
 
     var srcDir    = __dirname + '/';
     var pkg       = grunt.file.readJSON('package.json');
-    var adaptName = pkg.name.substring('iobroker.'.length);
     var iopackage = grunt.file.readJSON('io-package.json');
     var version   = (pkg && pkg.version) ? pkg.version : iopackage.common.version;
-    var newname   = grunt.option('name');
-    var author    = grunt.option('author') || '@@Author@@';
-    var email     = grunt.option('email')  || '@@email@@';
-    var fs        = require('fs');
-
-    // check arguments
-    if (process.argv[2] == 'rename') {
-		console.log('Try to rename to "' + newname + '"');
-        if (!newname) {
-            console.log('Please write the new template name, like: "grunt rename --name=mywidgetset" --author="Author Name"');
-            process.exit();
-        }
-        if (newname.indexOf(' ') != -1) {
-            console.log('Name may not have space in it.');
-            process.exit();
-        }
-        if (newname.toLowerCase() != newname) {
-            console.log('Name must be lower case.');
-            process.exit();
-        }
-        if (fs.existsSync(__dirname + '/admin/template.png')) {
-            fs.renameSync(__dirname + '/admin/template.png',              __dirname + '/admin/' + newname + '.png');
-        }
-        if (fs.existsSync(__dirname + '/widgets/template.html')) {
-            fs.renameSync(__dirname + '/widgets/template.html',           __dirname + '/widgets/' + newname + '.html');
-        }
-        if (fs.existsSync(__dirname + '/widgets/template/js/template.js')) {
-            fs.renameSync(__dirname + '/widgets/template/js/template.js', __dirname + '/widgets/template/js/' + newname + '.js');
-        }
-        if (fs.existsSync(__dirname + '/widgets/template')) {
-            fs.renameSync(__dirname + '/widgets/template',                __dirname + '/widgets/' + newname);
-        }
-    }
+    var appName   = getAppName();
 
     // Project configuration.
     grunt.initConfig({
         pkg: pkg,
-
         replace: {
-            version: {
+            core: {
                 options: {
                     patterns: [
                         {
-                            match: /version: *"[\.0-9]*"/,
-                            replacement: 'version: "' + version + '"'
+                            match: /var version = *'[\.0-9]*';/g,
+                            replacement: "var version = '" + version + "';"
                         },
                         {
-                            match: /"version": *"[\.0-9]*",/g,
+                            match: /"version"\: *"[\.0-9]*",/g,
                             replacement: '"version": "' + version + '",'
-                        },
-                        {
-                            match: /version: *"[\.0-9]*",/g,
-                            replacement: 'version: "' + version + '",'
                         }
                     ]
                 },
@@ -73,94 +40,11 @@ module.exports = function (grunt) {
                         expand:  true,
                         flatten: true,
                         src:     [
-                                srcDir + 'package.json',
-                                srcDir + 'io-package.json'
+                            srcDir + 'controller.js',
+                            srcDir + 'package.json',
+                            srcDir + 'io-package.json'
                         ],
                         dest:    srcDir
-                    },
-                    {
-                        expand:  true,
-                        flatten: true,
-                        src:     [
-                                 srcDir + 'widgets/' + adaptName + '.html'
-                        ],
-                        dest:    srcDir + 'widgets'
-                    },
-                    {
-                        expand:  true,
-                        flatten: true,
-                        src:     [
-                                 srcDir + 'widgets/' + adaptName + '/js/' + adaptName + '.js'
-                        ],
-                        dest:    srcDir + 'widgets/' + adaptName + '/js/'
-                    }
-                ]
-            },
-            name: {
-                options: {
-                    patterns: [
-                        {
-                            match: /template/g,
-                            replacement: newname
-                        },
-                        {
-                            match: /Template/g,
-                            replacement: newname ? (newname[0].toUpperCase() + newname.substring(1)) : 'Template'
-                        },
-                        {
-                            match: /@@Author@@/g,
-                            replacement: author
-                        },
-                        {
-                            match: /@@email@@/g,
-                            replacement: email
-                        }
-                    ]
-                },
-                files: [
-                    {
-                        expand:  true,
-                        flatten: true,
-                        src:     [
-                                 srcDir + 'io-package.json',
-                                 srcDir + 'LICENSE',
-                                 srcDir + 'package.json',
-                                 srcDir + 'README.md',
-                                 srcDir + 'io-package.json'
-                        ],
-                        dest:    srcDir
-                    },
-                    {
-                        expand:  true,
-                        flatten: true,
-                        src:     [
-                                 srcDir + 'widgets/' + newname +'.html'
-                        ],
-                        dest:    srcDir + 'widgets'
-                    },
-                    {
-                        expand:  true,
-                        flatten: true,
-                        src:     [
-                                 srcDir + 'admin/index.html'
-                        ],
-                        dest:    srcDir + 'admin'
-                    },
-                    {
-                        expand:  true,
-                        flatten: true,
-                        src:     [
-                                 srcDir + 'widgets/' + newname + '/js/' + newname +'.js'
-                        ],
-                        dest:    srcDir + 'widgets/' + newname + '/js'
-                    },
-                    {
-                        expand:  true,
-                        flatten: true,
-                        src:     [
-                                 srcDir + 'widgets/' + newname + '/css/*.css'
-                        ],
-                        dest:    srcDir + 'widgets/' + newname + '/css'
                     }
                 ]
             }
@@ -169,25 +53,65 @@ module.exports = function (grunt) {
         jscs:   require(__dirname + '/tasks/jscs.js'),
         // Lint
         jshint: require(__dirname + '/tasks/jshint.js'),
-
         http: {
             get_hjscs: {
                 options: {
-                    url: 'https://raw.githubusercontent.com/ioBroker/ioBroker.js-controller/master/tasks/jscs.js'
+                    url: 'https://raw.githubusercontent.com/' + appName + '/' + appName + '.js-controller/master/tasks/jscs.js'
                 },
                 dest: 'tasks/jscs.js'
             },
             get_jshint: {
                 options: {
-                    url: 'https://raw.githubusercontent.com/ioBroker/ioBroker.js-controller/master/tasks/jshint.js'
+                    url: 'https://raw.githubusercontent.com/' + appName + '/' + appName + '.js-controller/master/tasks/jshint.js'
                 },
                 dest: 'tasks/jshint.js'
             },
+            get_gruntfile: {
+                options: {
+                    url: 'https://raw.githubusercontent.com/' + appName + '/' + appName + '.build/master/adapters/Gruntfile.js'
+                },
+                dest: 'Gruntfile.js'
+            },
+            get_utilsfile: {
+                options: {
+                    url: 'https://raw.githubusercontent.com/' + appName + '/' + appName + '.build/master/adapters/utils.js'
+                },
+                dest: 'lib/utils.js'
+            },
             get_jscsRules: {
                 options: {
-                    url: 'https://raw.githubusercontent.com/ioBroker/ioBroker.js-controller/master/tasks/jscsRules.js'
+                    url: 'https://raw.githubusercontent.com/' + appName + '/' + appName + '.js-controller/master/tasks/jscsRules.js'
                 },
                 dest: 'tasks/jscsRules.js'
+            }
+        }
+    });
+
+    grunt.registerTask('updateReadme', function () {
+        var readme = grunt.file.read('README.md');
+        var pos = readme.indexOf('## Changelog\n');
+        if (pos != -1) {
+            var readmeStart = readme.substring(0, pos + '## Changelog\n'.length);
+            var readmeEnd   = readme.substring(pos + '## Changelog\n'.length);
+
+            if (readme.indexOf(version) == -1) {
+                var timestamp = new Date();
+                var date = timestamp.getFullYear() + '-' +
+                    ('0' + (timestamp.getMonth() + 1).toString(10)).slice(-2) + '-' +
+                    ('0' + (timestamp.getDate()).toString(10)).slice(-2);
+
+                var news = "";
+                if (iopackage.common.whatsNew) {
+                    for (var i = 0; i < iopackage.common.whatsNew.length; i++) {
+                        if (typeof iopackage.common.whatsNew[i] == 'string') {
+                            news += '* ' + iopackage.common.whatsNew[i] + '\n';
+                        } else {
+                            news += '* ' + iopackage.common.whatsNew[i].en + '\n';
+                        }
+                    }
+                }
+
+                grunt.file.write('README.md', readmeStart + '### ' + version + ' (' + date + ')\n' + (news ? news + '\n\n' : '\n') + readmeEnd);
             }
         }
     });
@@ -199,22 +123,14 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', [
         'http',
-        'replace:version',
+        'replace:core',
+        'updateReadme',
         'jshint',
         'jscs'
     ]);
 
-    grunt.registerTask('prepublish', [
-        'http',
-        'replace:version'
-    ]);
-
     grunt.registerTask('p', [
-        'http',
-        'replace:version'
-    ]);
-
-    grunt.registerTask('rename', [
-        'replace:name'
+        'replace:core',
+        'updateReadme'
     ]);
 };
