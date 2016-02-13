@@ -171,6 +171,45 @@ adapter.on('ready', function () {
     main();
 }); 
 
+var dbsUnique=[];//будут хранится уникальные посылки от всех юнитов, из ком порта
+//  ---------------------------------------------------------
+//  node-id; child-sensor-id; message-type; ack; sub-type; payload\n
+//  ---------------------------------------------------------
+function mkdbmsgUnique( str ) {
+   var valcsv=str.split( ";" ); //элементы строки лога
+   var fl=false;
+    adapter.log.info("количество сообщений "+dbsUnique.length);
+   for( var n = 0 ; n < dbsUnique.length; n ++ ){
+     
+      if(   dbsUnique[n].NodeId==valcsv[0] &&
+            dbsUnique[n].ChildId==valcsv[1] &&
+            dbsUnique[n].Data_type==valcsv[4]
+      ){
+         // dbsUnique[n].==valcsv[3] &&
+         // dbsUnique[n].==valcsv[4] &&
+         // dbsUnique[n].==valcsv[5] &&
+         // dbsUnique[n].==valcsv[6]    //sub-type
+         fl=true
+      }
+   }
+   if ( fl==false &&  valcsv[1]!=="0" )//не добавляем ноду шлюза
+   {
+      //  alert( str );
+      dbsUnique.push(
+      {
+         "NodeId":		valcsv[0],
+         "ChildId":		valcsv[1],
+         "MsgType":		valcsv[2],
+         "Ack":			valcsv[3],
+         "Data_type":	valcsv[4],
+         "Value":		valcsv[5],
+         
+      }
+      );
+
+     // tree.push( str );
+   }
+}
 function main() {
     host = adapter.host;
 
@@ -192,7 +231,8 @@ function main() {
 
         // ловим события порта
         myPort.on('data', function(data) {
-            var result = Sensors.parse(data.toString());
+            mkdbmsgUnique(data); //пишем в массив уникальных сообщений
+			var result = Sensors.parse(data.toString());
 
             for(var i in result) {
                 adapter.log.info('__' +
