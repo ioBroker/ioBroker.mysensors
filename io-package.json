@@ -14,7 +14,7 @@
         "enabled":                  true,
         "messagebox":               true,		
         "extIcon":                  "https://raw.githubusercontent.com/DJONvl/ioBroker.mqtt/master/admin//mysensors.png",
-        "keywords":                 ["mysensors", "vis", "GUI", "graphical", "scada"],
+        "keywords":                 ["mysensors", "arduino"],
         "readme":                   "https://github.com/DJONvl/ioBroker.mysensors/blob/master/README.md",
         "loglevel":                 "info",
         "type":                     "communication"

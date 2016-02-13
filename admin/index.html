@@ -6,6 +6,8 @@
 <script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
 <script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
+<script type="text/javascript" src="../../lib/js/jqGrid/jquery.jqGrid-4.5.4.min.js"></script>
+<script type="text/javascript" src="../../lib/js/jqGrid/grid.locale-all.js"></script>
 
 <link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
 <script type="text/javascript" src="../../js/translate.js"></script>
@@ -22,6 +24,8 @@
         "ru": "После сохранения драйвер перезапуститься"
         }
     };
+
+    var devices;
 
    //   getIPs(function(ips) {
    //         for (var i = 0; i < ips.length; i++) {
@@ -85,6 +89,8 @@
             if (isAlive) getComPorts(settings.comName);
         });
 
+        editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 350);
+
         onChange(false);
     }
 
@@ -102,6 +108,9 @@
             }
         });
 
+        // Get edited table  node-id;child-sensor-id;message-type;ack;sub-type;payload\n
+        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room']);
+
         callback(obj);
     }
 </script>
@@ -111,6 +120,7 @@
 	<table><tr>
         <td><select class="value" id="comName"></select></td>
     </tr></table>
+    <table id="devices"></table>
 </div>
 
 </html>
