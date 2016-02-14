@@ -41,6 +41,7 @@
 						'</td><td>' + _('ack')		+
 						'</td><td>' + _('sub-type')	+
 						'</td><td>' + _('payload')	+
+						'</td><td>' + _('Bind')	+						
 						'</td></tr>';
 						
             for (var j = 0; j < list.length; j++) {
@@ -49,7 +50,8 @@
 					'</td><td>' + list[j].MsgType	+ 					
 					'</td><td>' + list[j].Ack		+ 					
 					'</td><td>' + list[j].Data_type	+ 					
-					'</td><td>' + list[j].Value		+ 				
+					'</td><td>' + list[j].Value		+ 
+					'</td><td><button id="addunit" onclick="test()">bind</button>'	+					
 					'</td></tr>';	
 				}
             $('#comTbl').html(text);
@@ -126,10 +128,10 @@
     }
 </script>
 
-<!-- you have to put your config page in a div with id adapter-container -->
+<!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
 <div id="adapter-container">
 	<table><tr>
-        <td><select class="value" id="comName"></select></td><td><button type='button' value="Bind" onclick='getUnit();'></td>
+        <td><select class="value" id="comName"></select></td><td><button type='button' id="lstunin" onclick='getUnit();'>list unit</td>
     </tr></table>
     <table id="devices"></table>
     <table id="comTbl" border="1"cellspacing="0" ></table>	

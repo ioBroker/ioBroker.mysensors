@@ -194,11 +194,11 @@ function mkdbmsgUnique( str ) {
          // dbsUnique[n].==valcsv[5] &&
          // dbsUnique[n].==valcsv[6]    //sub-type
          fl=true
+		 dbsUnique[n].Value=valcsv[5];//todo сравнить с олд вал и изменить стейт
       }
    }
    if ( fl==false &&  valcsv[1]!=="0" )//не добавляем ноду шлюза
    {
-      //  alert( str );
       dbsUnique.push(
       {
          "NodeId":		valcsv[0],
