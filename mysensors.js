@@ -27,8 +27,11 @@ adapter.on('message', function (obj) {
                 });
                 break;
 
-            case 'start_uart':
-
+            case 'list_dbsU'://ToDo отдать список юнитов
+                    if (obj.callback) {
+                        adapter.log.info('obj.callback...ToDo выслать список юнитов');
+                        adapter.sendTo(obj.from, obj.command, dbsUnique, obj.callback);
+                    }
 		        break;
 		}
 	}
@@ -181,8 +184,9 @@ function mkdbmsgUnique( str ) {
     adapter.log.info("количество сообщений "+dbsUnique.length);
    for( var n = 0 ; n < dbsUnique.length; n ++ ){
      
-      if(   dbsUnique[n].NodeId==valcsv[0] &&
-            dbsUnique[n].ChildId==valcsv[1] &&
+      if(   dbsUnique[n].NodeId==valcsv[0]	&&
+            dbsUnique[n].ChildId==valcsv[1]	&&
+            dbsUnique[n].MsgType==valcsv[2]	&&			
             dbsUnique[n].Data_type==valcsv[4]
       ){
          // dbsUnique[n].==valcsv[3] &&

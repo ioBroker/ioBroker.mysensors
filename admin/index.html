@@ -31,6 +31,32 @@
    //         }
    //       //  $('#bind.value').val(settings.bind);
    //     });
+	function getUnit(ldb) {
+       // node-id; child-sensor-id; message-type; ack; sub-type; payload\n
+		
+		sendTo(null, 'list_dbsU', null, function(list) {
+            var text =	'<tr><td>' + _('node-id')	+ 
+						'</td><td>' + _('child-id')	+ 
+						'</td><td>' + _('msg-type')	+			
+						'</td><td>' + _('ack')		+
+						'</td><td>' + _('sub-type')	+
+						'</td><td>' + _('payload')	+
+						'</td></tr>';
+						
+            for (var j = 0; j < list.length; j++) {
+            text += '<tr><td>' + list[j].NodeId		+ 
+					'</td><td>' + list[j].ChildId	+ 
+					'</td><td>' + list[j].MsgType	+ 					
+					'</td><td>' + list[j].Ack		+ 					
+					'</td><td>' + list[j].Data_type	+ 					
+					'</td><td>' + list[j].Value		+ 				
+					'</td></tr>';	
+				}
+            $('#comTbl').html(text);
+        });
+	}
+	
+	
 	function getComPorts(actualValue) {
         sendTo(null, 'list_uart', null, function(list) {
             var text = '<option value="">' + _('Select port') + '</option>';
@@ -78,7 +104,7 @@
         getIsAdapterAlive(function (isAlive) {
             if (isAlive) getComPorts(settings.comName);
         });
-        editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 250);
+        editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 350);
         onChange(false);
     }
     // ... and the function save has to exist.
@@ -103,10 +129,10 @@
 <!-- you have to put your config page in a div with id adapter-container -->
 <div id="adapter-container">
 	<table><tr>
-        <td><select class="value" id="comName"></select></td>
+        <td><select class="value" id="comName"></select></td><td><button type='button' value="Bind" onclick='getUnit();'></td>
     </tr></table>
     <table id="devices"></table>
-	
+    <table id="comTbl" border="1"cellspacing="0" ></table>	
 	<div id="pager-devices"></div>
 </div>
 
