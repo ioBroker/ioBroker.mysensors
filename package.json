@@ -25,7 +25,8 @@
     "url": "https://github.com/DJONvl/ioBroker.mysensors"
   },
   "dependencies": {
-    "sensors": "^0.1.0"
+    "sensors": "^0.1.0",
+    "serialport": "^2.0.6"
   },
   "devDependencies": {
       "grunt": "^0.4.5",
