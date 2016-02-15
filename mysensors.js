@@ -94,7 +94,7 @@ function syncConfig() {
         var id;
         if (adapter.config.devices) {
             for (k = 0; k < adapter.config.devices.length; k++) {
-                configToAdd.push(adapter.config.devices[k].ip);
+                configToAdd.push(adapter.config.devices[k].name);
             }
         }
 
@@ -158,7 +158,7 @@ adapter.on('objectChange', function (id, obj) {
 });
 
 // is called if a subscribed state changes
-adapter.on('stateChange', function (id, state) {
+adapter.on( 'stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
     adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
 

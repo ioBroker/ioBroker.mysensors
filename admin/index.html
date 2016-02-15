@@ -25,33 +25,56 @@
         }
     };
     var devices;
+    var units;
    //   getIPs(function(ips) {
    //         for (var i = 0; i < ips.length; i++) {
    //             $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
    //         }
    //       //  $('#bind.value').val(settings.bind);
    //     });
-	function getUnit(ldb) {
-       // node-id; child-sensor-id; message-type; ack; sub-type; payload\n
+
+    function test(a1,a2,a3,a4,a5,a6){
+      addToTable('devices',{	name:	'unit'+'_'+a1+'_'+a2,
+							node_id:	a1,
+                            child_id:	a2,
+                            msg_type:	a3,
+                            ack:		a4,
+                            sub_type:	a5,
+                            payload:	a6,
+                            room:		'none'});
+    }
+
+
+
+    function getUnit(ldb) { //ToDo  переделать в дерево, пока таблица
+       // node_id; child-sensor-id; message-type; ack; sub_type; payload\n
 		
-		sendTo(null, 'list_dbsU', null, function(list) {
-            var text =	'<tr><td>' + _('node-id')	+ 
+		sendTo(null, 'list_dbsU', null, function(units) {
+        
+		   var text =	'<tr><td>' + _('node_id')	+ 
 						'</td><td>' + _('child-id')	+ 
-						'</td><td>' + _('msg-type')	+			
+						'</td><td>' + _('msg_type')	+			
 						'</td><td>' + _('ack')		+
-						'</td><td>' + _('sub-type')	+
+						'</td><td>' + _('sub_type')	+
 						'</td><td>' + _('payload')	+
 						'</td><td>' + _('Bind')	+						
 						'</td></tr>';
-						
-            for (var j = 0; j < list.length; j++) {
-            text += '<tr><td>' + list[j].NodeId		+ 
-					'</td><td>' + list[j].ChildId	+ 
-					'</td><td>' + list[j].MsgType	+ 					
-					'</td><td>' + list[j].Ack		+ 					
-					'</td><td>' + list[j].Data_type	+ 					
-					'</td><td>' + list[j].Value		+ 
-					'</td><td><button id="addunit" onclick="test()">bind</button>'	+					
+						//ToDo копировать по кнопке в devices с проверкой на уже существующий юнит
+            for (var j = 0; j < units.length; j++) {
+  
+			text += '<tr><td>'  + units[j].NodeId	+
+					'</td><td>' + units[j].ChildId	+
+					'</td><td>' + units[j].MsgType	+
+					'</td><td>' + units[j].Ack		+
+					'</td><td>' + units[j].Data_type	+
+					'</td><td>' + units[j].Value		+
+					'</td><td><button id="addunit" onclick="test('  + units[j].NodeId	+
+																',' + units[j].ChildId	+ 
+																',' + units[j].MsgType	+
+																',' + units[j].Ack		+
+																',' + units[j].Data_type +
+																',0); ">bind</button>'+
+					
 					'</td></tr>';	
 				}
             $('#comTbl').html(text);
@@ -106,9 +129,12 @@
         getIsAdapterAlive(function (isAlive) {
             if (isAlive) getComPorts(settings.comName);
         });
-        editTable('devices', ['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room'], devices, 350);
+        editTable('devices', ['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','room'], devices, 350);
         onChange(false);
     }
+
+
+
     // ... and the function save has to exist.
     // you have to make sure the callback is called with the settings object as first param!
     function save(callback) {
@@ -122,8 +148,8 @@
                 obj[$this.attr('id')] = $this.val();
             }
         });
-        // Get edited table  node-id;child-sensor-id;message-type;ack;sub-type;payload\n
-        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg-type','ack','sub-type','payload','room']);
+        // Get edited table  node_id;child-sensor-id;message-type;ack;sub_type;payload\n
+        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','room']);
         callback(obj);
     }
 </script>
@@ -132,10 +158,13 @@
 <div id="adapter-container">
 	<table><tr>
         <td><select class="value" id="comName"></select></td><td><button type='button' id="lstunin" onclick='getUnit();'>list unit</td>
-    </tr></table>
+    </tr>
+	<tr><td>    <table id="comTbl" border="1"cellspacing="0" ></table>	</td></tr>
+	</table>
+	<div id="pager-devices"></div>	
     <table id="devices"></table>
-    <table id="comTbl" border="1"cellspacing="0" ></table>	
-	<div id="pager-devices"></div>
+
+
 </div>
 
 </html>
