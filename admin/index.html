@@ -34,7 +34,7 @@
    //     });
 
     function test(a1,a2,a3,a4,a5,a6){
-      addToTable('devices',{	name:	'unit'+'_'+a1+'_'+a2,
+      addToTable('devices',{	name:	a5 + '_'+a1+'_'+a2,
 							node_id:	a1,
                             child_id:	a2,
                             msg_type:	a3,
@@ -51,7 +51,7 @@
 		
 		sendTo(null, 'list_dbsU', null, function(units) {
         
-		   var text =	'<tr><td>' + _('node_id')	+ 
+		   var text =	'<tr bgcolor="#808080"><td>' + _('node_id')	+ 
 						'</td><td>' + _('child-id')	+ 
 						'</td><td>' + _('msg_type')	+			
 						'</td><td>' + _('ack')		+
@@ -68,12 +68,12 @@
 					'</td><td>' + units[j].Ack		+
 					'</td><td>' + units[j].Data_type	+
 					'</td><td>' + units[j].Value		+
-					'</td><td><button id="addunit" onclick="test('  + units[j].NodeId	+
-																',' + units[j].ChildId	+ 
-																',' + units[j].MsgType	+
-																',' + units[j].Ack		+
-																',' + units[j].Data_type +
-																',0); ">bind</button>'+
+					'</td><td><button id="addunit" onclick="test(\''  + units[j].NodeId	+
+																'\',\'' + units[j].ChildId	+ 
+																'\',\'' + units[j].MsgType	+
+																'\',\'' + units[j].Ack		+
+																'\',\'' + units[j].Data_type +
+																'\',0); ">bind</button>'+
 					
 					'</td></tr>';	
 				}
@@ -159,7 +159,7 @@
 	<table><tr>
         <td><select class="value" id="comName"></select></td><td><button type='button' id="lstunin" onclick='getUnit();'>list unit</td>
     </tr>
-	<tr><td>    <table id="comTbl" border="1"cellspacing="0" ></table>	</td></tr>
+	<tr><td> </td> <td>  <table id="comTbl" border="1"cellspacing="0" ></table>	</td></tr>
 	</table>
 	<div id="pager-devices"></div>	
     <table id="devices"></table>
