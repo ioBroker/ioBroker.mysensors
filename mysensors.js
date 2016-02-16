@@ -10,7 +10,7 @@ var stopTimer = null;
 
 var Sensors    = require('sensors');
 var serialport = require('serialport');//.SerialPort;
-var SerialPort  = serialport.SerialPort;
+var SerialPort = serialport.SerialPort;
 var portConfig = {baudRate: 115200,	parser: serialport.parsers.readline('\n')};
 
 //принимаем и обрабатываем сообщения 
@@ -37,7 +37,6 @@ adapter.on('message', function (obj) {
 	}
 });
 
-var host  = ''; // название машины где подключен шлюз
 var mysdevs = []; // список устройств mysensor
 
 function pingAll() {
@@ -50,94 +49,6 @@ function pingAll() {
 
     mysdevs.forEach(function (_mysdevice) {
         adapter.log.debug('tada-- ' + _mysdevice);
-    });
-}
-
-function createState(name, ip, room, callback) {
-   // var id = ip.replace(/[.\s]+/g, '_');
-
-    // if (room) {
-        // adapter.addStateToEnum('room', room, '', host, id);
-    // }
-
-    // adapter.createState('', host, id, {
-        // name:   name || ip,
-        // def:    false,
-        // type:   'boolean',
-        // read:   'true',
-        // write:  'false',
-        // role:   'indicator.reachable',
-        // desc:   'Ping state of ' + ip
-    // }, {
-        // ip: ip
-    // }, callback);
-}
-
-function addState(name, ip, room, callback) {
-    adapter.getObject(host, function (err, obj) {
-        if (err || !obj) {
-            // if root does not exist, channel will not be created
-            adapter.createChannel('', host, [], function () {
-                createState(name, ip, room, callback);
-            });
-        } else {
-            createState(name, ip, room, callback);
-        }
-    });
-}
-
-function syncConfig() {
-    adapter.getStatesOf('', host, function (err, _states) {
-        var configToDelete = [];
-        var configToAdd    = [];
-        var k;
-        var id;
-        if (adapter.config.devices) {
-            for (k = 0; k < adapter.config.devices.length; k++) {
-                configToAdd.push(adapter.config.devices[k].name);
-            }
-        }
-
-        if (_states) {
-            for (var j = 0; j < _states.length; j++) {
-                var ip = _states[j].native.ip;
-                id = ip.replace(/[.\s]+/g, '_');
-                var pos = configToAdd.indexOf(ip);
-                if (pos != -1) {
-                    configToAdd.splice(pos, 1);
-                    // Check name and room
-                    for (var u = 0; u < adapter.config.devices.length; u++) {
-                        if (adapter.config.devices[u].ip == ip) {
-                            if (_states[j].common.name != (adapter.config.devices[u].name || adapter.config.devices[u].ip)) {
-                                adapter.extendObject(_states[j]._id, {common: {name: (adapter.config.devices[u].name || adapter.config.devices[u].ip)}});
-                            }
-                            if (adapter.config.devices[u].room) {
-                                adapter.addStateToEnum('room', adapter.config.devices[u].room, '', host, id);
-                            } else {
-                                adapter.deleteStateFromEnum('room', '', host, id);
-                            }
-                        }
-                    }
-                } else {
-                    configToDelete.push(ip);
-                }
-            }
-        } 
-
-        if (configToAdd.length) {
-            for (var r = 0; r < adapter.config.devices.length; r++) {
-                if (configToAdd.indexOf(adapter.config.devices[r].ip) != -1) {
-                    addState(adapter.config.devices[r].name, adapter.config.devices[r].ip, adapter.config.devices[r].room);
-                }
-            }
-        }
-        if (configToDelete.length) {
-            for (var e = 0; e < configToDelete.length; e++) {
-                id = configToDelete[e].replace(/[.\s]+/g, '_');
-                adapter.deleteStateFromEnum('room', '',  host, id);
-                adapter.deleteState('', host, id);
-            }
-        }
     });
 }
 
@@ -174,85 +85,186 @@ adapter.on('ready', function () {
     main();
 }); 
 
-var dbsUnique=[];//будут хранится уникальные посылки от всех юнитов, из ком порта
+var dbsUnique = [];//будут хранится уникальные посылки от всех юнитов, из ком порта
 //  ---------------------------------------------------------
 //  node-id; child-sensor-id; message-type; ack; sub-type; payload\n
 //  ---------------------------------------------------------
-function mkdbmsgUnique( str ) {
-   var valcsv=str.split( ";" ); //элементы строки лога
-   var fl=false;
-    adapter.log.info("количество сообщений "+dbsUnique.length);
-   for( var n = 0 ; n < dbsUnique.length; n ++ ){
-     
-      if(   dbsUnique[n].NodeId==valcsv[0]	&&
-            dbsUnique[n].ChildId==valcsv[1]	&&
-            dbsUnique[n].MsgType==valcsv[2]	&&			
-            dbsUnique[n].Data_type==valcsv[4]
-      ){
+function mkdbmsgUnique(str) {
+    var valcsv = str.split( ";" ); //элементы строки лога
+    var fl = false;
+    adapter.log.info("количество сообщений " + dbsUnique.length);
+    for (var n = 0; n < dbsUnique.length; n++) {
+
+        if (dbsUnique[n].NodeId    == valcsv[0]	&&
+            dbsUnique[n].ChildId   == valcsv[1]	&&
+            dbsUnique[n].MsgType   == valcsv[2]	&&
+            dbsUnique[n].Data_type == valcsv[4]
+        ){
          // dbsUnique[n].==valcsv[3] &&
          // dbsUnique[n].==valcsv[4] &&
          // dbsUnique[n].==valcsv[5] &&
          // dbsUnique[n].==valcsv[6]    //sub-type
-         fl=true
-		 dbsUnique[n].Value=valcsv[5];//todo сравнить с олд вал и изменить стейт
-      }
-   }
-   if ( fl==false &&  valcsv[1]!=="0" )//не добавляем ноду шлюза
-   {
-      dbsUnique.push(
-      {
-         "NodeId":		valcsv[0],
-         "ChildId":		valcsv[1],
-         "MsgType":		valcsv[2],
-         "Ack":			valcsv[3],
-         "Data_type":	valcsv[4],
-         "Value":		valcsv[5],
-         
-      }
-      );
+         fl = true;
+         dbsUnique[n].Value = valcsv[5];//todo сравнить с олд вал и изменить стейт
+        }
+    }
+    if (fl == false && valcsv[1] !== "0"){//не добавляем ноду шлюза
+        dbsUnique.push({
+            "NodeId":		valcsv[0],
+            "ChildId":		valcsv[1],
+            "MsgType":		valcsv[2],
+            "Ack":			valcsv[3],
+            "Data_type":	valcsv[4],
+            "Value":		valcsv[5]
+        });
 
-     // tree.push( str );
-   }
+    // tree.push( str );
+    }
 }
-function main() {
-    host = adapter.host;
 
-    for (var i = 0; i < adapter.config.devices.length; i++) {
-        mysdevs.push(adapter.config.devices[i].name);
+function syncObjects(index, cb) {
+    if (typeof index === 'function') {
+        cb    = index;
+        index = 0;
     }
 
-    if (adapter.config.interval < 5000) adapter.config.interval = 5000;
+    index = index || 0;
 
-    syncConfig();
+    if (!adapter.config.devices || index >= adapter.config.devices.length) {
+        cb && cb();
+        return;
+    }
 
-    //------------------------------------------------------------------	
-    
-	adapter.log.debug('Communication port:' + adapter.config.comName);
+    var id = adapter.config.devices[index].name.replace(/[.\s]+/g, '_');
+    adapter.getObject(id, function (err, obj) {
+        if (err) adapter.log.error(err);
 
-	// open the serial port:
-	if (adapter.config.comName) {
-        var myPort = new SerialPort(adapter.config.comName, portConfig);
+        // if new or changed
+        if (!obj || JSON.stringify(obj.native) !== JSON.stringify(adapter.config.devices[index])) {
+            adapter.setObject(id, {
+                common: {
+                    name: adapter.config.devices[index].name,
+                    def:  false,
+                    type: 'boolean', // нужный тип надо подставить
+                    read: 'true',
+                    write:'false',   // нужный режим надо подставить
+                    role: 'state',
+                    desc: obj ? obj.common.desc : 'Variable from mySensors'
+                },
+                type: 'state',
+                native: adapter.config.devices[index]
+            }, function (err) {
+                // Sync Rooms
+                adapter.deleteStateFromEnum('rooms', '', '', id, function () {
+                    if (adapter.config.devices[index].room) {
+                        adapter.addStateToEnum('rooms', adapter.config.devices[index].room, '', '', id);
+                    }
+                });
 
-        // ловим события порта
-        myPort.on('data', function(data) {
-            mkdbmsgUnique(data); //пишем в массив уникальных сообщений
-			var result = Sensors.parse(data.toString());
+                if (err) adapter.log.error(err);
+                if (!obj) {
+                    adapter.log.info('Create state ' + id);
 
-            for(var i in result) {
-                adapter.log.info('__' +
-                    result[i].id      + '_|_' +
-                    result[i].childId + '_|_' +
-                    result[i].type    + '_|_' +
-                    result[i].ack     + '_|_' +
-                    result[i].subType + '_|_' +
-                    result[i].payload);
+                    // if new object => create state
+                    adapter.setState(id, null, true, function () {
+                        setTimeout(function () {
+                            syncObjects(index + 1, cb);
+                        }, 0);
+                    });
+                } else {
+                    adapter.log.info('Update state ' + id);
+                    setTimeout(function () {
+                        syncObjects(index + 1, cb);
+                    }, 0);
+                }
+            });
+        } else {
+            setTimeout(function () {
+                syncObjects(index + 1, cb);
+            }, 0);
+        }
+    });
+}
+
+function deleteStates(states, cb) {
+    if (!states || !states.length) {
+        cb && cb();
+        return;
+    }
+    var id = states.pop();
+    adapter.log.info('Delete state ' + id);
+    adapter.delForeignObject(id, function (err) {
+        adapter.deleteStateFromEnum('rooms', '', '', id);
+
+        if (err) adapter.log.error(err);
+
+        adapter.delForeignState(id, function (err) {
+            if (err) adapter.log.error(err);
+
+            setTimeout(function () {
+                deleteStates(states, cb);
+            }, 0);
+        })
+    });
+}
+
+function main() {
+    // read current existing objects
+    adapter.getForeignObjects(adapter.namespace + '.*', 'state', function (err, states) {
+        var toDelete = [];
+
+        // delete non existing objects
+        for (var id in states) {
+            var isFound = false;
+            for (var i2 = 0; i2 < adapter.config.devices.length; i2++) {
+                if (adapter.config.devices[i2].name === states[id].common.name) {
+                    isFound = true;
+                    break;
+                }
             }
-        });
-	}
+            if (!isFound) toDelete.push(id);
+        }
 
-    //-----------------------------------------------------------------
-    //	myPort.write("1;1;1;1;3;0\n");
-    //	myPort.write("2;1;1;1;2;1\n");
-    //    pingAll();
-    //  timer = setInterval(pingAll, adapter.config.interval);
+        // delete non existing states
+        deleteStates(toDelete, function () {
+            // create new or modified states
+            syncObjects(function () {
+                for (var i = 0; i < adapter.config.devices.length; i++) {
+                    mysdevs.push(adapter.config.devices[i].name);
+                }
+                //------------------------------------------------------------------
+
+                adapter.log.debug('Communication port:' + adapter.config.comName);
+
+                // open the serial port:
+                if (adapter.config.comName) {
+                    var myPort = new SerialPort(adapter.config.comName, portConfig);
+
+                    // ловим события порта
+                    myPort.on('data', function(data) {
+                        mkdbmsgUnique(data); //пишем в массив уникальных сообщений
+                        var result = Sensors.parse(data.toString());
+
+                        for(var i in result) {
+                            adapter.log.info('__' +
+                                result[i].id      + '_|_' +
+                                result[i].childId + '_|_' +
+                                result[i].type    + '_|_' +
+                                result[i].ack     + '_|_' +
+                                result[i].subType + '_|_' +
+                                result[i].payload);
+                        }
+                    });
+                }
+
+                //-----------------------------------------------------------------
+                //	myPort.write("1;1;1;1;3;0\n");
+                //	myPort.write("2;1;1;1;2;1\n");
+                //    pingAll();
+                //  timer = setInterval(pingAll, adapter.config.interval);
+            });
+        });
+    });
+
+    if (adapter.config.interval < 5000) adapter.config.interval = 5000;
 }
