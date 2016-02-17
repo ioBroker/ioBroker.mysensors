@@ -33,15 +33,16 @@
    //       //  $('#bind.value').val(settings.bind);
    //     });
 
-    function test(a1,a2,a3,a4,a5,a6){
+    function test(a1,a2,a3,a4,a5,a6,a7){
       addToTable('devices',{	name:	a5 + '_'+a1+'_'+a2,
-							node_id:	a1,
-                            child_id:	a2,
-                            msg_type:	a3,
-                            ack:		a4,
-                            sub_type:	a5,
-                            payload:	a6,
-                            room:		'none'});
+								node_id:	a1,
+								child_id:	a2,
+								msg_type:	a3,
+								ack:		a4,
+								sub_type:	a5,
+								payload:	a6,
+								raw:		a7,							
+								room:		'none'});
     }
 
 
@@ -57,6 +58,7 @@
 						'</td><td>' + _('ack')		+
 						'</td><td>' + _('sub_type')	+
 						'</td><td>' + _('payload')	+
+						'</td><td>' + _('raw')	+							
 						'</td><td>' + _('Bind')	+						
 						'</td></tr>';
 						//ToDo копировать по кнопке в devices с проверкой на уже существующий юнит
@@ -68,15 +70,19 @@
 					'</td><td>' + units[j].Ack		+
 					'</td><td>' + units[j].Data_type	+
 					'</td><td>' + units[j].Value		+
+					'</td><td>' + units[j].raw		+					
 					'</td><td><button id="addunit" onclick="test(\''  + units[j].NodeId	+
 																'\',\'' + units[j].ChildId	+ 
 																'\',\'' + units[j].MsgType	+
 																'\',\'' + units[j].Ack		+
 																'\',\'' + units[j].Data_type +
+																'\',\'' + units[j].Value +																
+																'\',\'' + units[j].raw +																
 																'\',0); ">bind</button>'+
 					
 					'</td></tr>';	
 				}
+			
             $('#comTbl').html(text);
         });
 	}
@@ -129,7 +135,7 @@
         getIsAdapterAlive(function (isAlive) {
             if (isAlive) getComPorts(settings.comName);
         });
-        editTable('devices', ['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','room'], devices, 350);
+        editTable('devices', ['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','raw','room'], devices, 350);
         onChange(false);
     }
 
@@ -149,17 +155,24 @@
             }
         });
         // Get edited table  node_id;child-sensor-id;message-type;ack;sub_type;payload\n
-        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','room']);
+        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','raw','room']);
         callback(obj);
     }
 </script>
-
+<style type="text/css">
+.tab1 p{
+    border: 1px solid blue;
+    width: 40px;
+    height: 50px;
+    overflow: auto;
+}
+</style>
 <!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
 <div id="adapter-container">
 	<table><tr>
         <td><select class="value" id="comName"></select></td><td><button type='button' id="lstunin" onclick='getUnit();'>list unit</td>
     </tr>
-	<tr><td> </td> <td>  <table id="comTbl" border="1"cellspacing="0" ></table>	</td></tr>
+	<tr><td> </td> <td>  <p> <table class="tab1" id="comTbl" border="1"cellspacing="0" ></table></p>	</td> </tr>
 	</table>
 	<div id="pager-devices"></div>	
     <table id="devices"></table>

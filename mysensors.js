@@ -12,7 +12,7 @@ var Sensors    = require('sensors');
 var serialport = require('serialport');//.SerialPort;
 var SerialPort = serialport.SerialPort;
 var portConfig = {baudRate: 115200,	parser: serialport.parsers.readline('\n')};
-
+var G_myPort;
 //принимаем и обрабатываем сообщения 
 adapter.on('message', function (obj) {
 	if (obj) {
@@ -71,21 +71,39 @@ adapter.on('objectChange', function (id, obj) {
 // is called if a subscribed state changes
 adapter.on( 'stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
-    adapter.log.info('stateChange ' + id );//+ ' ' + JSON.stringify(state));
-	adapter.log.info('blablablabla-',id);
+    adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
+	 adapter.log.info(adapter.name);
+	
+	//________________выводим в порт___________________________________________
+		for (var co = 0; co < adapter.config.devices.length; co++) {		
+				if (id == adapter.namespace + '.' + adapter.config.devices[co].name){//todo убрать костыль
+				var msg_s;
+					msg_s =	adapter.config.devices[co].raw		+ ';' +
+							state.val + '\n';
+
+					
+					G_myPort.write(msg_s);
+					adapter.log.info('mesage-'+msg_s); 				
+					}  
+		adapter.log.info(adapter.config.devices[co].name+ ';' + adapter.config.devices[co].node_id)		
+				}
+	
+	adapter.log.info('ToDo-вывести в компорт  для '+id+'значение-'+state.val);
+
+ //----------------------------------------------------------------------------  
     // you can use the ack flag to detect if it is status (true) or command (false)
-    if (state && !state.ack) {
+   if (state && !state.ack) {
         adapter.log.info('ack is not set!');
     }
 });
 
- 
+
  
  
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
-    main();
+	main();
 }); 
 
 var dbsUnique = [];//будут хранится уникальные посылки от всех юнитов, из ком порта
@@ -99,6 +117,7 @@ function mkdbmsgUnique(str) {
 
   var result = Sensors.parse(str.toString());
 	var i=0;	
+	var raw=valcsv[0]+';'+valcsv[1]+';'+valcsv[2]+';'+valcsv[3]+';'+valcsv[4];
 	valcsv[0] = result[i].id ;
     valcsv[1] =result[i].childId ;
     valcsv[2] =result[i].type ;
@@ -107,7 +126,7 @@ function mkdbmsgUnique(str) {
     valcsv[5] =result[i].payload;
 	
 		
-	adapter.log.info("количество сообщений " + dbsUnique.length);
+	adapter.log.debug("количество сообщений " + dbsUnique.length);
     for (var n = 0; n < dbsUnique.length; n++) {
 
         if (dbsUnique[n].NodeId    == valcsv[0]	&&
@@ -130,7 +149,8 @@ function mkdbmsgUnique(str) {
             "MsgType":		valcsv[2],
             "Ack":			valcsv[3],
             "Data_type":	valcsv[4],
-            "Value":		valcsv[5]
+            "Value":		valcsv[5],
+            "raw":			raw			
         });
 
     // tree.push( str );
@@ -244,8 +264,17 @@ function main() {
 
         // delete non existing states
         deleteStates(toDelete, function () {
+			
+			
+			
+			
             // create new or modified states
             syncObjects(function () {
+				
+				// подписываемся на изменения извне
+             	adapter.subscribeStates('*');
+				
+				
                 for (var i = 0; i < adapter.config.devices.length; i++) {
                     mysdevs.push(adapter.config.devices[i].name);
                 }
@@ -256,7 +285,7 @@ function main() {
                 // open the serial port:
                 if (adapter.config.comName) {
                     var myPort = new SerialPort(adapter.config.comName, portConfig);
-
+					G_myPort=myPort;
                     // ловим события порта
                     myPort.on('data', function(data) {
                        mkdbmsgUnique(data); //пишем в массив уникальных сообщений
