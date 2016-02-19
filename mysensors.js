@@ -72,11 +72,11 @@ adapter.on('objectChange', function (id, obj) {
 adapter.on( 'stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
     adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
-	 adapter.log.info(adapter.name);
+	
 	
 	//________________выводим в порт___________________________________________
 		for (var co = 0; co < adapter.config.devices.length; co++) {		
-				if (id == adapter.namespace + '.' + adapter.config.devices[co].name){//todo убрать костыль
+				if (id == adapter.namespace + '.' + adapter.config.devices[co].name){
 				var msg_s;
 					msg_s =	adapter.config.devices[co].raw		+ ';' +
 							state.val + '\n';
@@ -88,7 +88,7 @@ adapter.on( 'stateChange', function (id, state) {
 		adapter.log.info(adapter.config.devices[co].name+ ';' + adapter.config.devices[co].node_id)		
 				}
 	
-	adapter.log.info('ToDo-вывести в компорт  для '+id+'значение-'+state.val);
+	
 
  //----------------------------------------------------------------------------  
     // you can use the ack flag to detect if it is status (true) or command (false)
@@ -142,8 +142,9 @@ function mkdbmsgUnique(str) {
          dbsUnique[n].Value = valcsv[5];//todo сравнить с олд вал и изменить стейт
         }
     }
-    if (fl == false && valcsv[0] !== "0"){//не добавляем ноду шлюза
-        dbsUnique.push({
+  //  if (fl == false && valcsv[0] !== "0"){//не добавляем ноду шлюза
+    if (fl == false ){//не добавляем ноду шлюза       
+	   dbsUnique.push({
             "NodeId":		valcsv[0],
             "ChildId":		valcsv[1],
             "MsgType":		valcsv[2],
@@ -288,7 +289,8 @@ function main() {
 					G_myPort=myPort;
                     // ловим события порта
                     myPort.on('data', function(data) {
-                       mkdbmsgUnique(data); //пишем в массив уникальных сообщений
+                    adapter.log.info('Rx-Raw  '+data);  
+					  mkdbmsgUnique(data); //пишем в массив уникальных сообщений
                        var result = Sensors.parse(data.toString());
 //___________________________Устанавливаем значение переменной по имени из ком порта____________________________________________
 						for (var co = 0; co < adapter.config.devices.length; co++) {		
@@ -302,7 +304,7 @@ function main() {
 
 
 					   for(var i in result) {
-                            adapter.log.debug('__' +
+                            adapter.log.info('__' +
                                 result[i].id      + '_|_' +
                                 result[i].childId + '_|_' +
                                 result[i].type    + '_|_' +
