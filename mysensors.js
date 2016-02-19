@@ -290,7 +290,12 @@ function main() {
                     // ловим события порта
                     myPort.on('data', function(data) {
                     adapter.log.info('Rx-Raw  '+data);  
-					  mkdbmsgUnique(data); //пишем в массив уникальных сообщений
+					var tmp= data.split( ";" );
+
+					if(tmp.length < 6){
+	                    adapter.log.info('raw_data_error '+ tmp.length);  									
+					}else{
+					mkdbmsgUnique(data); //пишем в массив уникальных сообщений
                        var result = Sensors.parse(data.toString());
 //___________________________Устанавливаем значение переменной по имени из ком порта____________________________________________
 						for (var co = 0; co < adapter.config.devices.length; co++) {		
@@ -311,8 +316,10 @@ function main() {
                                 result[i].ack     + '_|_' +
                                 result[i].subType + '_|_' +
                                 result[i].payload);
-                      
 						}
+						
+					}	
+						
                     });
                 }
 
