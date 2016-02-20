@@ -69,28 +69,25 @@ adapter.on('objectChange', function (id, obj) {
 });
 
 // is called if a subscribed state changes
-adapter.on( 'stateChange', function (id, state) {
+adapter.on('stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
+    
+    if (!state && state.ack) return;
+    
     adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
 	
 	
 	//________________выводим в порт___________________________________________
 		for (var co = 0; co < adapter.config.devices.length; co++) {		
-				if (id == adapter.namespace + '.' + adapter.config.devices[co].name){
-				var msg_s;
-					msg_s =	adapter.config.devices[co].raw		+ ';' +
-							state.val + '\n';
-
-					
-					G_myPort.write(msg_s);
-					adapter.log.info('mesage-'+msg_s); 				
-					}  
-		adapter.log.info(adapter.config.devices[co].name+ ';' + adapter.config.devices[co].node_id)		
-				}
+			if (id == adapter.namespace + '.' + adapter.config.devices[co].name) {
+				var msg_s =	adapter.config.devices[co].raw	+ ';' +	state.val + '\n';
+				G_myPort.write(msg_s);
+				adapter.log.info('mesage-'+msg_s); 				
+			}  
+			adapter.log.info(adapter.config.devices[co].name+ ';' + adapter.config.devices[co].node_id)		
+		}
 	
-	
-
- //----------------------------------------------------------------------------  
+ 	//----------------------------------------------------------------------------  
     // you can use the ack flag to detect if it is status (true) or command (false)
    if (state && !state.ack) {
         adapter.log.info('ack is not set!');
@@ -114,19 +111,22 @@ function mkdbmsgUnique(str) {
     var valcsv = str.split( ";" ); //элементы строки лога
     var fl = false;
 
-
-  var result = Sensors.parse(str.toString());
-	var i=0;	
-	var raw=valcsv[0]+';'+valcsv[1]+';'+valcsv[2]+';'+valcsv[3]+';'+valcsv[4];
+    var result = Sensors.parse(str.toString());
+    if (!result || !result.length) {
+    	adapter.log.warn('Cannot parse data: ' + str);
+    	return null;
+    }
+	var i = 0;	
+	var raw = valcsv[0] + ';' + valcsv[1] + ';' + valcsv[2] + ';' + valcsv[3] + ' ;' + valcsv[4];
 	valcsv[0] = result[i].id ;
-    valcsv[1] =result[i].childId ;
-    valcsv[2] =result[i].type ;
+    valcsv[1] = result[i].childId ;
+    valcsv[2] = result[i].type ;
     valcsv[3] = result[i].ack  ;
-    valcsv[4] =result[i].subType ;
-    valcsv[5] =result[i].payload;
+    valcsv[4] = result[i].subType ;
+    valcsv[5] = result[i].payload;
 	
 		
-	adapter.log.debug("количество сообщений " + dbsUnique.length);
+	adapter.log.debug("number of messages: " + dbsUnique.length);
     for (var n = 0; n < dbsUnique.length; n++) {
 
         if (dbsUnique[n].NodeId    == valcsv[0]	&&
@@ -156,6 +156,7 @@ function mkdbmsgUnique(str) {
 
     // tree.push( str );
     }
+    return result;
 }
 
 function syncObjects(index, cb) {
@@ -292,17 +293,26 @@ function main() {
                     adapter.log.info('Rx-Raw  '+data);  
 					var tmp= data.split( ";" );
 
-					if(tmp.length < 6){
-	                    adapter.log.info('raw_data_error '+ tmp.length);  									
-					}else{
-					mkdbmsgUnique(data); //пишем в массив уникальных сообщений
-                       var result = Sensors.parse(data.toString());
+					if (tmp.length < 6) {
+	                    adapter.log.info('raw_data_error ' + tmp.length);  									
+					} else {
+					   if (!data) {
+					   		adapter.log warn('Invalid data: null');
+					   		return;
+					   }					   
+					   
+					   var result = mkdbmsgUnique(data); //пишем в массив уникальных сообщений
+					   if (!result) {
+					   		adapter.log warn('Cannot parse: ' + data);
+					   		return;
+					   }
+
 //___________________________Устанавливаем значение переменной по имени из ком порта____________________________________________
 						for (var co = 0; co < adapter.config.devices.length; co++) {		
 							if ( 	  result[0].subType + 
 								'_' + result[0].id  + 
-								'_' + result[0].childId			==	adapter.config.devices[co].name){
-								adapter.setState(adapter.config.devices[co].name, result[0].payload); 				
+								'_' + result[0].childId	== adapter.config.devices[co].name){
+								adapter.setState(adapter.config.devices[co].name, result[0].payload, true); 				
 							}  
 						}
 //------------------------------------------------------------------------------------------------------------------------------
