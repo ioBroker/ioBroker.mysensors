@@ -247,7 +247,10 @@ function deleteStates(states, cb) {
 }
 
 function main() {
-    // read current existing objects
+	// set default settings
+	adapter.config.devices = adapter.config.devices || [];
+	
+	// read current existing objects
     adapter.getForeignObjects(adapter.namespace + '.*', 'state', function (err, states) {
         var toDelete = [];
 
