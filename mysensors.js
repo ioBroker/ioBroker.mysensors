@@ -73,7 +73,8 @@ adapter.on( 'stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
     adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
 	
-	
+	// If no serial port configured, but state change received
+	if (!G_myPort) return;
 	//________________выводим в порт___________________________________________
 		for (var co = 0; co < adapter.config.devices.length; co++) {		
 				if (id == adapter.namespace + '.' + adapter.config.devices[co].name){
