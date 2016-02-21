@@ -72,9 +72,9 @@ adapter.on('objectChange', function (id, obj) {
 adapter.on('stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
     
-   // if (!state && state.ack) return;
-    
-    adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
+    if (!state && !state.ack ) return;
+    if (state.from == 'system.adapter.'+adapter.name + '.' + adapter.instance) return;//todo костыль иначе при входящих шлет херню в порт
+    adapter.log.info('stateChange ' +  id + ''  + JSON.stringify(state));
 	
 	// If no serial port configured, but state change received
 	if (!G_myPort) return;
@@ -82,14 +82,13 @@ adapter.on('stateChange', function (id, state) {
 		for (var co = 0; co < adapter.config.devices.length; co++) {		
 				if (id == adapter.namespace + '.' + adapter.config.devices[co].name){
 				var msg_s;
-					msg_s =	adapter.config.devices[co].raw		+ ';' +
-							state.val + '\n';
+					msg_s =	adapter.config.devices[co].raw + ';' + state.val + '\n';
 
 					
 					G_myPort.write(msg_s);
-					adapter.log.info('mesage-'+msg_s); 				
+					adapter.log.info('Tx_Raw-'+msg_s); 				
 					}  
-		adapter.log.info(adapter.config.devices[co].name+ ';' + adapter.config.devices[co].node_id)		
+		adapter.log.debug(adapter.config.devices[co].name+ ';' + adapter.config.devices[co].node_id)		
 				}
 	
 	
@@ -301,15 +300,14 @@ function main() {
 					var tmp= data.split( ";" );
 
 					if(tmp.length < 6){
-	                    adapter.log.info('raw_data_error '+ tmp.length);  									
+	                    adapter.log.info('MySens_raw_dataParse_error '+ tmp.length + '_' + data);  									
 					}else{
 					mkdbmsgUnique(data); //пишем в массив уникальных сообщений
                        var result = Sensors.parse(data.toString());
 //___________________________Устанавливаем значение переменной по имени из ком порта____________________________________________
 						for (var co = 0; co < adapter.config.devices.length; co++) {		
-							if ( 	  result[0].subType + 
-								'_' + result[0].id  + 
-								'_' + result[0].childId			==	adapter.config.devices[co].name){
+	if ( result[0].subType + '_' + result[0].id  + '_' + result[0].childId	==	adapter.config.devices[co].name){// проверка по имени
+	
 								adapter.setState(adapter.config.devices[co].name, result[0].payload); 				
 							}  
 						}
@@ -317,13 +315,13 @@ function main() {
 
 
 					   for(var i in result) {
-                            adapter.log.info('__' +
+                            adapter.log.info('MySens - |_' +
                                 result[i].id      + '_|_' +
                                 result[i].childId + '_|_' +
                                 result[i].type    + '_|_' +
                                 result[i].ack     + '_|_' +
                                 result[i].subType + '_|_' +
-                                result[i].payload);
+                                result[i].payload + '_|');
 						}
 						
 					}	
