@@ -139,6 +139,7 @@ function mkdbmsgUnique(str) {
 
         // Add new node
         if (!found) {
+            result[i].dataType = typeof result[i].payload;
             dbsUnique.push(result[i]);
             adapter.log.debug('Number of messages ' + dbsUnique.length);
         }
