@@ -96,12 +96,13 @@ function processPresentation(data) {
     }
 
     for (var i = 0; i < result.length; i++) {
+        adapter.log.debug('Got: ' + JSON.stringify(result[i]));
         if (result[i].type === 'presentation') {
             var found = false;
             for (var n = 0; n < devices.length; n++) {
                 if (devices[n].native.id      == result[i].id      &&
                     devices[n].native.childId == result[i].childId &&
-                    devices[n].native.subType == result[i].subType) {
+                    ((result[i].subType === undefined && devices[n].native.subType === undefined) || devices[n].native.subType == result[i].subType)) {
                     found = true;
                     break;
                 }
@@ -110,6 +111,7 @@ function processPresentation(data) {
             // Add new node
             if (!found) {
                 var obj = getMeta(result[i]);
+                adapter.log.info('Add new object: ' + obj._id + ' - ' + obj.common.name);
                 adapter.setObject(obj._id, obj, function (err) {
                     if (err) adapter.log.error(err);
                 });
@@ -233,7 +235,7 @@ function main() {
 
                 for (var i = 0; i < result.length; i++) {
                     if (result[i].type == 'set' || result[i].type == 'req') {
-                        for (var id in devicesid) {
+                        for (var id in devices) {
                             if (devices[id].native.subType === result[i].subType &&
                                 devices[id].native.id      === result[i].id      &&
                                 devices[id].native.childId === result[i].childId) {

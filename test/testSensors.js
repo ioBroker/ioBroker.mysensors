@@ -28,7 +28,7 @@ function checkConnection(value, done, counter) {
 }
 
 function sendMessage(message, callback) {
-    udpClient.send(new Buffer('message'), 0, message.length, 5003, '127.0.0.1', function(err, bytes) {
+    udpClient.send(new Buffer(message), 0, message.length, 5003, '127.0.0.1', function(err, bytes) {
         callback && callback(err);
     });
 }
@@ -38,7 +38,7 @@ function sendMessages(list, interval, callback) {
     } else {
         sendMessage(list.pop(), function (err) {
             setTimeout(function() {
-                sendMessages(list);
+                sendMessages(list, interval, callback);
             }, interval || 100);
         });
     }
@@ -73,9 +73,9 @@ describe('mySensors: Test UDP server', function() {
     });
 
     it('mySensors: Check if connected to MQTT broker', function (done) {
-        this.timeout(2000);
+        this.timeout(20000);
         var commands = fs.readFileSync(__dirname + '/lib/commands.txt').toString().split(/[\r\n|\n|\r]/g);
-        sendMessages(commands, 100, function () {
+        sendMessages(commands, 50, function () {
             if (!connected) {
                 checkConnection(true, done);
             } else {
