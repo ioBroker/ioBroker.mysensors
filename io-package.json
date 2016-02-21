@@ -1,29 +1,55 @@
 {
-    "common": {
-        "name":                     "mysensors",
-        "version":                  "0.0.1",
-        "title":                    "mysensors adapter",
-        "desc":                     {
-             "en": "ioBroker mysensors Adapter",
-             "de": "ioBroker Mysensors Adapter",
-             "ru": "ioBroker Mysensors драйвер "
-	    },
-        "platform":                 "js",
-        "mode":                     "daemon",
-        "icon":                     "mysensors.png",
-        "enabled":                  true,
-        "messagebox":               true,		
-        "extIcon":                  "https://raw.githubusercontent.com/DJONvl/ioBroker.mqtt/master/admin//mysensors.png",
-        "keywords":                 ["mysensors", "arduino"],
-        "readme":                   "https://github.com/DJONvl/ioBroker.mysensors/blob/master/README.md",
-        "loglevel":                 "info",
-        "type":                     "communication"
+  "common": {
+    "name": "mysensors",
+    "version": "0.1.0",
+    "title": "mysensors adapter",
+    "desc": {
+      "en": "ioBroker mysensors Adapter",
+      "de": "ioBroker Mysensors Adapter",
+      "ru": "ioBroker Mysensors драйвер "
     },
-    "native": {
-        "comName": "",
-        "interval": 5000
+    "platform":   "js",
+    "mode":       "daemon",
+    "icon":       "mysensors.png",
+    "enabled":    true,
+    "messagebox": true,
+    "extIcon":    "https://raw.githubusercontent.com/ioBroker/ioBroker.mysensors/master/admin//mysensors.png",
+    "keywords": [
+      "mysensors",
+      "arduino"
+    ],
+    "readme":     "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
+    "loglevel":   "info",
+    "type":       "communication"
+  },
+  "native": {
+    "comName":  "",
+    "interval": 5000,
+    "connTimeout": 60000
+  },
+  "objects": [
+  ],
+  "instanceObjects": [
+    {
+      "_id":  "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
     },
-    "objects": [
-
-    ]
+    {
+      "_id":  "info.connection",
+      "type": "state",
+      "common": {
+        "role":  "indicator.connected",
+        "name":  "If connected to my sensors",
+        "type":  "boolean",
+        "read":  true,
+        "write": false,
+        "def":   false
+      },
+      "native": {}
+    }
+  ]
 }

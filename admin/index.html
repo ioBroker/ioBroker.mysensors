@@ -1,4 +1,4 @@
-<html> 
+<html>
 
 <link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
 <link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
@@ -17,98 +17,110 @@
 <script type="text/javascript">
     // Dictionary (systemDictionary is global variable from adapter-settings.js)
     systemDictionary = {
-        "mysensors adapter settings": { "ru": "Настройки"},
-        "test1":                    {"en": "Test 1", "ru": "Тест 1"},
-        "test2":                    {"en": "Test 2", "ru": "Тест 2"},
-        "on save adapter restarts with new config immediately": {
-        "ru": "После сохранения драйвер перезапуститься"
+        "mysensors adapter settings": {"ru": "Настройки"},
+        "name":         {"en": "name",          "de": "name",           "ru": "name"},
+        "id":           {"en": "id",            "de": "id",             "ru": "id"},
+        "childId":      {"en": "childId",       "de": "childId",        "ru": "childId"},
+        "type":         {"en": "type",          "de": "type",           "ru": "type"},
+        "ack":          {"en": "ack",           "de": "ack",            "ru": "ack"},
+        "subType":      {"en": "subType",       "de": "subType",        "ru": "subType"},
+        "payload":      {"en": "payload",       "de": "payload",        "ru": "payload"},
+        "raw":          {"en": "raw",           "de": "raw",            "ru": "raw"},
+        "room":         {"en": "room",          "de": "room",           "ru": "room"},
+        "Select port":  {"en": "Select port",   "de": "Select port",    "ru": "Select port"},
+        "Bind":         {"en": "Bind",          "de": "Bind",           "ru": "Bind"},
+        "Device yet exists in the table": {
+            "en": "Device yet exists in the table",
+            "de": "Bind",
+            "ru": "Bind"
         }
     };
     var devices;
     var units;
-   //   getIPs(function(ips) {
-   //         for (var i = 0; i < ips.length; i++) {
-   //             $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
-   //         }
-   //       //  $('#bind.value').val(settings.bind);
-   //     });
+    //   getIPs(function(ips) {
+    //         for (var i = 0; i < ips.length; i++) {
+    //             $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
+    //         }
+    //       //  $('#bind.value').val(settings.bind);
+    //     });
 
-    function test(a1,a2,a3,a4,a5,a6,a7){
-      addToTable('devices',{	name:	a5 + '_'+a1+'_'+a2,
-								node_id:	a1,
-								child_id:	a2,
-								msg_type:	a3,
-								ack:		a4,
-								sub_type:	a5,
-								payload:	a6,
-								raw:		a7,							
-								room:		'none'});
+    function addUnit(node) {
+        try {
+            var node  = JSON.parse(node);
+            node.name = node.subType + '_' + node.id + '_' + node.childId;
+            node.room = '';
+            var devices = getTableResult('devices', ['name', 'id', 'childId', 'type', 'ack', 'subType', 'payload', 'raw', 'room']);
+            for (var i = 0; i < devices.length; i++) {
+                if (devices[i].id      == node.id      &&
+                    devices[i].childId == node.childId &&
+                    devices[i].type    == node.type    &&
+                    devices[i].subType == node.subType) {
+                    showMessage(_('Device yet exists in the table'));
+                    return;
+                }
+            }
+
+            addToTable('devices', node);
+        } catch (e) {
+
+        }
     }
 
 
-
     function getUnit(ldb) { //ToDo  переделать в дерево, пока таблица
-       // node_id; child-sensor-id; message-type; ack; sub_type; payload\n
-		
-		sendTo(null, 'list_dbsU', null, function(units) {
-        
-		   var text =	'<tr bgcolor="#808080"><td>' + _('node_id')	+ 
-						'</td><td>' + _('child-id')	+ 
-						'</td><td>' + _('msg_type')	+			
-						'</td><td>' + _('ack')		+
-						'</td><td>' + _('sub_type')	+
-						'</td><td>' + _('payload')	+
-						'</td><td>' + _('raw')	+							
-						'</td><td>' + _('Bind')	+						
-						'</td></tr>';
-						//ToDo копировать по кнопке в devices с проверкой на уже существующий юнит
+        // node_id; child-sensor-id; message-type; ack; sub_type; payload\n
+
+        sendTo(null, 'listUnits', null, function (units) {
+
+            var text = '<tr bgcolor="#808080"><td>' + _('id') +
+                    '</td><td>' + _('childId') +
+                    '</td><td>' + _('type') +
+                    '</td><td>' + _('ack') +
+                    '</td><td>' + _('subType') +
+                    '</td><td>' + _('payload') +
+                    '</td><td>' + _('raw') +
+                    '</td><td>' + _('Bind') +
+                    '</td></tr>';
+            //ToDo копировать по кнопке в devices с проверкой на уже существующий юнит
             for (var j = 0; j < units.length; j++) {
-  
-			text += '<tr><td>'  + units[j].NodeId	+
-					'</td><td>' + units[j].ChildId	+
-					'</td><td>' + units[j].MsgType	+
-					'</td><td>' + units[j].Ack		+
-					'</td><td>' + units[j].Data_type	+
-					'</td><td>' + units[j].Value		+
-					'</td><td>' + units[j].raw		+					
-					'</td><td><button id="addunit" onclick="test(\''  + units[j].NodeId	+
-																'\',\'' + units[j].ChildId	+ 
-																'\',\'' + units[j].MsgType	+
-																'\',\'' + units[j].Ack		+
-																'\',\'' + units[j].Data_type +
-																'\',\'' + units[j].Value +																
-																'\',\'' + units[j].raw +																
-																'\',0); ">bind</button>'+
-					
-					'</td></tr>';	
-				}
-			
+
+                text += '<tr><td>'  + units[j].id +
+                        '</td><td>' + units[j].childId +
+                        '</td><td>' + units[j].type +
+                        '</td><td>' + units[j].ack +
+                        '</td><td>' + units[j].subType +
+                        '</td><td>' + units[j].payload +
+                        '</td><td>' + units[j].raw +
+                        '</td><td><button onclick=\'addUnit("' + JSON.stringify(units[j]) + '");\'>' + _('bind') + '</button>' +
+                        '</td></tr>';
+            }
+
             $('#comTbl').html(text);
         });
-	}
-	
-	
-	function getComPorts(actualValue) {
-        sendTo(null, 'list_uart', null, function(list) {
+    }
+
+
+    function getComPorts(actualValue) {
+        sendTo(null, 'listUart', null, function (list) {
             var text = '<option value="">' + _('Select port') + '</option>';
             for (var j = 0; j < list.length; j++) {
                 text += '<option value="' + list[j].comName + '" ' + ((actualValue == list[j].comName) ? 'selected' : '') + '>' + list[j].comName + '</option>';
             }
             $('#comName').html(text);
         });
-	}
-	
+    }
+
     function setValue(id, value, onChange) {
         // example: select elements with id=key and class=value and insert value
         if ($('#' + id + '.value').attr('type') == 'checkbox') {
-            $('#' + id + '.value').prop('checked', value).change(function() {
+            $('#' + id + '.value').prop('checked', value).change(function () {
                 onChange();
             });
         } else {
-            $('#' + id + '.value').val(value).change(function() {
+            $('#' + id + '.value').val(value).change(function () {
                 onChange();
-            }).keyup(function() {
-                // Chack that only numbers entered
+            }).keyup(function () {
+                // Check that only numbers entered
                 if ($(this).hasClass('number')) {
                     var val = $(this).val();
                     if (val) {
@@ -125,8 +137,9 @@
             });
         }
     }
+
     // the function loadSettings has to exist ...
-    function load(settings, onChange) { 
+    function load(settings, onChange) {
         if (!settings) return;
         devices = settings.devices || [];
         for (var key in settings) {
@@ -135,16 +148,13 @@
         getIsAdapterAlive(function (isAlive) {
             if (isAlive) getComPorts(settings.comName);
         });
-        editTable('devices', ['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','raw','room'], devices, 350);
-        onChange(true);//todo убрать костыль
+        editTable('devices', ['name', 'id', 'childId', 'type', 'ack', 'subType', 'payload', 'raw', 'room'], devices, 350);
+        onChange(false);
     }
-
-
-
+    
     // ... and the function save has to exist.
     // you have to make sure the callback is called with the settings object as first param!
     function save(callback) {
-        // example: select elements with class=value and build settings object
         var obj = {};
         $('.value').each(function () {
             var $this = $(this);
@@ -154,30 +164,25 @@
                 obj[$this.attr('id')] = $this.val();
             }
         });
-        // Get edited table  node_id;child-sensor-id;message-type;ack;sub_type;payload\n
-        obj.devices = getTableResult('devices',['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','raw','room']);
+        // Get edited table  name;node_id;child-sensor-id;message-type;ack;sub_type;payload\n
+        obj.devices = getTableResult('devices', ['name', 'id', 'childId', 'type', 'ack', 'subType', 'payload', 'raw', 'room']);
         callback(obj);
     }
 </script>
 <style type="text/css">
-.tab1 p{
-    border: 1px solid blue;
-    width: 40px;
-    height: 50px;
-    overflow: auto;
-}
+    .tab1 {
+        border:     1px solid blue;
+        width:      100%;
+        overflow:   auto;
+    }
 </style>
 <!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
 <div id="adapter-container">
-	<table><tr>
-        <td><select class="value" id="comName"></select></td><td><button type='button' id="lstunin" onclick='getUnit();'>list unit</td>
-    </tr>
-	<tr><td> </td> <td>  <p> <table class="tab1" id="comTbl" border="1"cellspacing="0" ></table></p>	</td> </tr>
-	</table>
-	<div id="pager-devices"></div>	
+        <select class="value" id="comName"></select>
+        <button type="button" id="listUnits" onclick="getUnit();">list unit</button>
+        <table class="tab1" id="comTbl" border="1" cellspacing="0"></table>
+    <div   id="pager-devices"></div>
     <table id="devices"></table>
-
-
 </div>
 
 </html>

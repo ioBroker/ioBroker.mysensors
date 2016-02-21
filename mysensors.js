@@ -3,46 +3,50 @@
 "use strict";
 
 // you have to require the utils module and call adapter function
-var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
+var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
+var serialport = require('serialport');//.SerialPort;
+var Parses     = require('sensors');
+var MySensors  = require(__dirname + '/lib/mysensors');
 
 var adapter   = utils.adapter('mysensors');
 var stopTimer = null;
 
-var Sensors    = require('sensors');
-var serialport = require('serialport');//.SerialPort;
-var SerialPort = serialport.SerialPort;
-var portConfig = {baudRate: 115200,	parser: serialport.parsers.readline('\n')};
-var G_myPort;
+
+var mySensorsInterface;
+
 //принимаем и обрабатываем сообщения 
 adapter.on('message', function (obj) {
-	if (obj) {
+    if (obj) {
         switch (obj.command) {
-            case 'list_uart':
-                //ToDo отдать список портов
-                serialport.list(function (err, ports) {
-                    if (obj.callback) {
-                        adapter.log.info('obj.callback...ToDo выслать список СОМ портов');
+            case 'listUart':
+                if (obj.callback) {
+                    // read all found serial ports
+                    serialport.list(function (err, ports) {
+                        adapter.log.info('List of port: ' + JSON.stringify(ports));
                         adapter.sendTo(obj.from, obj.command, ports, obj.callback);
-                    }
-                });
+                    });
+                }
+
                 break;
 
-            case 'list_dbsU'://ToDo отдать список юнитов
-                    if (obj.callback) {
-                        adapter.log.info('obj.callback...ToDo выслать список юнитов');
-                        adapter.sendTo(obj.from, obj.command, dbsUnique, obj.callback);
-                    }
-		        break;
-		}
-	}
+            case 'listUnits':
+                // Read list of nodes
+                if (obj.callback) {
+                    adapter.log.info('dbsUnique: ' + dbsUnique.lengrh);
+                    adapter.sendTo(obj.from, obj.command, dbsUnique, obj.callback);
+                }
+                break;
+        }
+    }
 });
 
 var mysdevs = []; // список устройств mysensor
 
+/*
 function pingAll() {
-   adapter.log.info('Ping-all' + adapter.config.comlst);
-    
-   if (stopTimer) clearTimeout(stopTimer);
+    adapter.log.info('Ping-all' + adapter.config.comlst);
+
+    if (stopTimer) clearTimeout(stopTimer);
 
     var count = mysdevs.length;
     adapter.log.info('count-' + mysdevs.length);
@@ -51,124 +55,100 @@ function pingAll() {
         adapter.log.info('tada-- ' + _mysdevice);
     });
 }
-
+*/
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
         adapter.log.info('cleaned everything up...');
+        if (mySensorsInterface) mySensorsInterface.destroy();
+        mySensorsInterface = null;
         callback();
     } catch (e) {
         callback();
     }
 });
 
-// is called if a subscribed object changes
-adapter.on('objectChange', function (id, obj) {
-    // Warning, obj can be null if it was deleted
-    adapter.log.info('objectChange ' + id + ' ' + JSON.stringify(obj));
-});
-
 // is called if a subscribed state changes
 adapter.on('stateChange', function (id, state) {
+    if (!state || state.ack || !mySensorsInterface) return;
+
     // Warning, state can be null if it was deleted
-    
-   // if (!state && state.ack) return;
-    
-    adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
-	
-	// If no serial port configured, but state change received
-	if (!G_myPort) return;
-	//________________выводим в порт___________________________________________
-		for (var co = 0; co < adapter.config.devices.length; co++) {		
-				if (id == adapter.namespace + '.' + adapter.config.devices[co].name){
-				var msg_s;
-					msg_s =	adapter.config.devices[co].raw		+ ';' +
-							state.val + '\n';
+    adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
 
-					
-					G_myPort.write(msg_s);
-					adapter.log.info('mesage-'+msg_s); 				
-					}  
-		adapter.log.info(adapter.config.devices[co].name+ ';' + adapter.config.devices[co].node_id)		
-				}
-	
-	
-
- //----------------------------------------------------------------------------  
-    // you can use the ack flag to detect if it is status (true) or command (false)
-   if (state && !state.ack) {
-        adapter.log.info('ack is not set!');
+    // output to mysensors
+    for (var co = 0; co < adapter.config.devices.length; co++) {
+        if (id == adapter.namespace + '.' + adapter.config.devices[co].name) {
+            var sMsg = adapter.config.devices[co].raw + ';' + state.val;
+            mySensorsInterface.write(sMsg);
+        }
     }
 });
 
 
- 
- 
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
-	main();
-}); 
+    main();
+});
 
-var dbsUnique = [];//будут хранится уникальные посылки от всех юнитов, из ком порта
+var dbsUnique = []; //  будут хранится уникальные посылки от всех юнитов, из ком порта
 //  ---------------------------------------------------------
 //  node-id; child-sensor-id; message-type; ack; sub-type; payload\n
 //  ---------------------------------------------------------
 function mkdbmsgUnique(str) {
-    var valcsv = str.split( ";" ); //элементы строки лога
-    var fl = false;
+    var result = Parses.parse(str.toString());
 
-    var result = Sensors.parse(str.toString());
+    //var result = [{
+    //    id:       lineParts[0],
+    //    childId:  lineParts[1],
+    //    type:     Values.types[lineParts[2]],
+    //    ack:      lineParts[3] === '1',
+    //    payload:  lineParts[5]
+    //    subType:  Values.subTypes[result.type][lineParts[4]];
+    //}];
+    
     if (!result || !result.length) {
-    	adapter.log.warn('Cannot parse data: ' + str);
-    	return null;
+        adapter.log.warn('Cannot parse data: ' + str);
+        return null;
     }
-	var i=0;	
-	var raw=valcsv[0]+';'+valcsv[1]+';'+valcsv[2]+';'+valcsv[3]+';'+valcsv[4];
-	valcsv[0] = result[i].id ;
-    valcsv[1] =result[i].childId ;
-    valcsv[2] =result[i].type ;
-    valcsv[3] = result[i].ack  ;
-    valcsv[4] =result[i].subType ;
-    valcsv[5] =result[i].payload;
-	
-		
-	adapter.log.debug("количество сообщений " + dbsUnique.length);
-    for (var n = 0; n < dbsUnique.length; n++) {
+    
+    for (var i = 0; i < result.length; i++) {
+        var found = false;
+        result[i].raw = result[i].id + ';' + result[i].childId + ';' + result[i].type + ';' + result[i].ack + ';' + result[i].subType;
 
-        if (dbsUnique[n].NodeId    == valcsv[0]	&&
-            dbsUnique[n].ChildId   == valcsv[1]	&&
-            dbsUnique[n].MsgType   == valcsv[2]	&&
-            dbsUnique[n].Data_type == valcsv[4]
-        ){
-         // dbsUnique[n].==valcsv[3] &&
-         // dbsUnique[n].==valcsv[4] &&
-         // dbsUnique[n].==valcsv[5] &&
-         // dbsUnique[n].==valcsv[6]    //sub-type
-         fl = true;
-         dbsUnique[n].Value = valcsv[5];//todo сравнить с олд вал и изменить стейт
+        // try to convert value
+        var val = result[i].payload;
+        var f = parseFloat(val);
+        if (f.toString() === val) val = f;
+        if (val === 'true')  val = true;
+        if (val === 'false') val = false;
+        result[i].payload = val;
+
+        for (var n = 0; n < dbsUnique.length; n++) {
+
+            // why here no compare with ack?
+            if (dbsUnique[n].id         == result[i].id         &&
+                dbsUnique[n].childId    == result[i].childId    &&
+                dbsUnique[n].type       == result[i].type       &&
+                dbsUnique[n].subType    == result[i].subType) {
+
+                found = true;
+                dbsUnique[n].payload = result[i].payload;
+            }
+        }
+
+        // Add new node
+        if (!found) {
+            dbsUnique.push(result[i]);
+            adapter.log.debug('Number of messages ' + dbsUnique.length);
         }
     }
-  //  if (fl == false && valcsv[0] !== "0"){//не добавляем ноду шлюза
-    if (fl == false ){//не добавляем ноду шлюза       
-	   dbsUnique.push({
-            "NodeId":		valcsv[0],
-            "ChildId":		valcsv[1],
-            "MsgType":		valcsv[2],
-            "Ack":			valcsv[3],
-            "Data_type":	valcsv[4],
-            "Value":		valcsv[5],
-            "raw":			raw			
-        });
-
-    // tree.push( str );
-    }
-    return result;	
+    return result;
 }
 
 function syncObjects(index, cb) {
     if (typeof index === 'function') {
-        cb    = index;
+        cb = index;
         index = 0;
     }
 
@@ -180,9 +160,9 @@ function syncObjects(index, cb) {
     }
 
     var id = adapter.config.devices[index].name.replace(/[.\s]+/g, '_');
-    
 
-	adapter.getObject(id, function (err, obj) {
+
+    adapter.getObject(id, function (err, obj) {
         if (err) adapter.log.error(err);
 
         // if new or changed
@@ -190,10 +170,10 @@ function syncObjects(index, cb) {
             adapter.setObject(id, {
                 common: {
                     name: adapter.config.devices[index].name,
-                    def:  false,
+                    def: false,
                     type: 'boolean', // нужный тип надо подставить
                     read: 'true',
-                    write:'true',   // нужный режим надо подставить
+                    write: 'true',   // нужный режим надо подставить
                     role: 'state',
                     desc: obj ? obj.common.desc : 'Variable from mySensors'
                 },
@@ -231,7 +211,7 @@ function syncObjects(index, cb) {
         }
     });
 }
- 
+
 function deleteStates(states, cb) {
     if (!states || !states.length) {
         cb && cb();
@@ -255,6 +235,7 @@ function deleteStates(states, cb) {
 }
 
 function main() {
+    adapter.config.devices = adapter.config.devices || [];
     // read current existing objects
     adapter.getForeignObjects(adapter.namespace + '.*', 'state', function (err, states) {
         var toDelete = [];
@@ -273,61 +254,35 @@ function main() {
 
         // delete non existing states
         deleteStates(toDelete, function () {
-			
-			
-			
-			
             // create new or modified states
             syncObjects(function () {
-				
-				// подписываемся на изменения извне
-             	adapter.subscribeStates('*');
-				
-				
+
+                // subscribe on changes
+                adapter.subscribeStates('*');
+
                 for (var i = 0; i < adapter.config.devices.length; i++) {
                     mysdevs.push(adapter.config.devices[i].name);
                 }
-                //------------------------------------------------------------------
 
-                adapter.log.debug('Communication port:' + adapter.config.comName);
+                adapter.log.debug('Communication port: ' + adapter.config.comName);
+
+                mySensorsInterface = new MySensors(adapter.config, adapter.log);
 
                 // open the serial port:
-                if (adapter.config.comName) {
-                    var myPort = new SerialPort(adapter.config.comName, portConfig);
-					G_myPort=myPort;
-                    // ловим события порта
-                    myPort.on('data', function(data) {
-                    adapter.log.info('Rx-Raw  '+data);  
-					var tmp= data.split( ";" );
+                if (mySensorsInterface) {
+                    // process received data
+                    mySensorsInterface.on('data', function (data) {
+                        var result = mkdbmsgUnique(data); // write to unique nodes
 
-					if(tmp.length < 6){
-	                    adapter.log.info('raw_data_error '+ tmp.length);  									
-					}else{
-					mkdbmsgUnique(data); //пишем в массив уникальных сообщений
-                       var result = Sensors.parse(data.toString());
-//___________________________Устанавливаем значение переменной по имени из ком порта____________________________________________
-						for (var co = 0; co < adapter.config.devices.length; co++) {		
-							if ( 	  result[0].subType + 
-								'_' + result[0].id  + 
-								'_' + result[0].childId			==	adapter.config.devices[co].name){
-								adapter.setState(adapter.config.devices[co].name, result[0].payload); 				
-							}  
-						}
-//------------------------------------------------------------------------------------------------------------------------------
+                        for (var i = 0; i < result.length; i++) {
+                            for (var co = 0; co < adapter.config.devices.length; co++) {
+                                if (result[0].subType + '_' + result[0].id + '_' + result[0].childId == adapter.config.devices[co].name) {
+                                    adapter.setState(adapter.config.devices[co].name, val, true);
+                                }
+                            }
 
-
-					   for(var i in result) {
-                            adapter.log.info('__' +
-                                result[i].id      + '_|_' +
-                                result[i].childId + '_|_' +
-                                result[i].type    + '_|_' +
-                                result[i].ack     + '_|_' +
-                                result[i].subType + '_|_' +
-                                result[i].payload);
-						}
-						
-					}	
-						
+                            adapter.log.debug(JSON.stringify(result[i]));
+                        }
                     });
                 }
 

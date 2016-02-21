@@ -2,7 +2,7 @@
 # ioBroker.mysensors
 =================
 
-# установка:
+# Install:
 
-cd (папка iobroker)
-npm install https://github.com/DJONvl/iobroker.mysensors/tarball/master
+cd /opt/iobroker
+npm install https://github.com/ioBroker/ioBroker.mysensors/tarball/master

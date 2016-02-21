@@ -1,4 +1,4 @@
-var srcDir   = __dirname + "/../";
+var srcDir = __dirname + "/../";
 
 module.exports = {
     options: {
