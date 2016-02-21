@@ -7,11 +7,10 @@ var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
 var serialport = require('serialport');//.SerialPort;
 var Parses     = require('sensors');
 var MySensors  = require(__dirname + '/lib/mysensors');
+var getMeta    = require(__dirname + '/lib/getmeta').getMetaInfo;
 
 var adapter   = utils.adapter('mysensors');
-var stopTimer = null;
-
-
+var devices   = {};
 var mySensorsInterface;
 
 //принимаем и обрабатываем сообщения 
@@ -28,41 +27,10 @@ adapter.on('message', function (obj) {
                 }
 
                 break;
-
-            case 'listUnits':
-                // Read list of nodes
-                if (obj.callback) {
-                    if (mySensorsInterface) {
-                        mySensorsInterface.write('0;0;0;0;0;0');
-                        setTimeout(function () {
-                            adapter.log.info('dbsUnique: ' + dbsUnique.length);
-                            adapter.sendTo(obj.from, obj.command, dbsUnique, obj.callback);
-                        }, 2000);
-                    } else {
-                        adapter.log.warn('No open connection');
-                    }
-                }
-                break;
         }
     }
 });
 
-var mysdevs = []; // список устройств mysensor
-
-/*
-function pingAll() {
-    adapter.log.info('Ping-all' + adapter.config.comlst);
-
-    if (stopTimer) clearTimeout(stopTimer);
-
-    var count = mysdevs.length;
-    adapter.log.info('count-' + mysdevs.length);
-
-    mysdevs.forEach(function (_mysdevice) {
-        adapter.log.info('tada-- ' + _mysdevice);
-    });
-}
-*/
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
     try {
@@ -83,14 +51,24 @@ adapter.on('stateChange', function (id, state) {
     adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
 
     // output to mysensors
-    for (var co = 0; co < adapter.config.devices.length; co++) {
-        if (id == adapter.namespace + '.' + adapter.config.devices[co].name) {
-            var sMsg = adapter.config.devices[co].raw + ';' + state.val;
-            mySensorsInterface.write(sMsg);
-        }
+    if (devices[id]) {
+        mySensorsInterface.write(
+            devices[id].native.id       + ';' +
+            devices[id].native.childId  + ';1;0;' +
+            devices[id].native.subType  + ';' +
+            state.val);
     }
 });
 
+adapter.on('objectChange', function (id, obj) {
+    if (!obj) {
+        if (devices[id]) delete devices[id];
+    } else {
+        if (obj.native.id !== undefined && obj.native.childId !== undefined && obj.native.subType !== undefined) {
+            devices[id] = obj;
+        }
+    }
+});
 
 // is called when databases are connected and adapter received configuration.
 // start here!
@@ -98,12 +76,10 @@ adapter.on('ready', function () {
     main();
 });
 
-var dbsUnique = []; //  будут хранится уникальные посылки от всех юнитов, из ком порта
-//  ---------------------------------------------------------
-//  node-id; child-sensor-id; message-type; ack; sub-type; payload\n
-//  ---------------------------------------------------------
-function mkdbmsgUnique(str) {
-    var result = Parses.parse(str.toString());
+var presentationDone = false;
+
+function processPresentation(data) {
+    var result = Parses.parse(data.toString());
 
     //var result = [{
     //    id:       lineParts[0],
@@ -113,39 +89,38 @@ function mkdbmsgUnique(str) {
     //    payload:  lineParts[5]
     //    subType:  Values.subTypes[result.type][lineParts[4]];
     //}];
-    
+
     if (!result || !result.length) {
-        adapter.log.warn('Cannot parse data: ' + str);
+        adapter.log.warn('Cannot parse data: ' + data);
         return null;
     }
-    
+
     for (var i = 0; i < result.length; i++) {
-        var found = false;
-        result[i].raw = result[i].id + ';' + result[i].childId + ';' + result[i].type + ';' + result[i].ack + ';' + result[i].subType;
-
-        // try to convert value
-        var val = result[i].payload;
-        var f = parseFloat(val);
-        if (f.toString() === val) val = f;
-        if (val === 'true')  val = true;
-        if (val === 'false') val = false;
-        result[i].payload = val;
-
-        for (var n = 0; n < dbsUnique.length; n++) {
-            // why here no compare with ack?
-            if (dbsUnique[n].id         == result[i].id         &&
-                dbsUnique[n].childId    == result[i].childId    &&
-                dbsUnique[n].subType    == result[i].subType) {
-                found = true;
-                dbsUnique[n].payload = result[i].payload;
+        if (result[i].type === 'presentation') {
+            var found = false;
+            for (var n = 0; n < devices.length; n++) {
+                if (devices[n].native.id      == result[i].id      &&
+                    devices[n].native.childId == result[i].childId &&
+                    devices[n].native.subType == result[i].subType) {
+                    found = true;
+                    break;
+                }
             }
-        }
 
-        // Add new node
-        if (!found) {
-            result[i].dataType = typeof result[i].payload;
-            dbsUnique.push(result[i]);
-            adapter.log.debug('Number of messages ' + dbsUnique.length);
+            // Add new node
+            if (!found) {
+                var obj = getMeta(result[i]);
+                adapter.setObject(obj._id, obj, function (err) {
+                    if (err) adapter.log.error(err);
+                });
+            }
+        } else {
+            // try to convert value
+            var val = result[i].payload;
+            if (val.match(/^[+-]\d+(\.\d*)$/)) val = parseFloat(val);
+            if (val === 'true')  val = true;
+            if (val === 'false') val = false;
+            result[i].payload = val;
         }
     }
     return result;
@@ -240,65 +215,42 @@ function deleteStates(states, cb) {
 }
 
 function main() {
-    adapter.config.devices = adapter.config.devices || [];
     // read current existing objects
     adapter.getForeignObjects(adapter.namespace + '.*', 'state', function (err, states) {
-        var toDelete = [];
+        // subscribe on changes
+        adapter.subscribeStates('*');
+        devices = states;
 
-        // delete non existing objects
-        for (var id in states) {
-            var isFound = false;
-            for (var i2 = 0; i2 < adapter.config.devices.length; i2++) {
-                if (adapter.config.devices[i2].name === states[id].common.name) {
-                    isFound = true;
-                    break;
-                }
-            }
-            if (!isFound) toDelete.push(id);
-        }
+        mySensorsInterface = new MySensors(adapter.config, adapter.log);
 
-        // delete non existing states
-        deleteStates(toDelete, function () {
-            // create new or modified states
-            syncObjects(function () {
+        // if object created
+        if (mySensorsInterface) {
+            mySensorsInterface.write('0;0;3;0;14;Gateway startup complete');
 
-                // subscribe on changes
-                adapter.subscribeStates('*');
+            // process received data
+            mySensorsInterface.on('data', function (data) {
+                var result = processPresentation(data); // update configuration if presentation received
 
-                for (var i = 0; i < adapter.config.devices.length; i++) {
-                    mysdevs.push(adapter.config.devices[i].name);
-                }
-
-                adapter.log.debug('Communication port: ' + adapter.config.comName);
-
-                mySensorsInterface = new MySensors(adapter.config, adapter.log);
-
-                // open the serial port:
-                if (mySensorsInterface) {
-                    // process received data
-                    mySensorsInterface.on('data', function (data) {
-                        var result = mkdbmsgUnique(data); // write to unique nodes
-
-                        for (var i = 0; i < result.length; i++) {
-                            for (var co = 0; co < adapter.config.devices.length; co++) {
-                                if (result[i].subType + '_' + result[i].id + '_' + result[i].childId == adapter.config.devices[co].name) {
-                                    adapter.setState(adapter.config.devices[co].name, result[i].payload, true);
-                                }
+                for (var i = 0; i < result.length; i++) {
+                    if (result[i].type == 'set' || result[i].type == 'req') {
+                        for (var id in devicesid) {
+                            if (devices[id].native.subType === result[i].subType &&
+                                devices[id].native.id      === result[i].id      &&
+                                devices[id].native.childId === result[i].childId) {
+                                adapter.setState(id, result[i].payload, true);
+                                break;
                             }
-
-                            adapter.log.debug(JSON.stringify(result[i]));
                         }
-                    });
+                    }
                 }
-
-                //-----------------------------------------------------------------
-                //	myPort.write("1;1;1;1;3;0\n");
-                //	myPort.write("2;1;1;1;2;1\n");
-                //    pingAll();
-                //  timer = setInterval(pingAll, adapter.config.interval);
             });
-        });
-    });
 
-    if (adapter.config.interval < 5000) adapter.config.interval = 5000;
+            mySensorsInterface.on('connectionChange', function (isConn) {
+                adapter.setState('info.connection', isConn, true);
+                if (!presentationDone) {
+                    mySensorsInterface.write('0;0;3;0;13;force presentation');
+                }
+            });
+        }
+    });
 }

@@ -23,9 +23,12 @@
     "type":       "communication"
   },
   "native": {
-    "comName":  "",
-    "interval": 5000,
-    "connTimeout": 60000
+    "comName":      "",
+    "connTimeout":  60000,
+    "port":         5003,
+    "mode":         "server",
+    "type":         "serial",
+    "bind":         "0.0.0.0"
   },
   "objects": [
   ],

@@ -1,19 +1,19 @@
 {
   "name": "iobroker.mysensors",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "ioBroker mysensors Adapter",
   "author": {
-    "name": "Vlad_k",
-    "email": "gstar-tools@rambler.ru"
+    "name": "bluefox",
+    "email": "dogafox@gmail.com"
   },
   "contributors": [
     {
-      "name": "Vlad_k",
-      "email": "gstar-tools@rambler.ru"
-    },
-    {
       "name": "Bluefox",
       "email": "dogafox@gmail.com"
+    },
+	{
+      "name": "Vlad_k",
+      "email": "gstar-tools@rambler.ru"
     }
   ],
   "homepage": "https://github.com/ioBroker/ioBroker.mysensors",
@@ -37,10 +37,15 @@
     "grunt-replace": "^0.9.3",
     "grunt-contrib-jshint": "^0.11.2",
     "grunt-jscs": "^2.0.0",
-    "grunt-http": "^1.6.0"
+    "grunt-http": "^1.6.0",
+    "mocha": "^2.3.4",
+    "chai": "^3.4.1"
   },
   "bugs": {
     "url": "https://github.com/ioBroker/ioBroker.mysensors/issues"
+  },
+  "scripts": {
+    "test": "node node_modules/mocha/bin/mocha"
   },
   "readmeFilename": "README.md"
 }

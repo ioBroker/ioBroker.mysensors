@@ -46,7 +46,6 @@
 
     function addUnit(node) {
         try {
-            var node  = JSON.parse(node);
             node.name = node.subType + '_' + node.id + '_' + node.childId;
             node.room = '';
             var devices = getTableResult('devices', ['name', 'id', 'childId', 'subType', 'room']);
@@ -58,6 +57,9 @@
                     return;
                 }
             }
+            if (node.type) delete node.type;
+            if (node.payload) delete node.payload;
+            if (node.raw)   delete node.raw;
 
             addToTable('devices', node);
         } catch (e) {
@@ -75,18 +77,17 @@
                     '</td><td>' + _('ack') +
                     '</td><td>' + _('subType') +
                     '</td><td>' + _('payload') +
-                    '</td><td>' + _('raw') +
                     '</td><td>' + _('Bind') +
                     '</td></tr>';
 
              for (var j = 0; j < units.length; j++) {
                 text += '<tr><td>'  + units[j].id +
                         '</td><td>' + units[j].childId +
-                        '</td><td>' + units[j].type +
+                        '</td><td>' + (units[j].type  || '') +
                         '</td><td>' + units[j].ack +
-                        '</td><td>' + units[j].subType +
-                        '</td><td>' + units[j].payload +
-                        '</td><td><button onclick=\'addUnit(JSON.stringify(units[j]));\'>' + _('bind') + '</button>' +
+                        '</td><td>' + (units[j].subType || '') +
+                        '</td><td>' + (units[j].payload || '') +
+                        '</td><td><button onclick=\'addUnit(' + JSON.stringify(units[j]) + ');\'>' + _('bind') + '</button>' +
                         '</td></tr>';
             }
 

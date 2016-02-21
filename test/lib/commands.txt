@@ -1,0 +1,80 @@
+0;58;1;0;0;15.14
+0;42;1;0;0;-127.00
+0;11;1;0;15;1
+0;255;3;0;9;Init complete, id=0, parent=0, distance=0
+0;61;1;0;77;for Warnings
+0;61;0;0;4;Test7 PWM 5V
+0;60;1;0;77;for Warnings
+0;60;0;0;4;Test PWM 5V
+0;59;1;0;77;for Warnings
+0;59;0;0;4;Test7 PWM 5V
+0;58;1;0;77;for Warnings
+0;58;0;0;6;Test NTC
+0;52;1;0;77;for Warnings
+0;52;0;0;255;W5100
+0;51;1;0;77;for Warnings
+0;51;0;0;255;W5100
+0;50;1;0;77;for Warnings
+0;50;0;0;255;W5100
+0;42;1;0;77;for Warnings
+0;42;0;0;6;dallas
+0;39;1;0;77;for Warnings
+0;39;0;0;255;MAX31855
+0;38;1;0;77;for Warnings
+0;38;0;0;255;MAX31855
+0;37;1;0;77;for Warnings
+0;37;0;0;3;RELAY D8
+0;36;1;0;77;for Warnings
+0;36;0;0;3;RELAY D8
+0;35;1;0;77;for Warnings
+0;35;0;0;3;RELAY D8
+0;34;1;0;77;for Warnings
+0;34;0;0;3;RELAY D8
+0;33;1;0;77;for Warnings
+0;33;0;0;3;RELAY D8
+0;32;1;0;77;for Warnings
+0;32;0;0;3;RELAY D8
+0;31;1;0;77;for Warnings
+0;31;0;0;3;RELAY D8
+0;30;1;0;77;for Warnings
+0;30;0;0;3;RELAY D8
+0;29;1;0;77;for Warnings
+0;29;0;0;3;RELAY D8
+0;28;1;0;77;for Warnings
+0;28;0;0;3;RELAY D8
+0;27;1;0;77;for Warnings
+0;27;0;0;3;RELAY D8
+0;26;1;0;77;for Warnings
+0;26;0;0;3;RELAY D8
+0;25;1;0;77;for Warnings
+0;25;0;0;3;RELAY D8
+0;24;1;0;77;for Warnings
+0;24;0;0;3;RELAY D8
+0;23;1;0;77;for Warnings
+0;23;0;0;3;RELAY D8
+0;22;1;0;77;for Warnings
+0;22;0;0;3;RELAY D8
+0;20;1;0;77;for Warnings
+0;20;0;0;4;Pumpe2_T3
+0;18;1;0;77;for Warnings
+0;18;0;0;4;Pumpe1_T5
+0;16;1;0;77;for Warnings
+0;16;0;0;255;LEDS_BLINKING_FEATURE
+0;13;1;0;77;for Warnings
+0;13;0;0;4;Test PWM
+0;11;1;0;77;for Warnings
+0;11;0;0;0;Digital Ein
+0;10;1;0;77;for Warnings
+0;10;0;0;255;W5100
+0;8;1;0;77;for Warnings
+0;8;0;0;3;RELAY D8
+0;7;1;0;77;for Warnings
+0;7;0;0;4;Test PWM
+0;1;1;0;77;for Warnings
+0;1;0;0;255;TX
+0;0;1;0;77;for Warnings
+0;0;0;0;255;RX
+0;255;3;0;12;1.0
+0;255;3;0;11;ETHduino by JR
+0;255;3;0;14;Gateway startup complete.
+0;255;3;0;9;Starting gateway (R-NGA-, 2.0.0-beta)
