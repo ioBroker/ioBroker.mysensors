@@ -136,7 +136,7 @@
             if (isAlive) getComPorts(settings.comName);
         });
         editTable('devices', ['name', 'node_id','child_id', 'msg_type','ack','sub_type','payload','raw','room'], devices, 350);
-        onChange(false);
+        onChange(true);//todo убрать костыль
     }
 
 
