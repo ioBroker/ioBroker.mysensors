@@ -276,8 +276,8 @@ function main() {
 
                         for (var i = 0; i < result.length; i++) {
                             for (var co = 0; co < adapter.config.devices.length; co++) {
-                                if (result[0].subType + '_' + result[0].id + '_' + result[0].childId == adapter.config.devices[co].name) {
-                                    adapter.setState(adapter.config.devices[co].name, val, true);
+                                if (result[i].subType + '_' + result[i].id + '_' + result[i].childId == adapter.config.devices[co].name) {
+                                    adapter.setState(adapter.config.devices[co].name, result[i].payload, true);
                                 }
                             }
 
