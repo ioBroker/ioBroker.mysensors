@@ -49,11 +49,10 @@
             var node  = JSON.parse(node);
             node.name = node.subType + '_' + node.id + '_' + node.childId;
             node.room = '';
-            var devices = getTableResult('devices', ['name', 'id', 'childId', 'type', 'ack', 'subType', 'payload', 'raw', 'room']);
+            var devices = getTableResult('devices', ['name', 'id', 'childId', 'subType', 'room']);
             for (var i = 0; i < devices.length; i++) {
                 if (devices[i].id      == node.id      &&
                     devices[i].childId == node.childId &&
-                    devices[i].type    == node.type    &&
                     devices[i].subType == node.subType) {
                     showMessage(_('Device yet exists in the table'));
                     return;
@@ -68,8 +67,6 @@
 
 
     function getUnit(ldb) { //ToDo  переделать в дерево, пока таблица
-        // node_id; child-sensor-id; message-type; ack; sub_type; payload\n
-
         sendTo(null, 'listUnits', null, function (units) {
 
             var text = '<tr bgcolor="#808080"><td>' + _('id') +
@@ -81,16 +78,14 @@
                     '</td><td>' + _('raw') +
                     '</td><td>' + _('Bind') +
                     '</td></tr>';
-            //ToDo копировать по кнопке в devices с проверкой на уже существующий юнит
-            for (var j = 0; j < units.length; j++) {
 
+             for (var j = 0; j < units.length; j++) {
                 text += '<tr><td>'  + units[j].id +
                         '</td><td>' + units[j].childId +
                         '</td><td>' + units[j].type +
                         '</td><td>' + units[j].ack +
                         '</td><td>' + units[j].subType +
                         '</td><td>' + units[j].payload +
-                        '</td><td>' + units[j].raw +
                         '</td><td><button onclick=\'addUnit(JSON.stringify(units[j]));\'>' + _('bind') + '</button>' +
                         '</td></tr>';
             }
@@ -148,7 +143,7 @@
         getIsAdapterAlive(function (isAlive) {
             if (isAlive) getComPorts(settings.comName);
         });
-        editTable('devices', ['name', 'id', 'childId', 'type', 'ack', 'subType', 'payload', 'raw', 'room'], devices, 350);
+        editTable('devices', ['name', 'id', 'childId', 'subType', 'room'], devices, 350);
         onChange(false);
     }
     
@@ -165,14 +160,14 @@
             }
         });
         // Get edited table  name;node_id;child-sensor-id;message-type;ack;sub_type;payload\n
-        obj.devices = getTableResult('devices', ['name', 'id', 'childId', 'type', 'ack', 'subType', 'payload', 'raw', 'room']);
+        obj.devices = getTableResult('devices', ['name', 'id', 'childId', 'subType', 'room']);
         callback(obj);
     }
 </script>
 <style type="text/css">
     .tab1 {
         border:     1px solid blue;
-        width:      100%;
+        width:      95%;
         overflow:   auto;
     }
 </style>

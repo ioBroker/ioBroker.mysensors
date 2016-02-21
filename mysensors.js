@@ -32,8 +32,15 @@ adapter.on('message', function (obj) {
             case 'listUnits':
                 // Read list of nodes
                 if (obj.callback) {
-                    adapter.log.info('dbsUnique: ' + dbsUnique.lengrh);
-                    adapter.sendTo(obj.from, obj.command, dbsUnique, obj.callback);
+                    if (mySensorsInterface) {
+                        mySensorsInterface.write('0;0;0;0;0;0');
+                        setTimeout(function () {
+                            adapter.log.info('dbsUnique: ' + dbsUnique.length);
+                            adapter.sendTo(obj.from, obj.command, dbsUnique, obj.callback);
+                        }, 2000);
+                    } else {
+                        adapter.log.warn('No open connection');
+                    }
                 }
                 break;
         }
@@ -125,13 +132,10 @@ function mkdbmsgUnique(str) {
         result[i].payload = val;
 
         for (var n = 0; n < dbsUnique.length; n++) {
-
             // why here no compare with ack?
             if (dbsUnique[n].id         == result[i].id         &&
                 dbsUnique[n].childId    == result[i].childId    &&
-                dbsUnique[n].type       == result[i].type       &&
                 dbsUnique[n].subType    == result[i].subType) {
-
                 found = true;
                 dbsUnique[n].payload = result[i].payload;
             }
