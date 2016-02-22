@@ -75,6 +75,7 @@
 0;0;1;0;77;for Warnings
 0;0;0;0;255;RX
 0;255;3;0;12;1.0
+0;255;3;0;6;I
 0;255;3;0;11;ETHduino by JR
 0;255;3;0;14;Gateway startup complete.
 0;255;3;0;9;Starting gateway (R-NGA-, 2.0.0-beta)

@@ -68,8 +68,10 @@
     }
 
 
-    function getUnit(ldb) { //ToDo  переделать в дерево, пока таблица
+    function getUnit() {
+        $('#getUnit').prop('disabled', true);
         sendTo(null, 'listUnits', null, function (units) {
+            $('#getUnit').prop('disabled', false);
 
             var text = '<tr bgcolor="#808080"><td>' + _('id') +
                     '</td><td>' + _('childId') +
@@ -142,10 +144,31 @@
             setValue(key, settings[key], onChange);
         }
         getIsAdapterAlive(function (isAlive) {
-            if (isAlive) getComPorts(settings.comName);
+            if (isAlive) {
+                getComPorts(settings.comName);
+            } else {
+                $('#getUnit').prop('disabled', false);
+            }
         });
-        editTable('devices', ['name', 'id', 'childId', 'subType', 'room'], devices, 350);
+
+        getIPs(function (ips) {
+            for (var i = 0; i < ips.length; i++) {
+                $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
+            }
+            $('#bind.value').val(settings.bind);
+        });
+
+        //editTable('devices', ['name', 'id', 'childId', 'subType', 'room'], devices, 350);
+        $('#type').change(onTypeChange);
+        onTypeChange();
         onChange(false);
+    }
+
+    function onTypeChange() {
+        $('.serial').hide();
+        $('.tcp').hide();
+        $('.udp').hide();
+        $('.' + $('#type').val()).show();
     }
     
     // ... and the function save has to exist.
@@ -161,7 +184,7 @@
             }
         });
         // Get edited table  name;node_id;child-sensor-id;message-type;ack;sub_type;payload\n
-        obj.devices = getTableResult('devices', ['name', 'id', 'childId', 'subType', 'room']);
+        //obj.devices = getTableResult('devices', ['name', 'id', 'childId', 'subType', 'room']);
         callback(obj);
     }
 </script>
@@ -173,12 +196,24 @@
     }
 </style>
 <!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
-<div id="adapter-container">
-        <select class="value" id="comName"></select>
-        <button type="button" id="listUnits" onclick="getUnit();">list unit</button>
-        <table class="tab1" id="comTbl" border="1" cellspacing="0"></table>
+    <div id="adapter-container">
+        <table><tr><td><img src="mysensors.png"></td><td><h3 class="translate">mySensors adapter settings</h3></td></tr></table>
+        <table>
+            <tr><td class="translate" style="width: 150px">Type:</td><td><select id="type" class="value">
+                <option value="serial" class="translate">serial</option>
+                <option value="tcp" class="translate">tcp server</option>
+                <option value="udp" class="translate">udp server</option>
+            </select></td></tr>
+            <tr class="serial"><td>Com port:</td><td><select class="value" id="comName"></select><button type="button" id="getUnit" onclick="getUnit();" class="translate">list unit</button></td></tr>
+            <tr class="tcp udp"><td>Bind:</td><td><select class="value" id="bind"></select></td></tr>
+            <tr class="tcp udp"><td>Port:</td><td><input class="value" id="port" /></td></tr>
+            <tr class="udp"><td>Connection timeout:</td><td><input class="value" id="connTimeout" /></td></tr>
+        </table>
+
+
+        <!--table class="tab1" id="comTbl" border="1" cellspacing="0"></table>
     <div   id="pager-devices"></div>
-    <table id="devices"></table>
-</div>
+    <table id="devices"></table-->
+    </div>
 
 </html>
