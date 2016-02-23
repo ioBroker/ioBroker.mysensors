@@ -33,6 +33,11 @@
             "en": "Device yet exists in the table",
             "de": "Bind",
             "ru": "Bind"
+        },
+        "Leave 0.0.0.0, if server should be available on any IP address": {
+            "en": "Leave 0.0.0.0, if server should be available on any IP address",
+            "de": "0.0.0.0 heisst, dass Server unter allen IP Adressen erreichbar ist",
+            "ru": "0.0.0.0 означает, что сервер доступен под любым доступным IP адресом"
         }
     };
     var devices;
@@ -194,6 +199,9 @@
         width:      95%;
         overflow:   auto;
     }
+    .help {
+        font-size: small;
+    }
 </style>
 <!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
     <div id="adapter-container">
@@ -205,8 +213,8 @@
                 <option value="udp" class="translate">udp server</option>
             </select></td><td></td></tr>
             <tr class="serial"><td>Com port:</td><td><select class="value" id="comName"></select></td><td></td></tr>
-            <tr class="tcp udp"><td>Bind:</td><td><select class="value" id="bind"></select></td><td></td></tr>
-            <tr class="tcp udp"><td>Port:</td><td><input class="value" id="port" /></td><td class="translate">Leave 0.0.0.0, if server should be available on any IP address</td></tr>
+            <tr class="tcp udp"><td>Bind:</td><td><select class="value" id="bind"></select></td><td class="translate help">Leave 0.0.0.0, if server should be available on any IP address</td></tr>
+            <tr class="tcp udp"><td>Port:</td><td><input class="value" id="port" /></td><td></td></tr>
             <tr class="udp"><td>Connection timeout:</td><td><input class="value" id="connTimeout" /></td><td></td></tr>
         </table>
 
