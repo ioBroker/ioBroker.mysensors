@@ -274,6 +274,7 @@ function main() {
                         if (result[i].subType == 77) {
                             for (var id in devices) {
                                 if (devices[id].native &&
+                                    (!ip || ip == devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&
                                     devices[id].native.childId == result[i].childId) {
                                     adapter.log.debug('Set quality of ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
@@ -287,6 +288,7 @@ function main() {
                             for (var id in devices) {
                                 //adapter.log.info(devices[id].native.varType + ' /// ' + result[i].subType);
                                 if (devices[id].native &&
+                                    (!ip || ip == devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&
                                     devices[id].native.childId == result[i].childId &&
                                     devices[id].native.varType == result[i].subType) {
@@ -305,9 +307,10 @@ function main() {
 
                                 // update battery value
                                 for (var id in devices) {
+                                    if (devices[id].native.varType == 'I_BATTERY_LEVEL') console.log('Compare ' + JSON.stringify(devices[id].native) + '| ' + JSON.stringify(result[i]))
                                     if (devices[id].native &&
+                                        (!ip || ip == devices[id].native.ip) &&
                                         devices[id].native.id      == result[i].id &&
-                                        devices[id].native.childId == result[i].childId &&
                                         devices[id].native.varType == 'I_BATTERY_LEVEL') {
                                         adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
                                         adapter.setState(id, parseFloat(result[i].payload), true);

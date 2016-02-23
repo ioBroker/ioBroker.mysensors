@@ -121,7 +121,7 @@ describe('mySensors UDP: Test UDP server', function() {
     it('mySensors UDP: check created objects', function (done) {
         this.timeout(5000);
         var expected = {
-            "_id": "mysensors.0.127_0_0_1.0.59.S_DIMMER.V_PERCENTAGE",
+            "_id": "mysensors.0.127_0_0_1.0.59_DIMMER.S_DIMMER.V_PERCENTAGE",
             "common": {
                 "name": "Test7 PWM 5V.V_PERCENTAGE",
                 "type": "number",
@@ -203,7 +203,7 @@ describe('mySensors UDP: Test UDP server', function() {
         this.timeout(5000);
         lastMessage = '';
         someObject = {
-            "_id": "mysensors.0.127_0_0_1.0.33.S_LIGHT.V_STATUS",
+            "_id": "mysensors.0.127_0_0_1.0.33_LIGHT.S_LIGHT.V_STATUS",
             "common": {
                 "name": "RELAY D8.V_STATUS",
                 "type": "boolean",
@@ -253,7 +253,7 @@ describe('mySensors UDP: Test UDP server', function() {
         this.timeout(5000);
         lastMessage = '';
         someObject = {
-            "_id": "mysensors.0.127_0_0_1.0.7.S_BATTERY",
+            "_id": "mysensors.0.127_0_0_1.0.S_BATTERY",
             "common": {
                 "name": "Test PWM",
                 "type": "number",
@@ -268,14 +268,11 @@ describe('mySensors UDP: Test UDP server', function() {
             "native": {
                 "ip": "127.0.0.1",
                 "id": "0",
-                "childId": "7",
-                "subType": "S_DIMMER",
-                "subTypeNum": 4,
                 "varType": "I_BATTERY_LEVEL"
             },
             "type": "state"
         };
-        var data = someObject.native.id + ';' + someObject.native.childId + ';3;0;0;50';
+        var data = someObject.native.id + ';0;3;0;0;50';
 
         udpClient.send(new Buffer(data), 0, data.length, port, '127.0.0.1', function(err, bytes) {
             expect(err).to.be.not.ok;
@@ -293,7 +290,7 @@ describe('mySensors UDP: Test UDP server', function() {
     it('mySensors UDP: check metrics', function (done) {
         this.timeout(5000);
         var expected = {
-            "_id": "mysensors.0.127_0_0_1.0.42.S_TEMP.V_TEMP",
+            "_id": "mysensors.0.127_0_0_1.0.42_TEMP.S_TEMP.V_TEMP",
             "common": {
                 "name": "dallas.V_TEMP",
                 "type": "number",
