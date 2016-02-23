@@ -6,6 +6,7 @@ var fs     = require('fs');
 var objects     = null;
 var states      = null;
 var connected   = false;
+var port        = 15003;
 var udpClient;
 var lastMessage;
 var someObject;
@@ -20,7 +21,7 @@ function checkConnection(value, done, counter) {
     states.getState('mysensors.0.info.connection', function (err, state) {
         if (err) console.error(err);
         if (state && typeof state.val == 'string' && ((value && state.val) || (!value && !state.val))) {
-            connected = value;
+            connected = state.val;
             done();
         } else {
             setTimeout(function () {
@@ -50,7 +51,7 @@ function checkValue(id, value, cb, counter) {
 }
 
 function sendMessage(message, callback) {
-    udpClient.send(new Buffer(message), 0, message.length, 5003, '127.0.0.1', function(err, bytes) {
+    udpClient.send(new Buffer(message), 0, message.length, port, '127.0.0.1', function(err, bytes) {
         callback && callback(err);
     });
 }
@@ -81,7 +82,7 @@ describe('mySensors UDP: Test UDP server', function() {
             config.native.type      = 'udp';
             config.native.bind      = '0.0.0.0';
             config.native.connTimeout = 5000;
-            config.native.port      = 5003;
+            config.native.port      = port;
 
             setup.setAdapterConfig(config.common, config.native);
 
@@ -174,7 +175,7 @@ describe('mySensors UDP: Test UDP server', function() {
         lastMessage = '';
         var data = someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';58.7';
 
-        udpClient.send(new Buffer(data), 0, data.length, 5003, '127.0.0.1', function(err, bytes) {
+        udpClient.send(new Buffer(data), 0, data.length, port, '127.0.0.1', function(err, bytes) {
             expect(err).to.be.not.ok;
             expect(bytes).to.be.equal(data.length);
             checkValue(someObject._id, 58.7, function (err, state) {
@@ -224,7 +225,7 @@ describe('mySensors UDP: Test UDP server', function() {
         };
         var data = someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';1';
 
-        udpClient.send(new Buffer(data), 0, data.length, 5003, '127.0.0.1', function(err, bytes) {
+        udpClient.send(new Buffer(data), 0, data.length, port, '127.0.0.1', function(err, bytes) {
             expect(err).to.be.not.ok;
             expect(bytes).to.be.equal(data.length);
             checkValue(someObject._id, true, function (err, state) {
@@ -276,7 +277,7 @@ describe('mySensors UDP: Test UDP server', function() {
         };
         var data = someObject.native.id + ';' + someObject.native.childId + ';3;0;0;50';
 
-        udpClient.send(new Buffer(data), 0, data.length, 5003, '127.0.0.1', function(err, bytes) {
+        udpClient.send(new Buffer(data), 0, data.length, port, '127.0.0.1', function(err, bytes) {
             expect(err).to.be.not.ok;
             expect(bytes).to.be.equal(data.length);
             checkValue(someObject._id, 50, function (err, state) {

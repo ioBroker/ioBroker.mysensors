@@ -9,6 +9,7 @@ var connected   = false;
 var tcpClient   = new net.Socket();
 var lastMessage;
 var someObject;
+var port        = 15003;
 
 function checkConnection(value, _done, counter) {
     counter = counter || 0;
@@ -20,7 +21,7 @@ function checkConnection(value, _done, counter) {
     states.getState('mysensors.0.info.connection', function (err, state) {
         if (err) console.error(err);
         if (state && typeof state.val == 'string' && ((value && state.val) || (!value && !state.val))) {
-            connected = value;
+            connected = state.val;
             _done();
         } else {
             setTimeout(function () {
@@ -81,7 +82,7 @@ describe('mySensors TCP: Test TCP server', function() {
             config.native.type      = 'tcp';
             config.native.bind      = '0.0.0.0';
             config.native.connTimeout = 5000;
-            config.native.port      = 5003;
+            config.native.port      = port;
 
             setup.setAdapterConfig(config.common, config.native);
 
@@ -89,13 +90,23 @@ describe('mySensors TCP: Test TCP server', function() {
                 objects = _objects;
                 states  = _states;
                 tcpClient.on('data', function (data) {
+                    if (!data) {
+                        console.log('Received empty string!');
+                        return;
+                    }
+                    var data = data.toString();
                     console.log('Received ' + data);
-                    lastMessage = data.toString();
+                    arr = data.split('\n');
+                    for (var t = arr.length - 1; t >= 0; t--) {
+                        if (!arr[t]) arr.splice(t, 1);
+                    }
+                    lastMessage = arr.length ? arr[arr.length - 1] : null;
+                    console.log('lastMessage: ' + lastMessage);
                 });
                 tcpClient.on('error', function (err) {
                     console.error(err);
                 });
-                tcpClient.connect(5003, '127.0.0.1', function() {
+                tcpClient.connect(port, '127.0.0.1', function() {
                     console.log('Connected!!');
                 });
                 _done();

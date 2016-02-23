@@ -234,6 +234,28 @@ function main() {
         adapter.subscribeObjects('*');
         devices = states;
 
+        if (!devices[adapter.namespace + '.info.connection'] || !devices[adapter.namespace + '.info.connection'].common ||
+            (devices[adapter.namespace + '.info.connection'].common.type === 'boolean' && adapter.config.type !== 'serial') ||
+            (devices[adapter.namespace + '.info.connection'].common.type !== 'boolean' && adapter.config.type === 'serial')) {
+            adapter.setForeignObject(adapter.namespace + '.info.connection', {
+                "_id":  "info.connection",
+                "type": "state",
+                "common": {
+                    "role":  "indicator.connected",
+                    "name":  adapter.config.type === 'serial' ? 'If connected to my sensors' : 'List of connected gateways',
+                    "type":  adapter.config.type === 'serial' ? 'boolean' : 'string',
+                    "read":  true,
+                    "write": false,
+                    "def":   false
+                },
+                "native": {
+
+                }
+            }, function (err) {
+                if (err) adapter.log.error(err);
+            });
+        }
+
         mySensorsInterface = new MySensors(adapter.config, adapter.log);
 
         // if object created

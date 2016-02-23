@@ -1,11 +1,12 @@
 var net    = require('net');
 var tcpClient = new net.Socket();
+var port   = 5003;
 
 tcpClient.on('error', function (err) {
     console.error(err);
 });
 
-tcpClient.connect({port: 5003}, function(err) {
+tcpClient.connect({port: port}, function(err) {
     console.log('Connected ' + (err || ''));
 });
 
