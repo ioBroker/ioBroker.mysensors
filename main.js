@@ -106,11 +106,11 @@ function processPresentation(data, ip, port) {
         if (result[i].type === 'presentation' && result[i].subType) {
             presentationDone = true;
             var found = false;
-            for (var n = 0; n < devices.length; n++) {
-                if ((!ip || ip === devices[n].native.ip) &&
-                    devices[n].native.id      == result[i].id      &&
-                    devices[n].native.childId == result[i].childId &&
-                    devices[n].native.subType == result[i].subType) {
+            for (var id in devices) {
+                if ((!ip || ip === devices[id].native.ip) &&
+                    devices[id].native.id      == result[i].id      &&
+                    devices[id].native.childId == result[i].childId &&
+                    devices[id].native.subType == result[i].subType) {
                     found = true;
                     break;
                 }
@@ -120,10 +120,13 @@ function processPresentation(data, ip, port) {
             if (!found) {
                 var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
                 for (var j = 0; j < objs.length; j++) {
-                    adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
-                    adapter.setObject(objs[j]._id, objs[j], function (err) {
-                        if (err) adapter.log.error(err);
-                    });
+                    if (!devices[objs[j]._id]) {
+                        devices[objs[j]._id] = objs[j];
+                        adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
+                        adapter.setObject(objs[j]._id, objs[j], function (err) {
+                            if (err) adapter.log.error(err);
+                        });
+                    }
                 }
             }
         } else {
@@ -307,7 +310,6 @@ function main() {
 
                                 // update battery value
                                 for (var id in devices) {
-                                    if (devices[id].native.varType == 'I_BATTERY_LEVEL') console.log('Compare ' + JSON.stringify(devices[id].native) + '| ' + JSON.stringify(result[i]))
                                     if (devices[id].native &&
                                         (!ip || ip == devices[id].native.ip) &&
                                         devices[id].native.id      == result[i].id &&
@@ -329,10 +331,18 @@ function main() {
 
                             case 'I_VERSION':           //	2	Used to request gateway version from controller.
                                 adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                config[ip || 'serial'] = config[ip || 'serial'] || {};
+                                config[ip || 'serial'].version = result[i].payload;
                                 if (!result[i].ack) {
                                     // send response
                                     mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + (adapter.version || 0), ip);
                                 }
+                                break;
+
+                            case 'I_SKETCH_NAME':           //	2	Used to request gateway version from controller.
+                                adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                config[ip || 'serial'] = config[ip || 'serial'] || {};
+                                config[ip || 'serial'].name = result[i].payload;
                                 break;
 
                             case 'I_INCLUSION_MODE':    //	5	Start/stop inclusion mode of the Controller (1=start, 0=stop).
@@ -341,7 +351,8 @@ function main() {
 
                             case 'I_CONFIG':            //	6	Config request from node. Reply with (M)etric or (I)mperal back to sensor.
                                 adapter.log.info('Config ' + (ip ? ' from ' + ip + ' ': '') + ':' + (result[i].payload == 'M' ? 'Metric' : 'Imperial'));
-                                config[ip || 'serial'] = result[i].payload == 'M' ? 'Metric' : 'Imperial';
+                                config[ip || 'serial'] = config[ip || 'serial'] || {};
+                                config[ip || 'serial'].metric = result[i].payload == 'M' ? 'Metric' : 'Imperial';
                                 break;
 
                             case 'I_LOG_MESSAGE':       //	9	Sent by the gateway to the Controller to trace-log a message
@@ -360,14 +371,14 @@ function main() {
                 // try soft request
                 if (!presentationDone) {
                     // request metric system
-                    mySensorsInterface.write('0;0;3;0;6;', ip, port);
-                    mySensorsInterface.write('0;0;0;0;0;force presentation', ip, port);
+                    mySensorsInterface.write('0;0;3;0;6;get metric', ip, port);
+                    mySensorsInterface.write('0;0;3;0;19;force presentation', ip, port);
                     setTimeout(function () {
                         // send reboot command if still no presentation
                         if (!presentationDone) {
                             mySensorsInterface.write('0;0;3;0;13;force restart', ip, port);
                         }
-                    }, 500);
+                    }, 1500);
                 }
             });
         }

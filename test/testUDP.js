@@ -107,11 +107,11 @@ describe('mySensors UDP: Test UDP server', function() {
             sendMessages(commands, 10, function () {
                 if (!connected) {
                     checkConnection(true, function () {
-                        expect(lastMessage).to.be.equal('0;0;0;0;0;force presentation');
+                        expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
                         done();
                     });
                 } else {
-                    expect(lastMessage).to.be.equal('0;0;0;0;0;force presentation');
+                    expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
                     done();
                 }
             });
