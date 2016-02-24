@@ -20,6 +20,7 @@
     ],
     "readme":     "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
     "loglevel":   "info",
+	"stopBeforeUpdate": true,
     "type":       "hardware"
   },
   "native": {
