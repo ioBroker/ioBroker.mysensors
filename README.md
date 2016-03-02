@@ -2,6 +2,13 @@
 # ioBroker.mysensors
 =================
 
+[![NPM version](http://img.shields.io/npm/v/iobroker.mysensors.svg)](https://www.npmjs.com/package/iobroker.mysensors)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.mysensors.svg)](https://www.npmjs.com/package/iobroker.mysensors)
+[![Tests](https://travis-ci.org/ioBroker/ioBroker.mysensors.svg?branch=master)](https://travis-ci.org/ioBroker/ioBroker.mysensors)
+
+[![NPM](https://nodei.co/npm/iobroker.mysensors.png?downloads=true)](https://nodei.co/npm/iobroker.mysensors/)
+
+
 # Install over Serial console:
 Prerequires:
 To use serial port on Windows it is VS required to build the binary.
@@ -27,9 +34,14 @@ e. enjoy!!!
 npm install https://github.com/ioBroker/ioBroker.mysensors/tarball/master
 
 ## Changelog
+### 0.1.8 (2016-03-02)
+* (bluefox) fix connection indicator for serial
+
+### 0.1.7 (2016-03-02)
+* (bluefox) do not send any data on disconnect
+
 ### 0.1.6 (2016-03-02)
 * (bluefox) set UDP as default settings
-
 
 ### 0.1.5 (2016-03-02)
 * (bluefox) change tree

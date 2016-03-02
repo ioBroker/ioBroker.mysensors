@@ -391,7 +391,7 @@ function main() {
             mySensorsInterface.on('connectionChange', function (isConn, ip, port) {
                 adapter.setState('info.connection', isConn, true);
                 // try soft request
-                if (!presentationDone) {
+                if (!presentationDone && isConn) {
                     // request metric system
                     mySensorsInterface.write('0;0;3;0;6;get metric', ip, port);
                     mySensorsInterface.write('0;0;3;0;19;force presentation', ip, port);
