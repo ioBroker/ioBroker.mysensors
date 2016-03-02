@@ -3,6 +3,13 @@
 =================
 
 # Install over Serial console:
+Prerequires:
+To use serial port on Windows it is VS required to build the binary.
+To use serial port on linux it is build-essential an python2.7 required. To install them just write:
+sudo apt-get update
+sudo apt-get install build-essential
+sudo apt-get install python2.7
+
 1. to change in the right folder type:
 
 cd /opt/iobroker
@@ -20,6 +27,10 @@ e. enjoy!!!
 npm install https://github.com/ioBroker/ioBroker.mysensors/tarball/master
 
 ## Changelog
+### 0.1.6 (2016-03-02)
+* (bluefox) set UDP as default settings
+
+
 ### 0.1.5 (2016-03-02)
 * (bluefox) change tree
 

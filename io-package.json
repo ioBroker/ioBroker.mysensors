@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "title": "mysensors adapter",
     "desc": {
       "en": "ioBroker mysensors Adapter",
@@ -28,7 +28,7 @@
     "connTimeout":  60000,
     "port":         5003,
     "mode":         "server",
-    "type":         "serial",
+    "type":         "udp",
     "bind":         "0.0.0.0"
   },
   "objects": [
