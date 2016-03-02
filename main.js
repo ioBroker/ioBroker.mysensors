@@ -4,7 +4,7 @@
 
 // you have to require the utils module and call adapter function
 var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
-var serialport = require('serialport');//.SerialPort;
+var serialport;
 var Parses     = require('sensors');
 var MySensors  = require(__dirname + '/lib/mysensors');
 var getMeta    = require(__dirname + '/lib/getmeta').getMetaInfo;
@@ -16,17 +16,28 @@ var floatRegEx = /^[+-]?\d+(\.\d*)$/;
 
 var config = {};
 
+try {
+    serialport = require('serialport');//.SerialPort;
+} catch (e) {
+    console.warn('Serial port is not available');
+}
+
 //принимаем и обрабатываем сообщения 
 adapter.on('message', function (obj) {
     if (obj) {
         switch (obj.command) {
             case 'listUart':
                 if (obj.callback) {
-                    // read all found serial ports
-                    serialport.list(function (err, ports) {
-                        adapter.log.info('List of port: ' + JSON.stringify(ports));
-                        adapter.sendTo(obj.from, obj.command, ports, obj.callback);
-                    });
+                    if (serialport) {
+                        // read all found serial ports
+                        serialport.list(function (err, ports) {
+                            adapter.log.info('List of port: ' + JSON.stringify(ports));
+                            adapter.sendTo(obj.from, obj.command, ports, obj.callback);
+                        });
+                    } else {
+                        adapter.log.warn('Module serialport is not available');
+                        adapter.sendTo(obj.from, obj.command, [{comName: 'Not available'}], obj.callback);
+                    }
                 }
 
                 break;
@@ -36,6 +47,7 @@ adapter.on('message', function (obj) {
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
+    adapter.setState('info.connection', false, true);
     try {
         if (mySensorsInterface) mySensorsInterface.destroy();
         mySensorsInterface = null;
@@ -120,8 +132,8 @@ function processPresentation(data, ip, port) {
             if (!found) {
                 var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
                 for (var j = 0; j < objs.length; j++) {
-                    if (!devices[objs[j]._id]) {
-                        devices[objs[j]._id] = objs[j];
+                    if (!devices[adapter.namespace + '.' + objs[j]._id]) {
+                        devices[adapter.namespace + '.' + objs[j]._id] = objs[j];
                         adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
                         adapter.setObject(objs[j]._id, objs[j], function (err) {
                             if (err) adapter.log.error(err);
@@ -304,21 +316,12 @@ function main() {
                             }
                         }
                     } else if(result[i].type === 'internal') {
+                        var saveValue = false;
+
                         switch (result[i].subType) {
                             case 'I_BATTERY_LEVEL':     //	0	Use this to report the battery level (in percent 0-100).
                                 adapter.log.info('Battery level ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
-
-                                // update battery value
-                                for (var id in devices) {
-                                    if (devices[id].native &&
-                                        (!ip || ip == devices[id].native.ip) &&
-                                        devices[id].native.id      == result[i].id &&
-                                        devices[id].native.varType == 'I_BATTERY_LEVEL') {
-                                        adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
-                                        adapter.setState(id, parseFloat(result[i].payload), true);
-                                        break;
-                                    }
-                                }
+                                saveValue = true;
                                 break;
 
                             case 'I_TIME':              //	1	Sensors can request the current time from the Controller using this message. The time will be reported as the seconds since 1970
@@ -331,8 +334,7 @@ function main() {
 
                             case 'I_VERSION':           //	2	Used to request gateway version from controller.
                                 adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
-                                config[ip || 'serial'] = config[ip || 'serial'] || {};
-                                config[ip || 'serial'].version = result[i].payload;
+                                saveValue = true;
                                 if (!result[i].ack) {
                                     // send response
                                     mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + (adapter.version || 0), ip);
@@ -341,8 +343,7 @@ function main() {
 
                             case 'I_SKETCH_NAME':           //	2	Used to request gateway version from controller.
                                 adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
-                                config[ip || 'serial'] = config[ip || 'serial'] || {};
-                                config[ip || 'serial'].name = result[i].payload;
+                                saveValue = true;
                                 break;
 
                             case 'I_INCLUSION_MODE':    //	5	Start/stop inclusion mode of the Controller (1=start, 0=stop).
@@ -350,9 +351,11 @@ function main() {
                                 break;
 
                             case 'I_CONFIG':            //	6	Config request from node. Reply with (M)etric or (I)mperal back to sensor.
-                                adapter.log.info('Config ' + (ip ? ' from ' + ip + ' ': '') + ':' + (result[i].payload == 'M' ? 'Metric' : 'Imperial'));
+                                result[i].payload = (result[i].payload == 'I') ? 'Imperial' : 'Metric';
+                                adapter.log.info('Config ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 config[ip || 'serial'] = config[ip || 'serial'] || {};
-                                config[ip || 'serial'].metric = result[i].payload == 'M' ? 'Metric' : 'Imperial';
+                                config[ip || 'serial'].metric = result[i].payload;
+                                saveValue = true;
                                 break;
 
                             case 'I_LOG_MESSAGE':       //	9	Sent by the gateway to the Controller to trace-log a message
@@ -362,6 +365,25 @@ function main() {
                             default:
                                 adapter.log.info('Received INTERNAL message: ' + result[i].subType + ': ' + result[i].payload);
                         }
+                        if (saveValue) {
+                            for (var id in devices) {
+                                //adapter.log.info(devices[id].native.varType + ' /// ' + result[i].subType);
+                                if (devices[id].native &&
+                                    (!ip || ip == devices[id].native.ip) &&
+                                    devices[id].native.id      == result[i].id &&
+                                    devices[id].native.childId == result[i].childId &&
+                                    devices[id].native.varType == result[i].subType) {
+
+                                    if (devices[id].common.type == 'boolean') result[i].payload = !!result[i].payload;
+                                    if (devices[id].common.type == 'number')  result[i].payload = parseFloat(result[i].payload);
+
+                                    adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
+                                    adapter.setState(id, result[i].payload, true);
+                                    break;
+                                }
+                            }
+                        }
+
                     }
                 }
             });

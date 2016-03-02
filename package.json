@@ -28,9 +28,11 @@
     "type": "git",
     "url": "https://github.com/ioBroker/ioBroker.mysensors"
   },
-  "dependencies": {
-    "sensors": "^0.1.0",
+  "optionalDependencies": {
     "serialport": "^2.0.6"
+  },
+  "dependencies": {
+    "sensors": "^0.2.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",

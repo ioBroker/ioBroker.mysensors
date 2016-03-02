@@ -135,7 +135,7 @@ describe('mySensors TCP: Test TCP server', function() {
     it('mySensors TCP: check created objects', function (done) {
         this.timeout(5000);
         var expected = {
-            "_id": "mysensors.0.127_0_0_1.0.59_DIMMER.S_DIMMER.V_PERCENTAGE",
+            "_id": "mysensors.0.127_0_0_1.0.59_DIMMER.V_PERCENTAGE",
             "common": {
                 "name": "Test7 PWM 5V.V_PERCENTAGE",
                 "type": "number",
@@ -217,7 +217,7 @@ describe('mySensors TCP: Test TCP server', function() {
         this.timeout(5000);
         lastMessage = '';
         someObject = {
-            "_id": "mysensors.0.127_0_0_1.0.33_LIGHT.S_LIGHT.V_STATUS",
+            "_id": "mysensors.0.127_0_0_1.0.33_LIGHT.V_STATUS",
             "common": {
                 "name": "RELAY D8.V_STATUS",
                 "type": "boolean",
@@ -266,11 +266,11 @@ describe('mySensors TCP: Test TCP server', function() {
         this.timeout(5000);
         lastMessage = '';
         someObject = {
-            "_id": "mysensors.0.127_0_0_1.0.S_BATTERY",
+            "_id": "mysensors.0.127_0_0_1.0.255_ARDUINO_NODE.I_BATTERY_LEVEL",
             "common": {
-                "name": "Test PWM",
+                "name": "ETHduino by JR.I_BATTERY_LEVEL",
                 "type": "number",
-                "role": "value.battery",
+                "role": "value",
                 "min": 0,
                 "max": 100,
                 "unit": "%",
@@ -281,11 +281,15 @@ describe('mySensors TCP: Test TCP server', function() {
             "native": {
                 "ip": "127.0.0.1",
                 "id": "0",
-                "varType": "I_BATTERY_LEVEL"
+                "childId": "255",
+                "subType": "S_ARDUINO_NODE",
+                "subTypeNum": 17,
+                "varType": "I_BATTERY_LEVEL",
+                "varTypeNum": 0
             },
             "type": "state"
         };
-        var data = someObject.native.id + ';0;3;0;0;50';
+        var data = someObject.native.id + ';255;3;0;0;50';
 
         tcpClient.write(data + '\n', function(err) {
             expect(err).to.be.not.ok;
@@ -302,7 +306,7 @@ describe('mySensors TCP: Test TCP server', function() {
     it('mySensors TCP: check metrics', function (done) {
         this.timeout(5000);
         var expected = {
-            "_id": "mysensors.0.127_0_0_1.0.42_TEMP.S_TEMP.V_TEMP",
+            "_id": "mysensors.0.127_0_0_1.0.42_TEMP.V_TEMP",
             "common": {
                 "name": "dallas.V_TEMP",
                 "type": "number",

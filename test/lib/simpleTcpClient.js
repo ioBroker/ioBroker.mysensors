@@ -24,7 +24,13 @@ function sendMessages(list, interval, callback) {
     if (!list || !list.length) {
         callback && callback();
     } else {
-        sendMessage(list.pop() + '\n', function (err) {
+        var msg = list.pop();
+        if (msg.indexOf('---') !== -1) {
+            callback && callback();
+            return;
+        }
+        console.log('Send ' + msg);
+        sendMessage(msg + '\n', function (err) {
             setTimeout(function() {
                 sendMessages(list, interval, callback);
             }, interval || 100);
@@ -38,7 +44,7 @@ setTimeout(function () {
     sendMessages(commands, 10, function () {
 
     });
-}, 1000);
+}, 500);
 
 setTimeout(function () {
     if (tcpClient) tcpClient.destroy();

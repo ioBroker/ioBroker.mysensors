@@ -18,23 +18,19 @@
     // Dictionary (systemDictionary is global variable from adapter-settings.js)
     systemDictionary = {
         "mysensors adapter settings": {"ru": "Настройки"},
-        "name":         {"en": "name",          "de": "name",           "ru": "name"},
-        "id":           {"en": "id",            "de": "id",             "ru": "id"},
-        "childId":      {"en": "childId",       "de": "childId",        "ru": "childId"},
-        "type":         {"en": "type",          "de": "type",           "ru": "type"},
-        "ack":          {"en": "ack",           "de": "ack",            "ru": "ack"},
-        "subType":      {"en": "subType",       "de": "subType",        "ru": "subType"},
-        "payload":      {"en": "payload",       "de": "payload",        "ru": "payload"},
-        "raw":          {"en": "raw",           "de": "raw",            "ru": "raw"},
-        "room":         {"en": "room",          "de": "room",           "ru": "room"},
-        "Select port":  {"en": "Select port",   "de": "Select port",    "ru": "Select port"},
-        "Bind":         {"en": "Bind",          "de": "Bind",           "ru": "Bind"},
-        "Device yet exists in the table": {
-            "en": "Device yet exists in the table",
-            "de": "Bind",
-            "ru": "Bind"
+        "Select port":          {"en": "Select port",   "de": "Select port",            "ru": "COM порт"},
+        "Bind":                 {"en": "Bind",          "de": "Bind",                   "ru": "IP сервера:"},
+        "mySensors adapter settings": {
+            "en": "mySensors adapter settings",
+            "de": "mySensors Einstellungen",
+            "ru": "Настройки mySensors драйвера"
         },
-        "Listen on all IPs":    {"en": "Listen on all IPs",     "de": "Auf allen IP Adressen hören",           "ru": "Слушать на всех адресах"}
+        "Type:":                {"en": "Type:",             "de": "Typ:",               "ru": "Тип:"},
+        "serial":               {"en": "serial",            "de": "serial",             "ru": "COM порт"},
+        "tcp server":           {"en": "TCP server",        "de": "TCP Server",         "ru": "TCP server"},
+        "udp server":           {"en": "UDP server",        "de": "UDP Sserver",        "ru": "UDP server"},
+        "Not available":        {"en": "Not available",     "de": "Nicht möglich",      "ru": "недоступно"},
+        "Listen on all IPs":    {"en": "Listen on all IPs", "de": "Auf allen IP Adressen hören",  "ru": "Слушать на всех IP адресах"}
     };
     var devices;
     var units;
@@ -67,7 +63,6 @@
 
         }
     }
-
 
     function getUnit() {
         $('#getUnit').prop('disabled', true);
@@ -103,7 +98,13 @@
         sendTo(null, 'listUart', null, function (list) {
             var text = '<option value="">' + _('Select port') + '</option>';
             for (var j = 0; j < list.length; j++) {
-                text += '<option value="' + list[j].comName + '" ' + ((actualValue == list[j].comName) ? 'selected' : '') + '>' + list[j].comName + '</option>';
+                if (list[j].comName === 'Not available') {
+                    text += '<option value="" selected>' + _('Not available') + '</option>';
+                    $('#comName').prop('disabled', true);
+                    break;
+                } else {
+                    text += '<option value="' + list[j].comName + '" ' + ((actualValue == list[j].comName) ? 'selected' : '') + '>' + list[j].comName + '</option>';
+                }
             }
             $('#comName').html(text);
         });
