@@ -34,6 +34,9 @@ e. enjoy!!!
 npm install https://github.com/ioBroker/ioBroker.mysensors/tarball/master
 
 ## Changelog
+### 0.1.9 (2016-03-15)
+* (bluefox) fix typo
+
 ### 0.1.8 (2016-03-02)
 * (bluefox) fix connection indicator for serial
 

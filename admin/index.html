@@ -27,8 +27,8 @@
         },
         "Type:":                {"en": "Type:",             "de": "Typ:",               "ru": "Тип:"},
         "serial":               {"en": "serial",            "de": "serial",             "ru": "COM порт"},
-        "tcp server":           {"en": "TCP server",        "de": "TCP Server",         "ru": "TCP server"},
-        "udp server":           {"en": "UDP server",        "de": "UDP Sserver",        "ru": "UDP server"},
+        "tcp server":           {"en": "TCP server",        "de": "TCP Server",         "ru": "TCP сервер"},
+        "udp server":           {"en": "UDP server",        "de": "UDP Server",         "ru": "UDP сервер"},
         "Not available":        {"en": "Not available",     "de": "Nicht möglich",      "ru": "недоступно"},
         "Listen on all IPs":    {"en": "Listen on all IPs", "de": "Auf allen IP Adressen hören",  "ru": "Слушать на всех IP адресах"}
     };
@@ -93,9 +93,24 @@
         });
     }
 
+    var timeout;
 
     function getComPorts(actualValue) {
+        timeout = setTimeout(function () {
+            getComPorts(actualValue);
+        }, 2000);
+
         sendTo(null, 'listUart', null, function (list) {
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+            }
+            if (!list || !list.length) {
+                setTimeout(function () {
+                    getComPorts(actualValue);
+                }, 1000);
+                return;
+            }
             var text = '<option value="">' + _('Select port') + '</option>';
             for (var j = 0; j < list.length; j++) {
                 if (list[j].comName === 'Not available') {
@@ -146,10 +161,10 @@
             setValue(key, settings[key], onChange);
         }
         getIsAdapterAlive(function (isAlive) {
-            if (isAlive) {
+            if (isAlive || common.enabled) {
                 getComPorts(settings.comName);
             } else {
-                $('#getUnit').prop('disabled', false);
+                $('#getUnit').prop('disabled', true);
             }
         });
 

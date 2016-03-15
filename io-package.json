@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "title": "mysensors adapter",
     "desc": {
       "en": "ioBroker mysensors Adapter",
