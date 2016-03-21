@@ -34,6 +34,9 @@ e. enjoy!!!
 npm install https://github.com/ioBroker/ioBroker.mysensors/tarball/master
 
 ## Changelog
+### 0.1.10 (2016-03-21)
+* (bluefox) set role of dimmer as level.dimmer
+
 ### 0.1.9 (2016-03-15)
 * (bluefox) fix typo
 
