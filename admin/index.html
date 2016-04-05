@@ -35,7 +35,13 @@
         "tcp server":           {"en": "TCP server",        "de": "TCP Server",         "ru": "TCP сервер"},
         "udp server":           {"en": "UDP server",        "de": "UDP Server",         "ru": "UDP сервер"},
         "Not available":        {"en": "Not available",     "de": "Nicht möglich",      "ru": "недоступно"},
-        "Listen on all IPs":    {"en": "Listen on all IPs", "de": "Auf allen IP Adressen hören",  "ru": "Слушать на всех IP адресах"}
+        "Listen on all IPs":    {"en": "Listen on all IPs", "de": "Auf allen IP Adressen hören",  "ru": "Слушать на всех IP адресах"},
+        "Com port:":            {"en": "Com port:",         "de": "Serialport:",        "ru": "Имя порта:"},
+        "Baud rate:":           {"en": "Baud rate:",        "de": "Baudrate:",          "ru": "Скорость порта:"},
+        "Bind:":                {"en": "Bind:",             "de": "Eigene IP Adresse:", "ru": "Свой IP aдрес:"},
+        "Port:":                {"en": "Port:",             "de": "Port:",              "ru": "Порт:"},
+        "Connection timeout:":  {"en": "Connection timeout:", "de": "Verbindungs-Timeout:", "ru": "Таймаут соединения:"},
+        "ms":                   {"en": "ms",                "de": "ms",                 "ru": "мс"}
     };
     var devices;
     var units;
@@ -225,15 +231,29 @@
         <table><tr><td><img src="mysensors.png"></td><td><h3 class="translate">mySensors adapter settings</h3></td></tr></table>
         <table>
             <tr><td class="translate" style="width: 150px">Type:</td><td><select id="type" class="value oneWidth">
-                <option value="serial" class="translate">serial</option>
-                <option value="tcp" class="translate">tcp server</option>
-                <option value="udp" class="translate">udp server</option>
+                <option value="serial"  class="translate">serial</option>
+                <option value="tcp"     class="translate">tcp server</option>
+                <option value="udp"     class="translate">udp server</option>
             </select></td><td></td></tr>
-            <tr class="serial"><td>Com port:</td><td><select class="value oneWidth" id="comName"></select></td><td></td></tr>
-            <tr class="serial"><td>Baud rate:</td><td><input class="value oneWidth" id="baudRate" /></td><td></td></tr>
-            <tr class="tcp udp"><td>Bind:</td><td><select class="value" id="bind"></select></td><td></td></tr>
-            <tr class="tcp udp"><td>Port:</td><td><input class="value oneWidth" id="port" /></td><td></td></tr>
-            <tr class="udp"><td>Connection timeout:</td><td><input class="value oneWidth" id="connTimeout" /></td><td></td></tr>
+            <tr class="serial"><td class="translate">Com port:</td><td><select class="value oneWidth" id="comName"></select></td><td></td></tr>
+            <tr class="serial"><td class="translate">Baud rate:</td><td><select class="value oneWidth" id="baudRate">
+                <option value="110">110</option>
+                <option value="150">150</option>
+                <option value="300">300</option>
+                <option value="600">600</option>
+                <option value="1200">1200</option>
+                <option value="2400">2400</option>
+                <option value="4800">4800</option>
+                <option value="9600">9600</option>
+                <option value="19200">19200</option>
+                <option value="38400">38400</option>
+                <option value="56000">56000</option>
+                <option value="57600">57600</option>
+                <option value="115200">115200</option>
+            </select></td><td></td></tr>
+            <tr class="tcp udp"><td class="translate">Bind:</td><td><select class="value" id="bind"></select></td><td></td></tr>
+            <tr class="tcp udp"><td class="translate">Port:</td><td><input class="value oneWidth" id="port" /></td><td></td></tr>
+            <tr class="udp serial"><td class="translate">Connection timeout:</td><td><input class="value oneWidth" id="connTimeout" /></td><td class="translate">ms</td></tr>
         </table>
 
 

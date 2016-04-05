@@ -22,6 +22,10 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 0.2.1 (2016-03-21)
+* (bluefox) translates
+* (bluefox) connection timeout for serial connection
+
 ### 0.2.0 (2016-03-21)
 * (bluefox) wait till serial port is opened
 * (bluefox) configurable baud rate
