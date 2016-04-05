@@ -137,26 +137,26 @@ describe('mySensors TCP: Test TCP server', function() {
         var expected = {
             "_id": "mysensors.0.127_0_0_1.0.59_DIMMER.V_PERCENTAGE",
             "common": {
-                "name": "Test7 PWM 5V.V_PERCENTAGE",
-                "type": "number",
-                "role": "value.dimmer",
-                "min": 0,
-                "max": 100,
-                "unit": "%",
-                "def": 0,
-                "read": true,
-                "write": true
+                "def":          0,
+                "type":         "number",
+                "read":         true,
+                "write":        true,
+                "min":          0,
+                "max":          100,
+                "unit":         "%",
+                "name":         "Test7 PWM 5V.V_PERCENTAGE",
+                "role":         "level.dimmer"
             },
             "native": {
-                "ip": "127.0.0.1",
-                "id": "0",
-                "childId": "59",
-                "subType": "S_DIMMER",
-                "subTypeNum": 4,
-                "varType": "V_PERCENTAGE",
-                "varTypeNum": 3
+                "ip":           "127.0.0.1",
+                "id":           "0",
+                "childId":      "59",
+                "subType":      "S_DIMMER",
+                "subTypeNum":   4,
+                "varType":      "V_PERCENTAGE",
+                "varTypeNum":   3
             },
-            "type": "state"
+            "type":             "state"
         };
 
         setTimeout(function () {

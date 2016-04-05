@@ -13,7 +13,12 @@
 <script type="text/javascript" src="../../js/translate.js"></script>
 <script type="text/javascript" src="../../js/adapter-settings.js"></script>
 
+<style>
+    .oneWidth {
+        width: 120px;
+    }
 
+</style>
 <script type="text/javascript">
     // Dictionary (systemDictionary is global variable from adapter-settings.js)
     systemDictionary = {
@@ -219,15 +224,16 @@
     <div id="adapter-container">
         <table><tr><td><img src="mysensors.png"></td><td><h3 class="translate">mySensors adapter settings</h3></td></tr></table>
         <table>
-            <tr><td class="translate" style="width: 150px">Type:</td><td><select id="type" class="value">
+            <tr><td class="translate" style="width: 150px">Type:</td><td><select id="type" class="value oneWidth">
                 <option value="serial" class="translate">serial</option>
                 <option value="tcp" class="translate">tcp server</option>
                 <option value="udp" class="translate">udp server</option>
             </select></td><td></td></tr>
-            <tr class="serial"><td>Com port:</td><td><select class="value" id="comName"></select></td><td></td></tr>
+            <tr class="serial"><td>Com port:</td><td><select class="value oneWidth" id="comName"></select></td><td></td></tr>
+            <tr class="serial"><td>Baud rate:</td><td><input class="value oneWidth" id="baudRate" /></td><td></td></tr>
             <tr class="tcp udp"><td>Bind:</td><td><select class="value" id="bind"></select></td><td></td></tr>
-            <tr class="tcp udp"><td>Port:</td><td><input class="value" id="port" /></td><td></td></tr>
-            <tr class="udp"><td>Connection timeout:</td><td><input class="value" id="connTimeout" /></td><td></td></tr>
+            <tr class="tcp udp"><td>Port:</td><td><input class="value oneWidth" id="port" /></td><td></td></tr>
+            <tr class="udp"><td>Connection timeout:</td><td><input class="value oneWidth" id="connTimeout" /></td><td></td></tr>
         </table>
 
 

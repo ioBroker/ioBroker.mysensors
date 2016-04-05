@@ -271,10 +271,8 @@ function main() {
             });
         }
 
-        mySensorsInterface = new MySensors(adapter.config, adapter.log);
-
-        // if object created
-        if (mySensorsInterface) {
+        mySensorsInterface = new MySensors(adapter.config, adapter.log, function (error) {
+            // if object created
             mySensorsInterface.write('0;0;3;0;14;Gateway startup complete');
 
             // process received data
@@ -403,6 +401,6 @@ function main() {
                     }, 1500);
                 }
             });
-        }
+        });
     });
 }

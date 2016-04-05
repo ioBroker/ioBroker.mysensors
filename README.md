@@ -8,32 +8,24 @@
 
 [![NPM](https://nodei.co/npm/iobroker.mysensors.png?downloads=true)](https://nodei.co/npm/iobroker.mysensors/)
 
+This adapter communicates with [mysensors](http://www.mysensors.org) serial or ethernet gateway (TCP or UDP). 
+It ethernet gateway selected in this case ioBroker is server, that expects connections.
 
-# Install over Serial console:
-Prerequires:
+## Prerequires
 To use serial port on Windows it is VS required to build the binary.
 To use serial port on linux it is build-essential an python2.7 required. To install them just write:
+
+```
 sudo apt-get update
 sudo apt-get install build-essential
 sudo apt-get install python2.7
-
-1. to change in the right folder type:
-
-cd /opt/iobroker
-
-2. to install:
-a. go on the interface (GUI) to ADPATER 
-b. in the Left upper corner, just underneath the "ioBroker.admin" Logo are 3 Buttons click on the 3rd one saying "install from Custom URL"
-c. paste following link:
-
-https://github.com/ioBroker/ioBroker.mysensors
-
-d. Press "INSTALL"
-
-e. enjoy!!!
-npm install https://github.com/ioBroker/ioBroker.mysensors/tarball/master
+```
 
 ## Changelog
+### 0.2.0 (2016-03-21)
+* (bluefox) wait till serial port is opened
+* (bluefox) configurable baud rate
+
 ### 0.1.10 (2016-03-21)
 * (bluefox) set role of dimmer as level.dimmer
 
