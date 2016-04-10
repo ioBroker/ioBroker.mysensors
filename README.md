@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 0.2.2 (2016-04-10)
+* (bluefox) implement inclusion mode
+
 ### 0.2.1 (2016-03-21)
 * (bluefox) translates
 * (bluefox) connection timeout for serial connection

@@ -13,6 +13,8 @@ var adapter   = utils.adapter('mysensors');
 var devices   = {};
 var mySensorsInterface;
 var floatRegEx = /^[+-]?\d+(\.\d*)$/;
+var inclusionOn = false;
+var inclusionTimeout = false;
 
 var config = {};
 
@@ -64,6 +66,9 @@ adapter.on('stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
     adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
 
+    if (id === adapter.namespace + '.inclusionOn') {
+        setInclusionState(state.val);
+    } else
     // output to mysensors
     if (devices[id] && devices[id].type == 'state') {
         if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
@@ -94,7 +99,27 @@ adapter.on('ready', function () {
     main();
 });
 
+// start here!
+adapter.on('unload', function () {
+    adapter.setState('inclusionOn', false, true);
+});
+
 var presentationDone = false;
+
+function setInclusionState(val) {
+    val = val === 'true' || val === true || val === 1 || val === '1';
+    inclusionOn = val;
+
+    if (inclusionTimeout) clearTimeout(inclusionTimeout);
+    inclusionTimeout = null;
+
+    if (inclusionOn && adapter.config.inclusionTimeout) {
+        inclusionTimeout = setTimeout(function () {
+            inclusionOn = false;
+            adapter.setState('inclusionOn', false, true);
+        }, adapter.config.inclusionTimeout);
+    }
+}
 
 function processPresentation(data, ip, port) {
     var result = Parses.parse(data.toString());
@@ -242,6 +267,10 @@ function deleteStates(states, cb) {
 }
 */
 function main() {
+    adapter.getState('inclusionOn', function (err, state) {
+        setInclusionState(state ? state.val : false);
+    });
+
     // read current existing objects
     adapter.getForeignObjects(adapter.namespace + '.*', 'state', function (err, states) {
         // subscribe on changes
@@ -325,8 +354,8 @@ function main() {
                             case 'I_TIME':              //	1	Sensors can request the current time from the Controller using this message. The time will be reported as the seconds since 1970
                                 adapter.log.info('Time ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 if (!result[i].ack) {
-                                    // send response
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + Math.round(new Date().getTime() / 1000), ip);
+                                    // send response: internal, ack=1
+                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + Math.round(new Date().getTime() / 1000), ip);
                                 }
                                 break;
 
@@ -334,8 +363,8 @@ function main() {
                                 adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 saveValue = true;
                                 if (!result[i].ack) {
-                                    // send response
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + (adapter.version || 0), ip);
+                                    // send response: internal, ack=1
+                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + (adapter.version || 0), ip);
                                 }
                                 break;
 
@@ -360,9 +389,30 @@ function main() {
                                 adapter.log.info('Log ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 break;
 
+                            case 'I_ID_REQUEST':
+                                if (inclusionOn) {
+                                    // find maximal index
+                                    var maxId = 0;
+                                    for (var id in devices) {
+                                        if (devices[id].native && (!ip || ip == devices[id].native.ip) &&
+                                            devices[id].native.id > maxId) {
+                                            maxId = devices[id].native.id;
+                                        }
+                                    }
+                                    maxId++;
+                                    if (!result[i].ack) {
+                                        // send response: internal, ack=0, I_ID_RESPONSE
+                                        mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;0;4;' + maxId, ip);
+                                    }
+                                } else {
+                                    adapter.log.warn('Received I_ID_REQUEST, but inclusion mode is disabled');
+                                }
+                                break;
+
                             default:
                                 adapter.log.info('Received INTERNAL message: ' + result[i].subType + ': ' + result[i].payload);
                         }
+
                         if (saveValue) {
                             for (var id in devices) {
                                 //adapter.log.info(devices[id].native.varType + ' /// ' + result[i].subType);

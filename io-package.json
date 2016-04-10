@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "title": "mysensors adapter",
     "desc": {
       "en": "ioBroker mysensors Adapter",
@@ -30,7 +30,9 @@
     "baudRate":     115200,
     "mode":         "server",
     "type":         "udp",
-    "bind":         "0.0.0.0"
+    "bind":         "0.0.0.0",
+    "broadcast":    false,
+    "inclusionTimeout": 60000
   },
   "objects": [
   ],
@@ -52,6 +54,20 @@
         "type":  "boolean",
         "read":  true,
         "write": false,
+        "def":   false
+      },
+      "native": {}
+    },
+    {
+      "_id":  "inclusionOn",
+      "type": "state",
+      "common": {
+        "role":  "state",
+        "name":  "Inclusion mode activated",
+        "desc":  "If inclusion mode on or off",
+        "type":  "boolean",
+        "read":  true,
+        "write": true,
         "def":   false
       },
       "native": {}
