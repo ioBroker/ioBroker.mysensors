@@ -335,7 +335,9 @@ function main() {
                                     devices[id].native.childId == result[i].childId &&
                                     devices[id].native.varType == result[i].subType) {
 
-                                    if (devices[id].common.type == 'boolean') result[i].payload = !!result[i].payload;
+                                    if (devices[id].common.type == 'boolean') {
+                                        result[i].payload = result[i].payload === 'true' || result[i].payload === true || result[i].payload === '1' || result[i].payload === 1;
+                                    }
                                     adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
                                     adapter.setState(id, result[i].payload, true);
                                     break;

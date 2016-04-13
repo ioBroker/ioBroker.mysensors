@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 0.2.3 (2016-04-13)
+* fix boolean values
+
 ### 0.2.2 (2016-04-10)
 * (bluefox) implement inclusion mode
 
