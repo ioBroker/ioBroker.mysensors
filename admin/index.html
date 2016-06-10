@@ -175,15 +175,32 @@
         for (var key in settings) {
             setValue(key, settings[key], onChange);
         }
+        $('#enableInclusion').button().button('disable');
 
-        $('#enableInclusion').button().click(function () {
-            socket.emit('setState', adapter + '.' + instance + '.inclusionOn', {val: true, ack: false}, function (err) {
-                if (!err) {
-                    showMessage(_('Inclusion mode is active'));
+        setInterval(function () {
+            socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
+                if (state && !state.val) {
+                    $('#enableInclusion').button('enable');
                 } else {
-                    showError(err);
+                    $('#enableInclusion').button('disable');
                 }
             });
+        }, 5000);
+
+        socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
+            if (err) window.alert(err);
+            if (state && !state.val) {
+                $('#enableInclusion').button('enable').click(function () {
+                    socket.emit('setState', adapter + '.' + instance + '.inclusionOn', {val: true, ack: false}, function (err) {
+                        if (!err) {
+                            $('#enableInclusion').button('disable');
+                            showMessage(_('Inclusion mode is active'));
+                        } else {
+                            showError(err);
+                        }
+                    });
+                });
+            }
         });
 
         getIsAdapterAlive(function (isAlive) {
@@ -270,8 +287,10 @@
             <tr class="tcp udp"><td class="translate">Bind:</td><td><select class="value" id="bind"></select></td><td></td></tr>
             <tr class="tcp udp"><td class="translate">Port:</td><td><input class="value oneWidth" id="port" /></td><td></td></tr>
             <tr class="udp serial"><td class="translate">Connection timeout:</td><td><input class="value oneWidth" id="connTimeout" /></td><td class="translate">ms</td></tr>
-            <tr class="tcp udp serial"><td class="translate">Inclusion mode timeout:</td><td><input class="value oneWidth" id="inclusionTimeout" /></td><td><span class="translate">ms</span><button id="enableInclusion" class="translateB">Enable inclusion mode</button></td></tr>
+            <tr class="tcp udp serial"><td class="translate">Inclusion mode timeout:</td><td><input class="value oneWidth" id="inclusionTimeout" /></td><td><span class="translate">ms</span></td></tr>
+            <tr class="tcp udp serial"><td></td><td colspan="2"><button id="enableInclusion" class="translateB">Enable inclusion mode</button></td></tr>
         </table>
+
 
 
         <!--table class="tab1" id="comTbl" border="1" cellspacing="0"></table>
