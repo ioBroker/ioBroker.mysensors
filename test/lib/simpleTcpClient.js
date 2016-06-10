@@ -1,6 +1,6 @@
 var net    = require('net');
 var tcpClient = new net.Socket();
-var port   = 5003;
+var port   = 15003;
 
 tcpClient.on('error', function (err) {
     console.error(err);

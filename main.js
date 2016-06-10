@@ -129,7 +129,7 @@ function processPresentation(data, ip, port) {
     try {
         result = Parses.parse(data);
     } catch (e) {
-        adapter.log.error('Cannot parse data: "' + data + '" [' + e + ']');
+        adapter.log.error('Cannot parse data: ' + data + '[' + e + ']');
         return null;
     }
 
@@ -185,46 +185,52 @@ function processPresentation(data, ip, port) {
                     adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
                 }
             }
-            // проверяем, есть ли принятая переменная в объектах
+            // check if received object exists
         } else if (result[i].type === 'set' && result[i].subType) {
-            adapter.log.debug('Message type is "set". Try to find it in DB...');
-            var found = false;
-            var id_found; // to store here ID that suit with parameters to id and childId
+            if (0) {
+                adapter.log.debug('Message type is "set". Try to find it in DB...');
+                var found = false;
+                var foundObjID; // store here ID that suit with parameters to id and childId
 
-            for (var id in devices) {
-                if ((!ip || ip === devices[id].native.ip) &&
-                    devices[id].native.id      == result[i].id      &&
-                    devices[id].native.childId == result[i].childId &&
-                    devices[id].native.varType == result[i].subType) {
-                    found = true;
-                    adapter.log.debug('Found id = ' + id);
-                    break;
+                for (var id in devices) {
+                    if ((!ip || ip === devices[id].native.ip) &&
+                        devices[id].native.id      == result[i].id      &&
+                        devices[id].native.childId == result[i].childId &&
+                        devices[id].native.varType == result[i].subType) {
+                        found = true;
+                        adapter.log.debug('Found id = ' + id);
+                        break;
+                    }
+                    if (devices[id].native.id      == result[i].id      &&
+                        devices[id].native.childId == result[i].childId){
+                        foundObjID = id;
+                        adapter.log.debug('Save foundObjID with similar id and childId');
+                        adapter.log.debug('devices[foundObjID].native.id      = ' + devices[foundObjID].native.id);
+                        adapter.log.debug('devices[foundObjID].native.childId = ' + devices[foundObjID].native.childId);
+                    }
                 }
-                if (devices[id].native.id      == result[i].id      &&
-                    devices[id].native.childId == result[i].childId){
-                    id_found = id;
-                    adapter.log.debug('Save id_found with similar id and childId');
-                    adapter.log.debug('devices[id_found].native.id      = ' + devices[id_found].native.id);
-                    adapter.log.debug('devices[id_found].native.childId = ' + devices[id_found].native.childId);
-                }
-                adapter.log.debug('Object not found!!!');
-            }
 
-            // Добавляем новую переменную в существующий узел
-            if (!found) {
-                if (inclusionOn) {
-                    adapter.log.debug('ID not found. Try to add to to DB');
-                    var common_name = devices[id_found].common.name.split('.');
-                    var objs = getMeta2(result[i], ip, port, config[ip || 'serial'], devices[id_found].native.subType, common_name[0]);
-                    if (!devices[adapter.namespace + '.' + objs[0]._id]) {
-                        devices[adapter.namespace + '.' + objs[0]._id] = objs[0];
-                        adapter.log.info('Add new object: ' + objs[0]._id + ' - ' + objs[0].common.name);
-                        adapter.setObject(objs[0]._id, objs[0], function (err) {
-                            if (err) adapter.log.error(err);
-                        });
+                // add new value to existing object
+                if (!found && foundObjID) {
+                    adapter.log.debug('Object ID: ' + result[i].id + ', childId: ' + result[i].childId + ', subType: ' + result[i].subType + ' not found!');
+                    if (inclusionOn) {
+                        adapter.log.debug('ID not found. Try to add to to DB');
+                        var common_name = devices[foundObjID].common.name.split('.');
+                        var objs = getMeta2(result[i], ip, port, config[ip || 'serial'], devices[foundObjID].native.subType, common_name[0]);
+                        if (!devices[adapter.namespace + '.' + objs[0]._id]) {
+                            devices[adapter.namespace + '.' + objs[0]._id] = objs[0];
+                            adapter.log.info('Add new object: ' + objs[0]._id + ' - ' + objs[0].common.name);
+                            adapter.setObject(objs[0]._id, objs[0], function (err) {
+                                if (err) adapter.log.error(err);
+                            });
+                        }
+                    } else {
+                        adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
                     }
                 } else {
-                    adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
+                    if (!found && !foundObjID) {
+                        adapter.log.debug('Object ID: ' + result[i].id + ', childId: ' + result[i].childId + ' not found!');
+                    }
                 }
             }
             // try to convert value
