@@ -1,7 +1,14 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.2.3",
+    "version": "0.2.4",
+    "news": {
+      "0.2.4": {
+        "en": "try/catch parse of messages",
+        "de": "try/catch parse of messages",
+        "ru": "try/catch parse of messages"
+      }
+    },
     "title": "mysensors adapter",
     "desc": {
       "en": "ioBroker mysensors Adapter",

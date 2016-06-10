@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 0.2.4 (2016-06-10)
+* (bluefox) try/catch parse of messages
+
 ### 0.2.3 (2016-04-13)
 * fix boolean values
 

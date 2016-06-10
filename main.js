@@ -123,7 +123,15 @@ function setInclusionState(val) {
 }
 
 function processPresentation(data, ip, port) {
-    var result = Parses.parse(data.toString());
+    data = data.toString();
+
+    var result;
+    try {
+        result = Parses.parse(data);
+    } catch (e) {
+        adapter.log.error('Cannot parse data: "' + data + '" [' + e + ']');
+        return null;
+    }
 
     //var result = [{
     //    id:       lineParts[0],
@@ -143,7 +151,7 @@ function processPresentation(data, ip, port) {
         adapter.log.debug('Got: ' + JSON.stringify(result[i]));
 
         if (result[i].type === 'presentation' && result[i].subType) {
-            adapter.log.debug('Сообщение Презетация');
+            adapter.log.debug('Message presentation');
             presentationDone = true;
             var found = false;
             for (var id in devices) {
@@ -153,7 +161,7 @@ function processPresentation(data, ip, port) {
                     devices[id].native.childId == result[i].childId &&
                     devices[id].native.subType == result[i].subType) {
                     found = true;
-                    adapter.log.debug('Найден id = ' + id);
+                    adapter.log.debug('Found id = ' + id);
                     break;
                 }
             }
@@ -164,7 +172,7 @@ function processPresentation(data, ip, port) {
                     adapter.log.debug('ID not found. Try to add to to DB');
                     var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
                     for (var j = 0; j < objs.length; j++) {
-                        adapter.log.debug('Проверка ' + devices[adapter.namespace + '.' + objs[j]._id]);
+                        adapter.log.debug('Check ' + devices[adapter.namespace + '.' + objs[j]._id]);
                         if (!devices[adapter.namespace + '.' + objs[j]._id]) {
                             devices[adapter.namespace + '.' + objs[j]._id] = objs[j];
                             adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
