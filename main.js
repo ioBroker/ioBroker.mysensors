@@ -404,7 +404,6 @@ function main() {
                             if (result[i].subType === 'V_DIMMER') result[i].subType = 'V_PERCENTAGE';
 
                             for (var id in devices) {
-                                adapter.log.debug(devices[id].native.varType + ' /// ' + result[i].subType);
                                 if (devices[id].native &&
                                     (!ip || ip == devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&
@@ -493,7 +492,6 @@ function main() {
 
                         if (saveValue) {
                             for (var id in devices) {
-                                adapter.log.debug('2 ' + devices[id].native.varType + ' /// ' + result[i].subType);
                                 if (devices[id].native &&
                                     (!ip || ip == devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&

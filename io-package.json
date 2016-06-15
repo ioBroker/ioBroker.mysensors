@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "news": {
+      "0.2.5": {
+        "en": "remove debug outputs",
+        "de": "remove debug outputs",
+        "ru": "remove debug outputs"
+      },
       "0.2.4": {
         "en": "try/catch parse of messages",
         "de": "try/catch parse of messages",

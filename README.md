@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 0.2.5 (2016-06-14)
+* (bluefox) remove debug outputs
+
 ### 0.2.4 (2016-06-10)
 * (bluefox) try/catch parse of messages
 
