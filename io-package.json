@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "news": {
+      "0.2.6": {
+        "en": "do not switch off inclusion mode by stop",
+        "de": "do not switch off inclusion mode by stop",
+        "ru": "do not switch off inclusion mode by stop"
+      },
       "0.2.5": {
         "en": "remove debug outputs",
         "de": "remove debug outputs",

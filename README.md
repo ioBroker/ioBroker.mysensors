@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 0.2.6 (2016-06-16)
+* (bluefox) do not switch off inclusion mode by stop
+
 ### 0.2.5 (2016-06-14)
 * (bluefox) remove debug outputs
 

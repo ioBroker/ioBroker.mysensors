@@ -94,15 +94,8 @@ adapter.on('objectChange', function (id, obj) {
     }
 });
 
-// is called when databases are connected and adapter received configuration.
-// start here!
 adapter.on('ready', function () {
     main();
-});
-
-// start here!
-adapter.on('unload', function () {
-    adapter.setState('inclusionOn', false, true);
 });
 
 var presentationDone = false;
@@ -155,13 +148,11 @@ function processPresentation(data, ip, port) {
             presentationDone = true;
             var found = false;
             for (var id in devices) {
-                adapter.log.debug('id = ' + id);
                 if ((!ip || ip === devices[id].native.ip) &&
                     devices[id].native.id      == result[i].id      &&
                     devices[id].native.childId == result[i].childId &&
                     devices[id].native.subType == result[i].subType) {
                     found = true;
-                    adapter.log.debug('Found id = ' + id);
                     break;
                 }
             }
@@ -356,17 +347,17 @@ function main() {
             (devices[adapter.namespace + '.info.connection'].common.type === 'boolean' && adapter.config.type !== 'serial') ||
             (devices[adapter.namespace + '.info.connection'].common.type !== 'boolean' && adapter.config.type === 'serial')) {
             adapter.setForeignObject(adapter.namespace + '.info.connection', {
-                "_id":  "info.connection",
-                "type": "state",
-                "common": {
-                    "role":  "indicator.connected",
-                    "name":  adapter.config.type === 'serial' ? 'If connected to my sensors' : 'List of connected gateways',
-                    "type":  adapter.config.type === 'serial' ? 'boolean' : 'string',
-                    "read":  true,
-                    "write": false,
-                    "def":   false
+                _id:  'info.connection',
+                type: 'state',
+                common: {
+                    role:  'indicator.connected',
+                    name:  adapter.config.type === 'serial' ? 'If connected to my sensors' : 'List of connected gateways',
+                    type:  adapter.config.type === 'serial' ? 'boolean' : 'string',
+                    read:  true,
+                    write: false,
+                    def:   false
                 },
-                "native": {
+                native: {
 
                 }
             }, function (err) {
@@ -421,7 +412,6 @@ function main() {
                         }
                     } else if(result[i].type === 'internal') {
                         var saveValue = false;
-                        adapter.log.debug('Внутреннее сообщение');
                         switch (result[i].subType) {
                             case 'I_BATTERY_LEVEL':     //   0   Use this to report the battery level (in percent 0-100).
                                 adapter.log.info('Battery level ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
