@@ -103,19 +103,21 @@ describe('mySensors UDP: Test UDP server', function() {
     it('mySensors UDP: Check if sensor connected to ioBroker', function (done) {
         this.timeout(4000);
         var commands = fs.readFileSync(__dirname + '/lib/commands.txt').toString().split(/[\r\n|\n|\r]/g);
-        setTimeout(function () {
-            sendMessages(commands, 10, function () {
-                if (!connected) {
-                    checkConnection(true, function () {
+        states.setState('mysensors.0.inclusionOn', true, function () {
+            setTimeout(function () {
+                sendMessages(commands, 10, function () {
+                    if (!connected) {
+                        checkConnection(true, function () {
+                            expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
+                            done();
+                        });
+                    } else {
                         expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
                         done();
-                    });
-                } else {
-                    expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
-                    done();
-                }
-            });
-        }, 1000);
+                    }
+                });
+            }, 1000);
+        });
     });
 
     it('mySensors UDP: check created objects', function (done) {

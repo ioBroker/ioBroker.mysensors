@@ -8,11 +8,14 @@ var serialport;
 var Parses     = require('sensors');
 var MySensors  = require(__dirname + '/lib/mysensors');
 var getMeta    = require(__dirname + '/lib/getmeta').getMetaInfo;
+var getMeta2   = require(__dirname + '/lib/getmeta').getMetaInfo2;
 
 var adapter   = utils.adapter('mysensors');
 var devices   = {};
 var mySensorsInterface;
 var floatRegEx = /^[+-]?\d+(\.\d*)$/;
+var inclusionOn = false;
+var inclusionTimeout = false;
 
 var config = {};
 
@@ -22,7 +25,7 @@ try {
     console.warn('Serial port is not available');
 }
 
-//принимаем и обрабатываем сообщения 
+//принимаем и обрабатываем сообщения
 adapter.on('message', function (obj) {
     if (obj) {
         switch (obj.command) {
@@ -64,6 +67,9 @@ adapter.on('stateChange', function (id, state) {
     // Warning, state can be null if it was deleted
     adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
 
+    if (id === adapter.namespace + '.inclusionOn') {
+        setInclusionState(state.val);
+    } else
     // output to mysensors
     if (devices[id] && devices[id].type == 'state') {
         if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
@@ -88,16 +94,37 @@ adapter.on('objectChange', function (id, obj) {
     }
 });
 
-// is called when databases are connected and adapter received configuration.
-// start here!
 adapter.on('ready', function () {
     main();
 });
 
 var presentationDone = false;
 
+function setInclusionState(val) {
+    val = val === 'true' || val === true || val === 1 || val === '1';
+    inclusionOn = val;
+
+    if (inclusionTimeout) clearTimeout(inclusionTimeout);
+    inclusionTimeout = null;
+
+    if (inclusionOn && adapter.config.inclusionTimeout) {
+        inclusionTimeout = setTimeout(function () {
+            inclusionOn = false;
+            adapter.setState('inclusionOn', false, true);
+        }, adapter.config.inclusionTimeout);
+    }
+}
+
 function processPresentation(data, ip, port) {
-    var result = Parses.parse(data.toString());
+    data = data.toString();
+
+    var result;
+    try {
+        result = Parses.parse(data);
+    } catch (e) {
+        adapter.log.error('Cannot parse data: ' + data + '[' + e + ']');
+        return null;
+    }
 
     //var result = [{
     //    id:       lineParts[0],
@@ -115,7 +142,9 @@ function processPresentation(data, ip, port) {
 
     for (var i = 0; i < result.length; i++) {
         adapter.log.debug('Got: ' + JSON.stringify(result[i]));
+
         if (result[i].type === 'presentation' && result[i].subType) {
+            adapter.log.debug('Message presentation');
             presentationDone = true;
             var found = false;
             for (var id in devices) {
@@ -130,17 +159,78 @@ function processPresentation(data, ip, port) {
 
             // Add new node
             if (!found) {
-                var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
-                for (var j = 0; j < objs.length; j++) {
-                    if (!devices[adapter.namespace + '.' + objs[j]._id]) {
-                        devices[adapter.namespace + '.' + objs[j]._id] = objs[j];
-                        adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
-                        adapter.setObject(objs[j]._id, objs[j], function (err) {
-                            if (err) adapter.log.error(err);
-                        });
+                if (inclusionOn) {
+                    adapter.log.debug('ID not found. Try to add to to DB');
+                    var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
+                    for (var j = 0; j < objs.length; j++) {
+                        adapter.log.debug('Check ' + devices[adapter.namespace + '.' + objs[j]._id]);
+                        if (!devices[adapter.namespace + '.' + objs[j]._id]) {
+                            devices[adapter.namespace + '.' + objs[j]._id] = objs[j];
+                            adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
+                            adapter.setObject(objs[j]._id, objs[j], function (err) {
+                                if (err) adapter.log.error(err);
+                            });
+                        }
+                    }
+                } else {
+                    adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
+                }
+            }
+            // check if received object exists
+        } else if (result[i].type === 'set' && result[i].subType) {
+            if (0) {
+                adapter.log.debug('Message type is "set". Try to find it in DB...');
+                var found = false;
+                var foundObjID; // store here ID that suit with parameters to id and childId
+
+                for (var id in devices) {
+                    if ((!ip || ip === devices[id].native.ip) &&
+                        devices[id].native.id      == result[i].id      &&
+                        devices[id].native.childId == result[i].childId &&
+                        devices[id].native.varType == result[i].subType) {
+                        found = true;
+                        adapter.log.debug('Found id = ' + id);
+                        break;
+                    }
+                    if (devices[id].native.id      == result[i].id      &&
+                        devices[id].native.childId == result[i].childId){
+                        foundObjID = id;
+                        adapter.log.debug('Save foundObjID with similar id and childId');
+                        adapter.log.debug('devices[foundObjID].native.id      = ' + devices[foundObjID].native.id);
+                        adapter.log.debug('devices[foundObjID].native.childId = ' + devices[foundObjID].native.childId);
+                    }
+                }
+
+                // add new value to existing object
+                if (!found && foundObjID) {
+                    adapter.log.debug('Object ID: ' + result[i].id + ', childId: ' + result[i].childId + ', subType: ' + result[i].subType + ' not found!');
+                    if (inclusionOn) {
+                        adapter.log.debug('ID not found. Try to add to to DB');
+                        var common_name = devices[foundObjID].common.name.split('.');
+                        var objs = getMeta2(result[i], ip, port, config[ip || 'serial'], devices[foundObjID].native.subType, common_name[0]);
+                        if (!devices[adapter.namespace + '.' + objs[0]._id]) {
+                            devices[adapter.namespace + '.' + objs[0]._id] = objs[0];
+                            adapter.log.info('Add new object: ' + objs[0]._id + ' - ' + objs[0].common.name);
+                            adapter.setObject(objs[0]._id, objs[0], function (err) {
+                                if (err) adapter.log.error(err);
+                            });
+                        }
+                    } else {
+                        adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
+                    }
+                } else {
+                    if (!found && !foundObjID) {
+                        adapter.log.debug('Object ID: ' + result[i].id + ', childId: ' + result[i].childId + ' not found!');
                     }
                 }
             }
+            // try to convert value
+            var val = result[i].payload;
+            if (floatRegEx.test(val)) val = parseFloat(val);
+            if (val === 'true')  val = true;
+            if (val === 'false') val = false;
+            result[i].payload = val;
+
         } else {
             // try to convert value
             var val = result[i].payload;
@@ -219,7 +309,7 @@ function syncObjects(index, cb) {
     });
 }
 
-function deleteStates(states, cb) {
+function d
     if (!states || !states.length) {
         cb && cb();
         return;
@@ -242,7 +332,11 @@ function deleteStates(states, cb) {
 }
 */
 function main() {
-    // read current existing objects
+    adapter.getState('inclusionOn', function (err, state) {
+        setInclusionState(state ? state.val : false);
+    });
+
+    // read current existing objects (прочитать текущие существующие объекты)
     adapter.getForeignObjects(adapter.namespace + '.*', 'state', function (err, states) {
         // subscribe on changes
         adapter.subscribeStates('*');
@@ -253,17 +347,17 @@ function main() {
             (devices[adapter.namespace + '.info.connection'].common.type === 'boolean' && adapter.config.type !== 'serial') ||
             (devices[adapter.namespace + '.info.connection'].common.type !== 'boolean' && adapter.config.type === 'serial')) {
             adapter.setForeignObject(adapter.namespace + '.info.connection', {
-                "_id":  "info.connection",
-                "type": "state",
-                "common": {
-                    "role":  "indicator.connected",
-                    "name":  adapter.config.type === 'serial' ? 'If connected to my sensors' : 'List of connected gateways',
-                    "type":  adapter.config.type === 'serial' ? 'boolean' : 'string',
-                    "read":  true,
-                    "write": false,
-                    "def":   false
+                _id:  'info.connection',
+                type: 'state',
+                common: {
+                    role:  'indicator.connected',
+                    name:  adapter.config.type === 'serial' ? 'If connected to my sensors' : 'List of connected gateways',
+                    type:  adapter.config.type === 'serial' ? 'boolean' : 'string',
+                    read:  true,
+                    write: false,
+                    def:   false
                 },
-                "native": {
+                native: {
 
                 }
             }, function (err) {
@@ -282,9 +376,11 @@ function main() {
                 if (!result) return;
 
                 for (var i = 0; i < result.length; i++) {
+                    adapter.log.debug('Message type: ' + result[i].type);
                     if (result[i].type === 'set') {
                         // If set quality
                         if (result[i].subType == 77) {
+                            adapter.log.debug('subType = 77');
                             for (var id in devices) {
                                 if (devices[id].native &&
                                     (!ip || ip == devices[id].native.ip) &&
@@ -299,14 +395,15 @@ function main() {
                             if (result[i].subType === 'V_DIMMER') result[i].subType = 'V_PERCENTAGE';
 
                             for (var id in devices) {
-                                //adapter.log.info(devices[id].native.varType + ' /// ' + result[i].subType);
                                 if (devices[id].native &&
                                     (!ip || ip == devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&
                                     devices[id].native.childId == result[i].childId &&
                                     devices[id].native.varType == result[i].subType) {
 
-                                    if (devices[id].common.type == 'boolean') result[i].payload = !!result[i].payload;
+                                    if (devices[id].common.type == 'boolean') {
+                                        result[i].payload = result[i].payload === 'true' || result[i].payload === true || result[i].payload === '1' || result[i].payload === 1;
+                                    }
                                     adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
                                     adapter.setState(id, result[i].payload, true);
                                     break;
@@ -315,40 +412,39 @@ function main() {
                         }
                     } else if(result[i].type === 'internal') {
                         var saveValue = false;
-
                         switch (result[i].subType) {
-                            case 'I_BATTERY_LEVEL':     //	0	Use this to report the battery level (in percent 0-100).
+                            case 'I_BATTERY_LEVEL':     //   0   Use this to report the battery level (in percent 0-100).
                                 adapter.log.info('Battery level ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 saveValue = true;
                                 break;
 
-                            case 'I_TIME':              //	1	Sensors can request the current time from the Controller using this message. The time will be reported as the seconds since 1970
+                            case 'I_TIME':              //   1   Sensors can request the current time from the Controller using this message. The time will be reported as the seconds since 1970
                                 adapter.log.info('Time ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 if (!result[i].ack) {
-                                    // send response
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + Math.round(new Date().getTime() / 1000), ip);
+                                    // send response: internal, ack=1
+                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + Math.round(new Date().getTime() / 1000), ip);
                                 }
                                 break;
 
-                            case 'I_VERSION':           //	2	Used to request gateway version from controller.
+                            case 'I_VERSION':           //   2   Used to request gateway version from controller.
                                 adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 saveValue = true;
                                 if (!result[i].ack) {
-                                    // send response
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + (adapter.version || 0), ip);
+                                    // send response: internal, ack=1
+                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + (adapter.version || 0), ip);
                                 }
                                 break;
 
-                            case 'I_SKETCH_NAME':           //	2	Used to request gateway version from controller.
+                            case 'I_SKETCH_NAME':           //   2   Used to request gateway version from controller.
                                 adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 saveValue = true;
                                 break;
 
-                            case 'I_INCLUSION_MODE':    //	5	Start/stop inclusion mode of the Controller (1=start, 0=stop).
+                            case 'I_INCLUSION_MODE':    //   5   Start/stop inclusion mode of the Controller (1=start, 0=stop).
                                 adapter.log.info('inclusion mode ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload ? 'STARTED' : 'STOPPED');
                                 break;
 
-                            case 'I_CONFIG':            //	6	Config request from node. Reply with (M)etric or (I)mperal back to sensor.
+                            case 'I_CONFIG':            //   6   Config request from node. Reply with (M)etric or (I)mperal back to sensor.
                                 result[i].payload = (result[i].payload == 'I') ? 'Imperial' : 'Metric';
                                 adapter.log.info('Config ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 config[ip || 'serial'] = config[ip || 'serial'] || {};
@@ -356,16 +452,36 @@ function main() {
                                 saveValue = true;
                                 break;
 
-                            case 'I_LOG_MESSAGE':       //	9	Sent by the gateway to the Controller to trace-log a message
+                            case 'I_LOG_MESSAGE':       //   9   Sent by the gateway to the Controller to trace-log a message
                                 adapter.log.info('Log ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                break;
+
+                            case 'I_ID_REQUEST':
+                                if (inclusionOn) {
+                                    // find maximal index
+                                    var maxId = 0;
+                                    for (var id in devices) {
+                                        if (devices[id].native && (!ip || ip == devices[id].native.ip) &&
+                                            devices[id].native.id > maxId) {
+                                            maxId = devices[id].native.id;
+                                        }
+                                    }
+                                    maxId++;
+                                    if (!result[i].ack) {
+                                        // send response: internal, ack=0, I_ID_RESPONSE
+                                        mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;0;4;' + maxId, ip);
+                                    }
+                                } else {
+                                    adapter.log.warn('Received I_ID_REQUEST, but inclusion mode is disabled');
+                                }
                                 break;
 
                             default:
                                 adapter.log.info('Received INTERNAL message: ' + result[i].subType + ': ' + result[i].payload);
                         }
+
                         if (saveValue) {
                             for (var id in devices) {
-                                //adapter.log.info(devices[id].native.varType + ' /// ' + result[i].subType);
                                 if (devices[id].native &&
                                     (!ip || ip == devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&
@@ -375,7 +491,7 @@ function main() {
                                     if (devices[id].common.type == 'boolean') result[i].payload = !!result[i].payload;
                                     if (devices[id].common.type == 'number')  result[i].payload = parseFloat(result[i].payload);
 
-                                    adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
+                                    adapter.log.info('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
                                     adapter.setState(id, result[i].payload, true);
                                     break;
                                 }

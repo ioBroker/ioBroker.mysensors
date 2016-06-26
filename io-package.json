@@ -1,7 +1,24 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.2.1",
+    "version": "0.2.6",
+    "news": {
+      "0.2.6": {
+        "en": "do not switch off inclusion mode by stop",
+        "de": "do not switch off inclusion mode by stop",
+        "ru": "do not switch off inclusion mode by stop"
+      },
+      "0.2.5": {
+        "en": "remove debug outputs",
+        "de": "remove debug outputs",
+        "ru": "remove debug outputs"
+      },
+      "0.2.4": {
+        "en": "try/catch parse of messages",
+        "de": "try/catch parse of messages",
+        "ru": "try/catch parse of messages"
+      }
+    },
     "title": "mysensors adapter",
     "desc": {
       "en": "ioBroker mysensors Adapter",
@@ -30,7 +47,9 @@
     "baudRate":     115200,
     "mode":         "server",
     "type":         "udp",
-    "bind":         "0.0.0.0"
+    "bind":         "0.0.0.0",
+    "broadcast":    false,
+    "inclusionTimeout": 60000
   },
   "objects": [
   ],
@@ -52,6 +71,20 @@
         "type":  "boolean",
         "read":  true,
         "write": false,
+        "def":   false
+      },
+      "native": {}
+    },
+    {
+      "_id":  "inclusionOn",
+      "type": "state",
+      "common": {
+        "role":  "state",
+        "name":  "Inclusion mode activated",
+        "desc":  "If inclusion mode on or off",
+        "type":  "boolean",
+        "read":  true,
+        "write": true,
         "def":   false
       },
       "native": {}
