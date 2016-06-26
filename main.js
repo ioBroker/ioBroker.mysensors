@@ -426,10 +426,11 @@ function main() {
                                 }
                                 break;
 
+                            case 'I_SKETCH_VERSION':
                             case 'I_VERSION':           //   2   Used to request gateway version from controller.
                                 adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 saveValue = true;
-                                if (!result[i].ack) {
+                                if (!result[i].ack && result[i].subType == 'I_VERSION') {
                                     // send response: internal, ack=1
                                     mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + (adapter.version || 0), ip);
                                 }
