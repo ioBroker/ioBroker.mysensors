@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 1.0.0 (2016-06-28)
+* (soef) some value corrections and enlargement
+
 ### 0.2.6 (2016-06-16)
 * (bluefox) do not switch off inclusion mode by stop
 

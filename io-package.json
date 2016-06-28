@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "0.2.6",
+    "version": "1.0.0",
     "news": {
+      "1.0.0": {
+        "en": "some value corrections and enlargement",
+        "de": "some value corrections and enlargement",
+        "ru": "some value corrections and enlargement"
+      },
       "0.2.6": {
         "en": "do not switch off inclusion mode by stop",
         "de": "do not switch off inclusion mode by stop",
