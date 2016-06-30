@@ -32,7 +32,7 @@
     "serialport": "^2.0.6"
   },
   "dependencies": {
-    "sensors": "^0.2.0"
+    "sensors": "^1.0.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
