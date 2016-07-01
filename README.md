@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 1.0.1 (2016-07-01)
+* (soef) necessary version of sensor module increased
+
 ### 1.0.0 (2016-06-28)
 * (soef) some value corrections and enlargement
 

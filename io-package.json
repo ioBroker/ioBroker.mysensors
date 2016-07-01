@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "news": {
+	  "1.0.1": {
+        "en": "necessary version of sensor module increased",
+        "de": "necessary version of sensor module increased",
+        "ru": "necessary version of sensor module increased"
+      },
       "1.0.0": {
         "en": "some value corrections and enlargement",
         "de": "some value corrections and enlargement",
