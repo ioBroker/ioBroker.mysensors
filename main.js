@@ -452,15 +452,15 @@ function main() {
                             case 'I_SKETCH_NAME':           //   2   Used to request gateway version from controller.
                                 adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
                                 var name = result[i].payload;
-                                var id = result[i].id;
-                                adapter.getObject(id, function(err, obj) {
+                                var _id = result[i].id;
+                                adapter.getObject(_id, function(err, obj) {
                                     if(!obj) {
                                         obj = { type: 'device', common: { name: name }}
                                     } else if (obj.common.name === name) {
                                         return;
                                     }
                                     obj.common.name = name;
-                                    adapter.setObject(adapter.namespace + '.' + id, obj, function (err) {
+                                    adapter.setObject(adapter.namespace + '.' + _id, obj, function (err) {
                                     });
                                 });
                                 saveValue = true;
