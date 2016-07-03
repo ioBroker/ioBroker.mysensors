@@ -3,7 +3,7 @@
     "name": "mysensors",
     "version": "1.0.2",
     "news": {
-	  "1.0.1": {
+      "1.0.1": {
         "en": "necessary version of sensor module increased",
         "de": "necessary version of sensor module increased",
         "ru": "necessary version of sensor module increased"
@@ -47,7 +47,7 @@
     ],
     "readme":     "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
     "loglevel":   "info",
-	"stopBeforeUpdate": true,
+    "stopBeforeUpdate": true,
     "type":       "hardware"
   },
   "native": {
@@ -101,3 +101,4 @@
     }
   ]
 }
+
