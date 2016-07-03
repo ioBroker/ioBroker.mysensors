@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mysensors",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "ioBroker mysensors Adapter",
   "author": {
     "name": "bluefox",
@@ -11,7 +11,7 @@
       "name": "Bluefox",
       "email": "dogafox@gmail.com"
     },
-	{
+    {
       "name": "Vlad_k",
       "email": "gstar-tools@rambler.ru"
     }
@@ -26,13 +26,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ioBroker/ioBroker.mysensors"
+    "url": "git+https://github.com/ioBroker/ioBroker.mysensors.git"
   },
   "optionalDependencies": {
     "serialport": "^2.0.6"
   },
   "dependencies": {
-    "sensors": "^1.0.0"
+    "sensors": "^1.0.0",
+    "serialport": "^2.0.6"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
@@ -49,5 +50,31 @@
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha"
   },
-  "readmeFilename": "README.md"
+  "gitHead": "db7c134d52f494ad9186a87fbe653b7bc7efb24d",
+  "_id": "iobroker.mysensors@1.0.1",
+  "_shasum": "1d3bea4084c19dcbcb06214161172cc2c7e49830",
+  "_from": "iobroker.mysensors@*",
+  "_npmVersion": "2.14.12",
+  "_nodeVersion": "4.3.1",
+  "_npmUser": {
+    "name": "bluefox",
+    "email": "dogafox@gmail.com"
+  },
+  "dist": {
+    "shasum": "1d3bea4084c19dcbcb06214161172cc2c7e49830",
+    "tarball": "https://registry.npmjs.org/iobroker.mysensors/-/iobroker.mysensors-1.0.1.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "bluefox",
+      "email": "dogafox@gmail.com"
+    }
+  ],
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/iobroker.mysensors-1.0.1.tgz_1467410287343_0.9624507806729525"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/iobroker.mysensors/-/iobroker.mysensors-1.0.1.tgz",
+  "readme": "ERROR: No README data found!"
 }
