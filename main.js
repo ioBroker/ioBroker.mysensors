@@ -115,6 +115,39 @@ function setInclusionState(val) {
     }
 }
 
+
+function findDevice(result, ip, subType) {
+    for (var id in devices) {
+        if (devices[id].native &&
+            (!ip || ip == devices[id].native.ip) &&
+            devices[id].native.id == result.id &&
+            devices[id].native.childId == result.childId &&
+            (subType === false || devices[id].native.varType == result.subType)) {
+            return id;
+        }
+    }
+    return -1;
+}
+
+
+function saveResult(id, result, ip, subType) {
+    if (id == -1) id = findDevice(result, ip, subType);
+    if (id != -1 && devices[id]) {
+        if (devices[id].common.type == 'boolean') {
+            result.payload = result.payload === 'true' || result.payload === true || result.payload === '1' || result.payload === 1;
+            //result.payload = !!result[i].payload;
+        }
+        if (devices[id].common.type == 'number')  result.payload = parseFloat(result.payload);
+
+        adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result.childId + ': ' + result.payload + ' ' + typeof result.payload);
+        adapter.setState(id, result.payload, true);
+
+        return id;
+    }
+    return 0;
+}
+
+
 function processPresentation(data, ip, port) {
     data = data.toString();
 
@@ -146,17 +179,7 @@ function processPresentation(data, ip, port) {
         if (result[i].type === 'presentation' && result[i].subType) {
             adapter.log.debug('Message presentation');
             presentationDone = true;
-            var found = false;
-            for (var id in devices) {
-                if ((!ip || ip === devices[id].native.ip) &&
-                    devices[id].native.id      == result[i].id      &&
-                    devices[id].native.childId == result[i].childId &&
-                    devices[id].native.subType == result[i].subType) {
-                    found = true;
-                    break;
-                }
-            }
-
+            var found = findDevice(result[i], ip) != -1;
             // Add new node
             if (!found) {
                 if (inclusionOn) {
@@ -331,6 +354,8 @@ function d
     });
 }
 */
+
+
 function main() {
     adapter.getState('inclusionOn', function (err, state) {
         setInclusionState(state ? state.val : false);
@@ -377,6 +402,7 @@ function main() {
 
                 for (var i = 0; i < result.length; i++) {
                     adapter.log.debug('Message type: ' + result[i].type);
+                    var id = findDevice(result[i], ip);
                     if (result[i].type === 'set') {
                         // If set quality
                         if (result[i].subType == 77) {
@@ -393,22 +419,9 @@ function main() {
                         } else {
                             if (result[i].subType === 'V_LIGHT')  result[i].subType = 'V_STATUS';
                             if (result[i].subType === 'V_DIMMER') result[i].subType = 'V_PERCENTAGE';
+                            if (result[i].subType === 'V_DUST_LEVEL') result[i].subType = 'V_LEVEL';
 
-                            for (var id in devices) {
-                                if (devices[id].native &&
-                                    (!ip || ip == devices[id].native.ip) &&
-                                    devices[id].native.id      == result[i].id &&
-                                    devices[id].native.childId == result[i].childId &&
-                                    devices[id].native.varType == result[i].subType) {
-
-                                    if (devices[id].common.type == 'boolean') {
-                                        result[i].payload = result[i].payload === 'true' || result[i].payload === true || result[i].payload === '1' || result[i].payload === 1;
-                                    }
-                                    adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
-                                    adapter.setState(id, result[i].payload, true);
-                                    break;
-                                }
-                            }
+                            saveResult(id, result[i], ip, true);
                         }
                     } else if(result[i].type === 'internal') {
                         var saveValue = false;
@@ -438,6 +451,18 @@ function main() {
 
                             case 'I_SKETCH_NAME':           //   2   Used to request gateway version from controller.
                                 adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                var name = result[i].payload;
+                                var _id = result[i].id;
+                                adapter.getObject(_id, function(err, obj) {
+                                    if(!obj) {
+                                        obj = { type: 'device', common: { name: name }}
+                                    } else if (obj.common.name === name) {
+                                        return;
+                                    }
+                                    obj.common.name = name;
+                                    adapter.setObject(adapter.namespace + '.' + _id, obj, function (err) {
+                                    });
+                                });
                                 saveValue = true;
                                 break;
 
@@ -479,27 +504,29 @@ function main() {
 
                             default:
                                 adapter.log.info('Received INTERNAL message: ' + result[i].subType + ': ' + result[i].payload);
+
                         }
 
                         if (saveValue) {
-                            for (var id in devices) {
-                                if (devices[id].native &&
-                                    (!ip || ip == devices[id].native.ip) &&
-                                    devices[id].native.id      == result[i].id &&
-                                    devices[id].native.childId == result[i].childId &&
-                                    devices[id].native.varType == result[i].subType) {
-
-                                    if (devices[id].common.type == 'boolean') result[i].payload = !!result[i].payload;
-                                    if (devices[id].common.type == 'number')  result[i].payload = parseFloat(result[i].payload);
-
-                                    adapter.log.info('Set value ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
-                                    adapter.setState(id, result[i].payload, true);
-                                    break;
-                                }
-                            }
+                            saveResult(id, result[i], ip, true);
                         }
-
+                    } else if(result[i].type === 'stream') {
+                        switch (result[i].subType) {
+                            case 'ST_FIRMWARE_CONFIG_REQUEST':
+                                break;
+                            case 'ST_FIRMWARE_CONFIG_RESPONSE':
+                                break;
+                            case 'ST_FIRMWARE_REQUEST':
+                                break;
+                            case 'ST_FIRMWARE_RESPONSE':
+                                break;
+                            case 'ST_SOUND':
+                                break;
+                            case 'ST_IMAGE':
+                                break;
+                        }
                     }
+
                 }
             });
 
