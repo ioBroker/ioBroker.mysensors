@@ -3,6 +3,11 @@
     "name": "mysensors",
     "version": "1.0.2",
     "news": {
+	  "1.0.2": {
+        "en": "fix id usage",
+        "de": "fix id usage",
+        "ru": "fix id usage"
+      },
       "1.0.1": {
         "en": "necessary version of sensor module increased",
         "de": "necessary version of sensor module increased",
