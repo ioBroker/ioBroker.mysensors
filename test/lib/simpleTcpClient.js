@@ -29,6 +29,13 @@ function sendMessages(list, interval, callback) {
             callback && callback();
             return;
         }
+        // skip message
+        if (msg[0] === '#') {
+            setTimeout(function() {
+                sendMessages(list, interval, callback);
+            }, interval || 100);
+            return;
+        }
         console.log('Send ' + msg);
         sendMessage(msg + '\n', function (err) {
             setTimeout(function() {

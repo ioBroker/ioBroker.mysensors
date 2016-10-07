@@ -1,6 +1,6 @@
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
-"use strict";
+'use strict';
 
 // you have to require the utils module and call adapter function
 var utils      = require(__dirname + '/lib/utils'); // Get common adapter utils
@@ -71,7 +71,7 @@ adapter.on('stateChange', function (id, state) {
         setInclusionState(state.val);
     } else
     // output to mysensors
-    if (devices[id] && devices[id].type == 'state') {
+    if (devices[id] && devices[id].type === 'state') {
         if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
         if (state.val === 'true')  state.val = 1;
         if (state.val === 'false') state.val = 0;
@@ -115,11 +115,10 @@ function setInclusionState(val) {
     }
 }
 
-
 function findDevice(result, ip, subType) {
     for (var id in devices) {
         if (devices[id].native &&
-            (!ip || ip == devices[id].native.ip) &&
+            (!ip || ip === devices[id].native.ip) &&
             devices[id].native.id == result.id &&
             devices[id].native.childId == result.childId &&
             (subType === false || devices[id].native.varType == result.subType)) {
@@ -129,15 +128,14 @@ function findDevice(result, ip, subType) {
     return -1;
 }
 
-
 function saveResult(id, result, ip, subType) {
-    if (id == -1) id = findDevice(result, ip, subType);
-    if (id != -1 && devices[id]) {
-        if (devices[id].common.type == 'boolean') {
+    if (id === -1) id = findDevice(result, ip, subType);
+    if (id !== -1 && devices[id]) {
+        if (devices[id].common.type === 'boolean') {
             result.payload = result.payload === 'true' || result.payload === true || result.payload === '1' || result.payload === 1;
             //result.payload = !!result[i].payload;
         }
-        if (devices[id].common.type == 'number')  result.payload = parseFloat(result.payload);
+        if (devices[id].common.type === 'number')  result.payload = parseFloat(result.payload);
 
         adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result.childId + ': ' + result.payload + ' ' + typeof result.payload);
         adapter.setState(id, result.payload, true);
@@ -146,7 +144,6 @@ function saveResult(id, result, ip, subType) {
     }
     return 0;
 }
-
 
 function processPresentation(data, ip, port) {
     data = data.toString();
@@ -179,14 +176,14 @@ function processPresentation(data, ip, port) {
         if (result[i].type === 'presentation' && result[i].subType) {
             adapter.log.debug('Message presentation');
             presentationDone = true;
-            var found = findDevice(result[i], ip) != -1;
+            var found = findDevice(result[i], ip) !== -1;
             // Add new node
             if (!found) {
                 if (inclusionOn) {
                     adapter.log.debug('ID not found. Try to add to to DB');
                     var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
                     for (var j = 0; j < objs.length; j++) {
-                        adapter.log.debug('Check ' + devices[adapter.namespace + '.' + objs[j]._id]);
+                        adapter.log.debug('Check ' + JSON.stringify(devices[adapter.namespace + '.' + objs[j]._id]));
                         if (!devices[adapter.namespace + '.' + objs[j]._id]) {
                             devices[adapter.namespace + '.' + objs[j]._id] = objs[j];
                             adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
@@ -355,8 +352,28 @@ function d
 }
 */
 
+function updateSketchName(id, name) {
+    adapter.getObject(id, function (err, obj) {
+        if (!obj) {
+            obj = {
+                type: 'device',
+                common: {
+                    name: name
+                }
+            };
+        } else if (obj.common.name === name) {
+            name = null;
+            return;
+        }
+        obj.common.name = name;
+        adapter.setObject(adapter.namespace + '.' + id, obj, function (err) {
+        });
+    });
+}
 
 function main() {
+    adapter.config.inclusionTimeout = parseInt(adapter.config.inclusionTimeout, 10) || 0;
+
     adapter.getState('inclusionOn', function (err, state) {
         setInclusionState(state ? state.val : false);
     });
@@ -409,7 +426,7 @@ function main() {
                             adapter.log.debug('subType = 77');
                             for (var id in devices) {
                                 if (devices[id].native &&
-                                    (!ip || ip == devices[id].native.ip) &&
+                                    (!ip || ip === devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&
                                     devices[id].native.childId == result[i].childId) {
                                     adapter.log.debug('Set quality of ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
@@ -427,12 +444,12 @@ function main() {
                         var saveValue = false;
                         switch (result[i].subType) {
                             case 'I_BATTERY_LEVEL':     //   0   Use this to report the battery level (in percent 0-100).
-                                adapter.log.info('Battery level ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                adapter.log.info('Battery level ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 saveValue = true;
                                 break;
 
                             case 'I_TIME':              //   1   Sensors can request the current time from the Controller using this message. The time will be reported as the seconds since 1970
-                                adapter.log.info('Time ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                adapter.log.info('Time ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 if (!result[i].ack) {
                                     // send response: internal, ack=1
                                     mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + Math.round(new Date().getTime() / 1000), ip);
@@ -441,7 +458,7 @@ function main() {
 
                             case 'I_SKETCH_VERSION':
                             case 'I_VERSION':           //   2   Used to request gateway version from controller.
-                                adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 saveValue = true;
                                 if (!result[i].ack && result[i].subType === 'I_VERSION') {
                                     // send response: internal, ack=1
@@ -450,36 +467,25 @@ function main() {
                                 break;
 
                             case 'I_SKETCH_NAME':           //   2   Used to request gateway version from controller.
-                                adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
-                                var name = result[i].payload;
-                                var _id = result[i].id;
-                                adapter.getObject(_id, function(err, obj) {
-                                    if(!obj) {
-                                        obj = { type: 'device', common: { name: name }}
-                                    } else if (obj.common.name === name) {
-                                        return;
-                                    }
-                                    obj.common.name = name;
-                                    adapter.setObject(adapter.namespace + '.' + _id, obj, function (err) {
-                                    });
-                                });
+                                adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                updateSketchName(result[i].id, result[i].payload);
                                 saveValue = true;
                                 break;
 
                             case 'I_INCLUSION_MODE':    //   5   Start/stop inclusion mode of the Controller (1=start, 0=stop).
-                                adapter.log.info('inclusion mode ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload ? 'STARTED' : 'STOPPED');
+                                adapter.log.info('inclusion mode ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload ? 'STARTED' : 'STOPPED');
                                 break;
 
                             case 'I_CONFIG':            //   6   Config request from node. Reply with (M)etric or (I)mperal back to sensor.
-                                result[i].payload = (result[i].payload == 'I') ? 'Imperial' : 'Metric';
-                                adapter.log.info('Config ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                result[i].payload = (result[i].payload === 'I') ? 'Imperial' : 'Metric';
+                                adapter.log.info('Config ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 config[ip || 'serial'] = config[ip || 'serial'] || {};
                                 config[ip || 'serial'].metric = result[i].payload;
                                 saveValue = true;
                                 break;
 
                             case 'I_LOG_MESSAGE':       //   9   Sent by the gateway to the Controller to trace-log a message
-                                adapter.log.info('Log ' + (ip ? ' from ' + ip + ' ': '') + ':' + result[i].payload);
+                                adapter.log.info('Log ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 break;
 
                             case 'I_ID_REQUEST':
@@ -487,7 +493,7 @@ function main() {
                                     // find maximal index
                                     var maxId = 0;
                                     for (var id in devices) {
-                                        if (devices[id].native && (!ip || ip == devices[id].native.ip) &&
+                                        if (devices[id].native && (!ip || ip === devices[id].native.ip) &&
                                             devices[id].native.id > maxId) {
                                             maxId = devices[id].native.id;
                                         }
@@ -526,7 +532,6 @@ function main() {
                                 break;
                         }
                     }
-
                 }
             });
 

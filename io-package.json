@@ -1,9 +1,14 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "news": {
-	  "1.0.2": {
+      "1.0.3": {
+        "en": "add note in configuration",
+        "de": "Kommentar im Konfig-Dialog hinzugefügt",
+        "ru": "Добавлено пояснения в настройках"
+      },
+      "1.0.2": {
         "en": "fix id usage",
         "de": "fix id usage",
         "ru": "fix id usage"
