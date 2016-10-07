@@ -107,6 +107,8 @@ function setInclusionState(val) {
     if (inclusionTimeout) clearTimeout(inclusionTimeout);
     inclusionTimeout = null;
 
+    if (inclusionOn) presentationDone = false;
+
     if (inclusionOn && adapter.config.inclusionTimeout) {
         inclusionTimeout = setTimeout(function () {
             inclusionOn = false;
