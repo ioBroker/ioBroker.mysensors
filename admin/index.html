@@ -56,6 +56,11 @@
             "de": "Anlernen-Modus ist aktiv",
             "ru": "Режим присваивания адресов активирован"
         },
+        "Inclusion mode is inactive": {
+            "en": "Inclusion mode is inactive",
+            "de": "Anlernen-Modus ist nicht mehr aktiv",
+            "ru": "Режим присваивания адресов деактивирован"
+        },
         "Ok":                   {"en": "Ok",                "de": "Ok",                 "ru": "Ok"}
     };
     var devices;
@@ -210,7 +215,7 @@
                             ack: false
                         }, function (err) {
                             if (!err) {
-                                showMessage(_('Inclusion mode is active'));
+                                showMessage(state.val ? _('Inclusion mode is active') : _('Inclusion mode is inactive'));
                             } else {
                                 showError(err);
                             }

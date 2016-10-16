@@ -69,6 +69,9 @@ adapter.on('stateChange', function (id, state) {
 
     if (id === adapter.namespace + '.inclusionOn') {
         setInclusionState(state.val);
+        setTimeout(function (val) {
+            adapter.setState('inclusionOn', val, true);
+        }, 200, state.val);
     } else
     // output to mysensors
     if (devices[id] && devices[id].type === 'state') {
@@ -255,11 +258,11 @@ function processPresentation(data, ip, port) {
 
         } else {
             // try to convert value
-            var val = result[i].payload;
-            if (floatRegEx.test(val)) val = parseFloat(val);
-            if (val === 'true')  val = true;
-            if (val === 'false') val = false;
-            result[i].payload = val;
+            var _val = result[i].payload;
+            if (floatRegEx.test(_val)) _val = parseFloat(_val);
+            if (_val === 'true')  _val = true;
+            if (_val === 'false') _val = false;
+            result[i].payload = _val;
         }
     }
     return result;

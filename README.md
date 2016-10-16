@@ -22,7 +22,7 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
-### 1.0.3 (2016-07-01)
+### 1.0.4 (2016-07-01)
 * (bluefox) add comment in configuration
 * (bluefox) fix inclusion mode control
 
