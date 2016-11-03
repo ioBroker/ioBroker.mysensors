@@ -231,6 +231,8 @@
                 getComPorts(settings.comName);
             } else {
                 $('#getUnit').prop('disabled', true);
+                $('#_comName').html('<input id="comName" class="value" value="' + settings.comName + '"/>');
+                $('#comName').change(onChange).keyup(onChange);
             }
         });
 
@@ -290,7 +292,7 @@
                 <option value="tcp"     class="translate">tcp server</option>
                 <option value="udp"     class="translate">udp server</option>
             </select></td><td></td></tr>
-            <tr class="serial"><td class="translate">Com port:</td><td><select class="value oneWidth" id="comName"></select></td><td></td></tr>
+            <tr class="serial"><td class="translate">Com port:</td><td id="_comName"><select class="value oneWidth" id="comName"></select></td><td></td></tr>
             <tr class="serial"><td class="translate">Baud rate:</td><td><select class="value oneWidth" id="baudRate">
                 <option value="110">110</option>
                 <option value="150">150</option>
