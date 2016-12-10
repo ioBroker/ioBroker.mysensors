@@ -109,7 +109,7 @@ describe('mySensors TCP: Test TCP server', function() {
                 tcpClient.connect(port, '127.0.0.1', function() {
                     console.log('Connected!!');
                 });
-                _done();
+                setTimeout(_done, 5000);
             });
         });
     });
