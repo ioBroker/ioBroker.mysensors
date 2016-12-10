@@ -46,6 +46,7 @@
   "bugs": {
     "url": "https://github.com/ioBroker/ioBroker.mysensors/issues"
   },
+  "main": "main.js",
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha"
   },

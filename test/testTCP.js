@@ -89,27 +89,29 @@ describe('mySensors TCP: Test TCP server', function() {
             setup.startController(function (_objects, _states) {
                 objects = _objects;
                 states  = _states;
-                tcpClient.on('data', function (data) {
-                    if (!data) {
-                        console.log('Received empty string!');
-                        return;
-                    }
-                    var data = data.toString();
-                    console.log('Received ' + data);
-                    arr = data.split('\n');
-                    for (var t = arr.length - 1; t >= 0; t--) {
-                        if (!arr[t]) arr.splice(t, 1);
-                    }
-                    lastMessage = arr.length ? arr[arr.length - 1] : null;
-                    console.log('lastMessage: ' + lastMessage);
-                });
-                tcpClient.on('error', function (err) {
-                    console.error(err);
-                });
-                tcpClient.connect(port, '127.0.0.1', function() {
-                    console.log('Connected!!');
-                });
-                _done();
+                setTimeout(function() {
+                    tcpClient.on('data', function (data) {
+                        if (!data) {
+                            console.log('Received empty string!');
+                            return;
+                        }
+                        var data = data.toString();
+                        console.log('Received ' + data);
+                        arr = data.split('\n');
+                        for (var t = arr.length - 1; t >= 0; t--) {
+                            if (!arr[t]) arr.splice(t, 1);
+                        }
+                        lastMessage = arr.length ? arr[arr.length - 1] : null;
+                        console.log('lastMessage: ' + lastMessage);
+                    });
+                    tcpClient.on('error', function (err) {
+                        console.error('Error: ' + err);
+                    });
+                    tcpClient.connect(port, '127.0.0.1', function() {
+                        console.log('Connected!!');
+                    });
+                    _done();
+                }, 1000);
             });
         });
     });
@@ -118,24 +120,22 @@ describe('mySensors TCP: Test TCP server', function() {
         this.timeout(4000);
         states.setState('mysensors.0.inclusionOn', true, function () {
             var commands = fs.readFileSync(__dirname + '/lib/commands.txt').toString().split(/[\r\n|\n|\r]/g);
-            setTimeout(function () {
-                sendMessages(commands, 10, function () {
-                    if (!connected) {
-                        checkConnection(true, function () {
-                            expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
-                            done();
-                        });
-                    } else {
+            sendMessages(commands, 10, function () {
+                if (!connected) {
+                    checkConnection(true, function () {
                         expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
                         done();
-                    }
-                });
-            }, 1000);
+                    });
+                } else {
+                    expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
+                    done();
+                }
+            });
         });
     });
 
     it('mySensors TCP: check created objects', function (done) {
-        this.timeout(5000);
+        this.timeout(10000);
         var expected = {
             "_id": "mysensors.0.127_0_0_1.0.59_DIMMER.V_PERCENTAGE",
             "common": {
@@ -183,7 +183,7 @@ describe('mySensors TCP: Test TCP server', function() {
                     done();
                 }
             });
-        }, 1000);
+        }, 5000);
     });
 
     it('mySensors TCP: it must receive numeric data', function (done) {

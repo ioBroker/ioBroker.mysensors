@@ -89,7 +89,7 @@ describe('mySensors UDP: Test UDP server', function() {
             setup.startController(function (_objects, _states) {
                 objects = _objects;
                 states  = _states;
-                _done();
+                setTimeout(_done, 1000);
             });
         });
 
@@ -121,7 +121,7 @@ describe('mySensors UDP: Test UDP server', function() {
     });
 
     it('mySensors UDP: check created objects', function (done) {
-        this.timeout(5000);
+        this.timeout(10000);
         var expected = {
             "_id": "mysensors.0.127_0_0_1.0.59_DIMMER.V_PERCENTAGE",
             "common": {
@@ -169,7 +169,7 @@ describe('mySensors UDP: Test UDP server', function() {
                     done();
                 }
             });
-        }, 1000);
+        }, 5000);
     });
 
     it('mySensors UDP: it must receive numeric data', function (done) {
