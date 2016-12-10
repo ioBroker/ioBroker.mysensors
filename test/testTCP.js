@@ -110,8 +110,8 @@ describe('mySensors TCP: Test TCP server', function() {
                     tcpClient.connect(port, '127.0.0.1', function() {
                         console.log('Connected!!');
                     });
-                    setTimeout(_done, 5000);
-                }, 600);
+                    _done();
+                }, 500);
             });
         });
     });
@@ -120,19 +120,17 @@ describe('mySensors TCP: Test TCP server', function() {
         this.timeout(4000);
         states.setState('mysensors.0.inclusionOn', true, function () {
             var commands = fs.readFileSync(__dirname + '/lib/commands.txt').toString().split(/[\r\n|\n|\r]/g);
-            setTimeout(function () {
-                sendMessages(commands, 10, function () {
-                    if (!connected) {
-                        checkConnection(true, function () {
-                            expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
-                            done();
-                        });
-                    } else {
+            sendMessages(commands, 10, function () {
+                if (!connected) {
+                    checkConnection(true, function () {
                         expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
                         done();
-                    }
-                });
-            }, 1000);
+                    });
+                } else {
+                    expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
+                    done();
+                }
+            });
         });
     });
 

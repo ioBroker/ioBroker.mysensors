@@ -89,7 +89,7 @@ describe('mySensors UDP: Test UDP server', function() {
             setup.startController(function (_objects, _states) {
                 objects = _objects;
                 states  = _states;
-                setTimeout(_done, 5000);
+                _done();
             });
         });
 
