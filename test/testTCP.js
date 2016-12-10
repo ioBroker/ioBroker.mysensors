@@ -183,7 +183,7 @@ describe('mySensors TCP: Test TCP server', function() {
                     done();
                 }
             });
-        }, 1000);
+        }, 2000);
     });
 
     it('mySensors TCP: it must receive numeric data', function (done) {

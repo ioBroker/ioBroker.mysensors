@@ -169,7 +169,7 @@ describe('mySensors UDP: Test UDP server', function() {
                     done();
                 }
             });
-        }, 1000);
+        }, 2000);
     });
 
     it('mySensors UDP: it must receive numeric data', function (done) {
