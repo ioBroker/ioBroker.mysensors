@@ -111,7 +111,7 @@ describe('mySensors TCP: Test TCP server', function() {
                         console.log('Connected!!');
                     });
                     _done();
-                }, 500);
+                }, 1000);
             });
         });
     });
