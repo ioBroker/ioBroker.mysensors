@@ -8,7 +8,7 @@
 
 [![NPM](https://nodei.co/npm/iobroker.mysensors.png?downloads=true)](https://nodei.co/npm/iobroker.mysensors/)
 
-This adapter communicates with [mysensors](http://www.mysensors.org) serial or ethernet gateway (TCP or UDP). 
+This adapter communicates with [mysensors](http://www.mysensors.org) serial or ethernet gateway (TCP or UDP).
 It ethernet gateway selected in this case ioBroker is server, that expects connections.
 
 ## Prerequires
@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 1.0.5 (2016-12-15) 
+* (Apollon77) update serialport library for node 6.x compatibility
+
 ### 1.0.4 (2016-07-01)
 * (bluefox) add comment in configuration
 * (bluefox) fix inclusion mode control
@@ -75,4 +78,3 @@ sudo apt-get install python2.7
 
 ### 0.1.5 (2016-03-02)
 * (bluefox) change tree
-

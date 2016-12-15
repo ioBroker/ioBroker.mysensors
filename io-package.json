@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "news": {
+      "1.0.5": {
+        "en": "update serialport library for node 6.x compatibility",
+        "de": "Bibliothek serialport aktualisiert um Kompatibel zu node 6.x zu sein",
+        "ru": "update serialport library for node 6.x compatibility"
+      },
       "1.0.4": {
         "en": "add note in configuration",
         "de": "Kommentar im Konfig-Dialog hinzugefügt",
@@ -111,4 +116,3 @@
     }
   ]
 }
-
