@@ -16,13 +16,59 @@ var mySensorsInterface;
 var floatRegEx = /^[+-]?\d+(\.\d*)$/;
 var inclusionOn = false;
 var inclusionTimeout = false;
-
+var path;
+var fs;
 var config = {};
 
 try {
     serialport = require('serialport');//.SerialPort;
 } catch (e) {
     console.warn('Serial port is not available');
+}
+
+function filterSerialPorts(path) {
+    // get only serial port names
+    if (!(/(tty(S|ACM|USB|AMA|MFD)|rfcomm)/).test(path)) return false;
+
+    return fs
+        .statSync(path)
+        .isCharacterDevice();
+}
+
+function listSerial(ports) {
+    ports = ports || [];
+    path  = path || require('path');
+    fs    = fs   || require('fs');
+
+    // Filter out the devices that aren't serial ports
+    var devDirName = '/dev';
+
+    var result;
+    try {
+        result = fs
+            .readdirSync(devDirName)
+            .map(function (file) {
+                return path.join(devDirName, file);
+            })
+            .filter(filterSerialPorts)
+            .map(function (port) {
+                var found = false;
+                for (var v = 0; v < ports.length; v++) {
+                    if (ports[v].comName === port) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) ports.push({comName: port});
+                return {comName: port};
+            });
+    } catch (e) {
+        if (require('os').platform() !== 'win32') {
+            adapter.log.error('Cannot read "' + devDirName + '": ' + e);
+        }
+        result = [];
+    }
+    return result;
 }
 
 //принимаем и обрабатываем сообщения
@@ -35,6 +81,7 @@ adapter.on('message', function (obj) {
                         // read all found serial ports
                         serialport.list(function (err, ports) {
                             adapter.log.info('List of port: ' + JSON.stringify(ports));
+                            ports = listSerial(ports);
                             adapter.sendTo(obj.from, obj.command, ports, obj.callback);
                         });
                     } else {

@@ -22,7 +22,10 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
-### 1.0.5 (2016-12-15) 
+### 1.0.6 (2016-12-17)
+* (bluefox) show extended list of serial ports
+
+### 1.0.5 (2016-12-15)
 * (Apollon77) update serialport library for node 6.x compatibility
 
 ### 1.0.4 (2016-07-01)

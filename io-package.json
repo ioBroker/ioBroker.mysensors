@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "news": {
+      "1.0.6": {
+        "en": "show extended list of serial ports",
+        "de": "Zeige erweiterte Liste von Serialports",
+        "ru": "Расширенный список последовательных портов"
+      },
       "1.0.5": {
         "en": "update serialport library for node 6.x compatibility",
         "de": "Bibliothek serialport aktualisiert um Kompatibel zu node 6.x zu sein",
