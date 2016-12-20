@@ -81,7 +81,7 @@ adapter.on('message', function (obj) {
                         // read all found serial ports
                         serialport.list(function (err, ports) {
                             adapter.log.info('List of port: ' + JSON.stringify(ports));
-                            ports = listSerial(ports);
+                            listSerial(ports);
                             adapter.sendTo(obj.from, obj.command, ports, obj.callback);
                         });
                     } else {
