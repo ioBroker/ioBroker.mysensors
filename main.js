@@ -81,7 +81,7 @@ adapter.on('message', function (obj) {
                         // read all found serial ports
                         serialport.list(function (err, ports) {
                             adapter.log.info('List of port: ' + JSON.stringify(ports));
-                            ports = listSerial(ports);
+                            listSerial(ports);
                             adapter.sendTo(obj.from, obj.command, ports, obj.callback);
                         });
                     } else {
@@ -411,7 +411,10 @@ function main() {
                 
                 for (var i = 0; i < result.length; i++) {
                     adapter.log.debug('Message type: ' + result[i].type);
-                    if (result[i].subType.indexOf("S_") == 0) {adapter.log.debug('Value type of S_... Out of the loop');return;}
+                    if (result[i].subType.indexOf('S_') === 0) {
+                        adapter.log.debug('Value type of S_... Out of the loop');
+                        return;
+                    }
                     var id = findDevice(result[i], ip);
                     if (result[i].type === 'set') {
                         // If set quality
