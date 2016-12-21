@@ -81,7 +81,7 @@ adapter.on('message', function (obj) {
                         // read all found serial ports
                         serialport.list(function (err, ports) {
                             adapter.log.info('List of port: ' + JSON.stringify(ports));
-                            listSerial(ports);
+                            ports = listSerial(ports);
                             adapter.sendTo(obj.from, obj.command, ports, obj.callback);
                         });
                     } else {
@@ -197,6 +197,34 @@ function saveResult(id, result, ip, subType) {
     return 0;
 }
 
+function reqGetSend(id, result, ip, subType) {
+    if (id === -1) id = findDevice(result, ip, subType);
+    if (id !== -1 && devices[id]) {
+        adapter.getState(id, function (err, state) {
+            if (err) adapter.log.error(err);
+            if (state && state.val) {
+                try {
+                    if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
+                    if (state.val === 'true')  state.val = 1;
+                    if (state.val === 'false') state.val = 0;
+                    adapter.log.debug('Get value ' + result.id + ' ' + result.childId + ': ' + state.val);
+                    mySensorsInterface.write(
+                        result.id           + ';' +
+                        result.childId      + ';1;0;' +
+                        devices[id].native.varTypeNum   + ';' +
+                        state.val, devices[id].native.ip);
+                } catch (err) {
+                    if (err) adapter.log.error(err);
+                    adapter.log.error('Cannot sending!');
+                }
+            }
+        });
+        
+        return id;
+    }
+    return 0;
+}
+
 function processPresentation(data, ip, port) {
     data = data.toString();
 
@@ -228,10 +256,10 @@ function processPresentation(data, ip, port) {
         if (result[i].type === 'presentation' && result[i].subType) {
             adapter.log.debug('Message presentation');
             presentationDone = true;
-            var found = findDevice(result[i], ip) !== -1;
             // Add new node
-            if (!found) {
-                if (inclusionOn) {
+            if (inclusionOn) {
+                var found = findDevice(result[i], ip) !== -1;
+                if (!found) {
                     adapter.log.debug('ID not found. Try to add to to DB');
                     var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
                     for (var j = 0; j < objs.length; j++) {
@@ -244,9 +272,9 @@ function processPresentation(data, ip, port) {
                             });
                         }
                     }
-                } else {
-                    adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
                 }
+            } else {
+                adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
             }
             // check if received object exists
         } else if (result[i].type === 'set' && result[i].subType) {
@@ -314,95 +342,7 @@ function processPresentation(data, ip, port) {
     }
     return result;
 }
-/*
-function syncObjects(index, cb) {
-    if (typeof index === 'function') {
-        cb = index;
-        index = 0;
-    }
 
-    index = index || 0;
-
-    if (!adapter.config.devices || index >= adapter.config.devices.length) {
-        cb && cb();
-        return;
-    }
-
-    var id = adapter.config.devices[index].name.replace(/[.\s]+/g, '_');
-
-
-    adapter.getObject(id, function (err, obj) {
-        if (err) adapter.log.error(err);
-
-        // if new or changed
-        if (!obj || JSON.stringify(obj.native) !== JSON.stringify(adapter.config.devices[index])) {
-            adapter.setObject(id, {
-                common: {
-                    name: adapter.config.devices[index].name,
-                    def: false,
-                    type: 'boolean', // нужный тип надо подставить
-                    read: 'true',
-                    write: 'true',   // нужный режим надо подставить
-                    role: 'state',
-                    desc: obj ? obj.common.desc : 'Variable from mySensors'
-                },
-                type: 'state',
-                native: adapter.config.devices[index]
-            }, function (err) {
-                // Sync Rooms
-                adapter.deleteStateFromEnum('rooms', '', '', id, function () {
-                    if (adapter.config.devices[index].room) {
-                        adapter.addStateToEnum('rooms', adapter.config.devices[index].room, '', '', id);
-                    }
-                });
-
-                if (err) adapter.log.error(err);
-                if (!obj) {
-                    adapter.log.info('Create state ' + id);
-
-                    // if new object => create state
-                    adapter.setState(id, null, true, function () {
-                        setTimeout(function () {
-                            syncObjects(index + 1, cb);
-                        }, 0);
-                    });
-                } else {
-                    adapter.log.info('Update state ' + id);
-                    setTimeout(function () {
-                        syncObjects(index + 1, cb);
-                    }, 0);
-                }
-            });
-        } else {
-            setTimeout(function () {
-                syncObjects(index + 1, cb);
-            }, 0);
-        }
-    });
-}
-
-function d
-    if (!states || !states.length) {
-        cb && cb();
-        return;
-    }
-    var id = states.pop();
-    adapter.log.info('Delete state ' + id);
-    adapter.delForeignObject(id, function (err) {
-        adapter.deleteStateFromEnum('rooms', '', '', id);
-
-        if (err) adapter.log.error(err);
-
-        adapter.delForeignState(id, function (err) {
-            if (err) adapter.log.error(err);
-
-            setTimeout(function () {
-                deleteStates(states, cb);
-            }, 0);
-        })
-    });
-}
-*/
 
 function updateSketchName(id, name) {
     adapter.getObject(id, function (err, obj) {
@@ -467,10 +407,11 @@ function main() {
             mySensorsInterface.on('data', function (data, ip, port) {
                 var result = processPresentation(data, ip, port); // update configuration if presentation received
 
-                if (!result) return;
-
+                if (!result) return; 
+                
                 for (var i = 0; i < result.length; i++) {
                     adapter.log.debug('Message type: ' + result[i].type);
+                    if (result[i].subType.indexOf("S_") == 0) {adapter.log.debug('Value type of S_... Out of the loop');return;}
                     var id = findDevice(result[i], ip);
                     if (result[i].type === 'set') {
                         // If set quality
@@ -492,6 +433,8 @@ function main() {
 
                             saveResult(id, result[i], ip, true);
                         }
+                    } else if(result[i].type === 'req') {
+                        reqGetSend(id, result[i], ip, true);
                     } else if(result[i].type === 'internal') {
                         var saveValue = false;
                         switch (result[i].subType) {
