@@ -436,9 +436,9 @@ function main() {
 
                             saveResult(id, result[i], ip, true);
                         }
-                    } else if(result[i].type === 'req') {
+                    } else if (result[i].type === 'req') {
                         reqGetSend(id, result[i], ip, true);
-                    } else if(result[i].type === 'internal') {
+                    } else if (result[i].type === 'internal') {
                         var saveValue = false;
                         switch (result[i].subType) {
                             case 'I_BATTERY_LEVEL':     //   0   Use this to report the battery level (in percent 0-100).
@@ -514,7 +514,7 @@ function main() {
                         if (saveValue) {
                             saveResult(id, result[i], ip, true);
                         }
-                    } else if(result[i].type === 'stream') {
+                    } else if (result[i].type === 'stream') {
                         switch (result[i].subType) {
                             case 'ST_FIRMWARE_CONFIG_REQUEST':
                                 break;
