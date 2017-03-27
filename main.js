@@ -316,7 +316,7 @@ function processPresentation(data, ip, port) {
                             });
                         }
                     } else {
-                        adapter.log.warn('ID not found. Inclusion mode OFF: ' + JSON.stringify(result[i]));
+                        adapter.log.warn('ID ignored by presentation, because inclusion mode OFF: ' + JSON.stringify(result[i]));
                     }
                 } else {
                     if (!found && !foundObjID) {
