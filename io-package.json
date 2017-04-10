@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "news": {
+      "1.0.7": {
+        "en": "fix I_TIME request",
+        "de": "Korrigiere I_TIME Anfrage",
+        "ru": "Исправлен запрос I_TIME"
+      },
       "1.0.6": {
         "en": "show extended list of serial ports",
         "de": "Zeige erweiterte Liste von Serialports",

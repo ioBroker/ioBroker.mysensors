@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 1.0.7 (2017-04-10)
+* (bluefox) fix I_TIME request
+
 ### 1.0.6 (2016-12-17)
 * (bluefox) show extended list of serial ports
 

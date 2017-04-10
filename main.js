@@ -450,7 +450,7 @@ function main() {
                                 adapter.log.info('Time ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 if (!result[i].ack) {
                                     // send response: internal, ack=1
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + Math.round(new Date().getTime() / 1000), ip);
+                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;1;' + Math.round(new Date().getTime() / 1000), ip);
                                 }
                                 break;
 
@@ -460,7 +460,7 @@ function main() {
                                 saveValue = true;
                                 if (!result[i].ack && result[i].subType === 'I_VERSION') {
                                     // send response: internal, ack=1
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;' + result[i].subType + ';' + (adapter.version || 0), ip);
+                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;2;' + (adapter.version || 0), ip);
                                 }
                                 break;
 
@@ -490,10 +490,11 @@ function main() {
                                 if (inclusionOn) {
                                     // find maximal index
                                     var maxId = 0;
-                                    for (var id in devices) {
-                                        if (devices[id].native && (!ip || ip === devices[id].native.ip) &&
-                                            devices[id].native.id > maxId) {
-                                            maxId = devices[id].native.id;
+                                    for (var _id in devices) {
+                                        if (!devices.hasOwnProperty(_id)) continue;
+                                        if (devices[_id].native && (!ip || ip === devices[_id].native.ip) &&
+                                            devices[_id].native.id > maxId) {
+                                            maxId = devices[_id].native.id;
                                         }
                                     }
                                     maxId++;
