@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 1.0.8 (2017-04-18)
+* (Qube2org) adjust log level for I_LOG_MESSAGE
+
 ### 1.0.7 (2017-04-10)
 * (bluefox) fix I_TIME request
 
