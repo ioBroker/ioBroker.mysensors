@@ -483,7 +483,7 @@ function main() {
                                 break;
 
                             case 'I_LOG_MESSAGE':       //   9   Sent by the gateway to the Controller to trace-log a message
-                                adapter.log.info('Log ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.debug.info('Log ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 break;
 
                             case 'I_ID_REQUEST':
