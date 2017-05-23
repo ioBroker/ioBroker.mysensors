@@ -1,8 +1,13 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "news": {
+        "1.0.9": {
+          "en": "Upgrade Serial Library",
+          "de": "Serial Library aktualisiert",
+          "ru": "Upgrade Serial Library"
+        },
       "1.0.8": {
         "en": "adjust log level for I_LOG_MESSAGE",
         "de": "Log-Level für I_LOG_MESSAGE angepasst",
