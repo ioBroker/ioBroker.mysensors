@@ -71,6 +71,7 @@ function sendMessages(list, interval, callback) {
 describe('mySensors UDP: Test UDP server', function() {
     before('mySensors UDP: Start js-controller', function (_done) {
         this.timeout(600000); // because of first install from npm
+        setup.adapterStarted = false;
 
         setup.setupController(function () {
             var config = setup.getAdapterConfig();

@@ -71,6 +71,7 @@ function sendMessages(list, interval, callback) {
 describe('mySensors TCP: Test TCP server', function() {
     before('mySensors TCP: Start js-controller', function (_done) {
         this.timeout(600000); // because of first install from npm
+        setup.adapterStarted = false;
 
         setup.setupController(function () {
             var config = setup.getAdapterConfig();
