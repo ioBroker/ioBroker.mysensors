@@ -1,138 +1,143 @@
 {
-  "common": {
-    "name": "mysensors",
-    "version": "1.0.9",
-    "news": {
-        "1.0.9": {
-          "en": "Upgrade Serial Library",
-          "de": "Serial Library aktualisiert",
-          "ru": "Upgrade Serial Library"
+    "common": {
+        "name": "mysensors",
+        "version": "1.0.9",
+        "news": {
+            "1.0.9": {
+                "en": "Upgrade Serial Library",
+                "de": "Serial Library aktualisiert",
+                "ru": "Upgrade Serial Library"
+            },
+            "1.0.8": {
+                "en": "adjust log level for I_LOG_MESSAGE",
+                "de": "Log-Level für I_LOG_MESSAGE angepasst",
+                "ru": "adjust log level for I_LOG_MESSAGE"
+            },
+            "1.0.7": {
+                "en": "fix I_TIME request",
+                "de": "Korrigiere I_TIME Anfrage",
+                "ru": "Исправлен запрос I_TIME"
+            },
+            "1.0.6": {
+                "en": "show extended list of serial ports",
+                "de": "Zeige erweiterte Liste von Serialports",
+                "ru": "Расширенный список последовательных портов"
+            },
+            "1.0.5": {
+                "en": "update serialport library for node 6.x compatibility",
+                "de": "Bibliothek serialport aktualisiert um Kompatibel zu node 6.x zu sein",
+                "ru": "update serialport library for node 6.x compatibility"
+            },
+            "1.0.4": {
+                "en": "add note in configuration",
+                "de": "Kommentar im Konfig-Dialog hinzugefügt",
+                "ru": "Добавлено пояснения в настройках"
+            },
+            "1.0.2": {
+                "en": "fix id usage",
+                "de": "fix id usage",
+                "ru": "fix id usage"
+            },
+            "1.0.1": {
+                "en": "necessary version of sensor module increased",
+                "de": "necessary version of sensor module increased",
+                "ru": "necessary version of sensor module increased"
+            },
+            "1.0.0": {
+                "en": "some value corrections and enlargement",
+                "de": "some value corrections and enlargement",
+                "ru": "some value corrections and enlargement"
+            },
+            "0.2.6": {
+                "en": "do not switch off inclusion mode by stop",
+                "de": "do not switch off inclusion mode by stop",
+                "ru": "do not switch off inclusion mode by stop"
+            },
+            "0.2.5": {
+                "en": "remove debug outputs",
+                "de": "remove debug outputs",
+                "ru": "remove debug outputs"
+            },
+            "0.2.4": {
+                "en": "try/catch parse of messages",
+                "de": "try/catch parse of messages",
+                "ru": "try/catch parse of messages"
+            }
         },
-      "1.0.8": {
-        "en": "adjust log level for I_LOG_MESSAGE",
-        "de": "Log-Level für I_LOG_MESSAGE angepasst",
-         "ru": "adjust log level for I_LOG_MESSAGE"
-      },
-      "1.0.7": {
-        "en": "fix I_TIME request",
-        "de": "Korrigiere I_TIME Anfrage",
-        "ru": "Исправлен запрос I_TIME"
-      },
-      "1.0.6": {
-        "en": "show extended list of serial ports",
-        "de": "Zeige erweiterte Liste von Serialports",
-        "ru": "Расширенный список последовательных портов"
-      },
-      "1.0.5": {
-        "en": "update serialport library for node 6.x compatibility",
-        "de": "Bibliothek serialport aktualisiert um Kompatibel zu node 6.x zu sein",
-        "ru": "update serialport library for node 6.x compatibility"
-      },
-      "1.0.4": {
-        "en": "add note in configuration",
-        "de": "Kommentar im Konfig-Dialog hinzugefügt",
-        "ru": "Добавлено пояснения в настройках"
-      },
-      "1.0.2": {
-        "en": "fix id usage",
-        "de": "fix id usage",
-        "ru": "fix id usage"
-      },
-      "1.0.1": {
-        "en": "necessary version of sensor module increased",
-        "de": "necessary version of sensor module increased",
-        "ru": "necessary version of sensor module increased"
-      },
-      "1.0.0": {
-        "en": "some value corrections and enlargement",
-        "de": "some value corrections and enlargement",
-        "ru": "some value corrections and enlargement"
-      },
-      "0.2.6": {
-        "en": "do not switch off inclusion mode by stop",
-        "de": "do not switch off inclusion mode by stop",
-        "ru": "do not switch off inclusion mode by stop"
-      },
-      "0.2.5": {
-        "en": "remove debug outputs",
-        "de": "remove debug outputs",
-        "ru": "remove debug outputs"
-      },
-      "0.2.4": {
-        "en": "try/catch parse of messages",
-        "de": "try/catch parse of messages",
-        "ru": "try/catch parse of messages"
-      }
+        "title": "mysensors adapter",
+        "desc": {
+            "en": "ioBroker mysensors Adapter",
+            "de": "ioBroker Mysensors Adapter",
+            "ru": "ioBroker Mysensors драйвер "
+        },
+        "platform": "Javascript/Node.js",
+        "mode": "daemon",
+        "icon": "mysensors.png",
+        "enabled": true,
+        "messagebox": true,
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.mysensors/master/admin//mysensors.png",
+        "keywords": [
+            "mysensors",
+            "arduino"
+        ],
+        "readme": "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
+        "loglevel": "info",
+        "stopBeforeUpdate": true,
+        "type": "iot-systems",
+        "authors": [
+            {
+                "name": "bluefox",
+                "email": "dogafox@gmail.com"
+            }
+        ]
     },
-    "title": "mysensors adapter",
-    "desc": {
-      "en": "ioBroker mysensors Adapter",
-      "de": "ioBroker Mysensors Adapter",
-      "ru": "ioBroker Mysensors драйвер "
+    "native": {
+        "comName": "",
+        "connTimeout": 60000,
+        "port": 5003,
+        "baudRate": 115200,
+        "mode": "server",
+        "type": "udp",
+        "bind": "0.0.0.0",
+        "broadcast": false,
+        "inclusionTimeout": 60000
     },
-    "platform":   "Javascript/Node.js",
-    "mode":       "daemon",
-    "icon":       "mysensors.png",
-    "enabled":    true,
-    "messagebox": true,
-    "extIcon":    "https://raw.githubusercontent.com/ioBroker/ioBroker.mysensors/master/admin//mysensors.png",
-    "keywords": [
-      "mysensors",
-      "arduino"
-    ],
-    "readme":     "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
-    "loglevel":   "info",
-    "stopBeforeUpdate": true,
-    "type":       "hardware"
-  },
-  "native": {
-    "comName":      "",
-    "connTimeout":  60000,
-    "port":         5003,
-    "baudRate":     115200,
-    "mode":         "server",
-    "type":         "udp",
-    "bind":         "0.0.0.0",
-    "broadcast":    false,
-    "inclusionTimeout": 60000
-  },
-  "objects": [
-  ],
-  "instanceObjects": [
-    {
-      "_id":  "info",
-      "type": "channel",
-      "common": {
-        "name": "Information"
-      },
-      "native": {}
-    },
-    {
-      "_id":  "info.connection",
-      "type": "state",
-      "common": {
-        "role":  "indicator.connected",
-        "name":  "If connected to my sensors",
-        "type":  "boolean",
-        "read":  true,
-        "write": false,
-        "def":   false
-      },
-      "native": {}
-    },
-    {
-      "_id":  "inclusionOn",
-      "type": "state",
-      "common": {
-        "role":  "state",
-        "name":  "Inclusion mode activated",
-        "desc":  "If inclusion mode on or off",
-        "type":  "boolean",
-        "read":  true,
-        "write": true,
-        "def":   false
-      },
-      "native": {}
-    }
-  ]
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "If connected to my sensors",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "inclusionOn",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Inclusion mode activated",
+                "desc": "If inclusion mode on or off",
+                "type": "boolean",
+                "read": true,
+                "write": true,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
 }
