@@ -128,7 +128,9 @@ adapter.on('stateChange', function (id, state) {
 
         mySensorsInterface.write(
             devices[id].native.id           + ';' +
-            devices[id].native.childId      + ';1;0;' +
+            //JG: Changed. Always request an ack when sending command 'set' to a node
+			//devices[id].native.childId      + ';1;0;' +
+			devices[id].native.childId      + ';1;1;' +
             devices[id].native.varTypeNum   + ';' +
             state.val, devices[id].native.ip);
     }
@@ -236,14 +238,7 @@ function processPresentation(data, ip, port) {
         return null;
     }
 
-    //var result = [{
-    //    id:       lineParts[0],
-    //    childId:  lineParts[1],
-    //    type:     Values.types[lineParts[2]],
-    //    ack:      lineParts[3] === '1',
-    //    payload:  lineParts[5]
-    //    subType:  Values.subTypes[result.type][lineParts[4]];
-    //}];
+    
 
     if (!result || !result.length) {
         adapter.log.warn('Cannot parse data: ' + data);
