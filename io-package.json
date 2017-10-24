@@ -1,8 +1,13 @@
 {
     "common": {
         "name": "mysensors",
-        "version": "1.0.9",
+        "version": "1.0.10",
         "news": {
+			"1.0.10": {
+                "en": "Fixed wrong data type for scene controller, enabled ack flag on set command",
+                "de": "Falschen Datentyp für Scene Controller korrigiert, Ack Flag aktiviert für set Befehl",
+                "ru": "Fixed wrong data type for scene controller, enabled ack flag on set command"
+            },
             "1.0.9": {
                 "en": "Upgrade Serial Library",
                 "de": "Serial Library aktualisiert",
