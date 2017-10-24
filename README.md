@@ -22,6 +22,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 10.0.10 (2017-10-24)
+* (jangatzke) Fixed wrong data type for scene controller, enabled ack flag on set command
+
 ### 1.0.8 (2017-04-18)
 * (Qube2org) adjust log level for I_LOG_MESSAGE
 
