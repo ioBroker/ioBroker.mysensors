@@ -10,7 +10,7 @@ var MySensors  = require(__dirname + '/lib/mysensors');
 var getMeta    = require(__dirname + '/lib/getmeta').getMetaInfo;
 var getMeta2   = require(__dirname + '/lib/getmeta').getMetaInfo2;
 
-var adapter   = utils.adapter('mysensors');
+var adapter   = new utils.Adapter('mysensors');
 var devices   = {};
 var mySensorsInterface;
 var floatRegEx = /^[+-]?\d+(\.\d*)$/;
