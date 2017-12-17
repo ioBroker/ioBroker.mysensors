@@ -11,6 +11,9 @@
 This adapter communicates with [mysensors](http://www.mysensors.org) serial or ethernet gateway (TCP or UDP).
 It ethernet gateway selected in this case ioBroker is server, that expects connections.
 
+## TCP Client
+This option works only together with TCP<=>Serial bridge, like [esp-link](https://github.com/jeelabs/esp-link).
+
 ## Prerequires
 To use serial port on Windows it is VS required to build the binary.
 To use serial port on linux it is build-essential an python2.7 required. To install them just write:
@@ -22,6 +25,9 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
+### 1.1.0 (2017-12-17)
+* (bluefox) TCP client added
+
 ### 1.0.10 (2017-10-24)
 * (jangatzke) Fixed wrong data type for scene controller, enabled ack flag on set command
 

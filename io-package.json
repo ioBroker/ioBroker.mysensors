@@ -1,8 +1,16 @@
 {
     "common": {
         "name": "mysensors",
-        "version": "1.0.10",
+        "version": "1.1.0",
         "news": {
+			"1.1.0": {
+                "en": "TCP client added",
+                "de": "TCP-Client hinzugefügt",
+                "ru": "Добавлен клиент TCP",
+                "pt": "Cliente TCP adicionado",
+                "fr": "Client TCP ajouté",
+                "nl": "TCP-client toegevoegd"
+            },
 			"1.0.10": {
                 "en": "Fixed wrong data type for scene controller, enabled ack flag on set command",
                 "de": "Falschen Datentyp für Scene Controller korrigiert, Ack Flag aktiviert für set Befehl",
@@ -22,58 +30,16 @@
                 "en": "fix I_TIME request",
                 "de": "Korrigiere I_TIME Anfrage",
                 "ru": "Исправлен запрос I_TIME"
-            },
-            "1.0.6": {
-                "en": "show extended list of serial ports",
-                "de": "Zeige erweiterte Liste von Serialports",
-                "ru": "Расширенный список последовательных портов"
-            },
-            "1.0.5": {
-                "en": "update serialport library for node 6.x compatibility",
-                "de": "Bibliothek serialport aktualisiert um Kompatibel zu node 6.x zu sein",
-                "ru": "update serialport library for node 6.x compatibility"
-            },
-            "1.0.4": {
-                "en": "add note in configuration",
-                "de": "Kommentar im Konfig-Dialog hinzugefügt",
-                "ru": "Добавлено пояснения в настройках"
-            },
-            "1.0.2": {
-                "en": "fix id usage",
-                "de": "fix id usage",
-                "ru": "fix id usage"
-            },
-            "1.0.1": {
-                "en": "necessary version of sensor module increased",
-                "de": "necessary version of sensor module increased",
-                "ru": "necessary version of sensor module increased"
-            },
-            "1.0.0": {
-                "en": "some value corrections and enlargement",
-                "de": "some value corrections and enlargement",
-                "ru": "some value corrections and enlargement"
-            },
-            "0.2.6": {
-                "en": "do not switch off inclusion mode by stop",
-                "de": "do not switch off inclusion mode by stop",
-                "ru": "do not switch off inclusion mode by stop"
-            },
-            "0.2.5": {
-                "en": "remove debug outputs",
-                "de": "remove debug outputs",
-                "ru": "remove debug outputs"
-            },
-            "0.2.4": {
-                "en": "try/catch parse of messages",
-                "de": "try/catch parse of messages",
-                "ru": "try/catch parse of messages"
             }
         },
         "title": "mysensors adapter",
         "desc": {
-            "en": "ioBroker mysensors Adapter",
-            "de": "ioBroker Mysensors Adapter",
-            "ru": "ioBroker Mysensors драйвер "
+            "en": "mysensors Adapter",
+            "de": "mysensors Adapter",
+            "ru": "Драйвер mysensors",
+            "nl": "mysensors Adapter",
+            "fr": "mysensors Adaptateur",
+            "pt": "adaptador de mysensors"
         },
         "platform": "Javascript/Node.js",
         "mode": "daemon",

@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mysensors",
-  "version": "1.0.10",
+  "version": "1.1.0",
   "description": "ioBroker mysensors Adapter",
   "author": {
     "name": "bluefox",
@@ -35,11 +35,7 @@
     "sensors": "^1.0.0"
   },
   "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-replace": "^1.0.1",
-    "grunt-contrib-jshint": "^1.1.0",
-    "grunt-jscs": "^3.0.1",
-    "grunt-http": "^2.2.0",
+    "gulp": "^3.9.1",
     "mocha": "^3.5.3",
     "chai": "^4.1.2",
     "nan": "2.4.0"

@@ -20,7 +20,7 @@ function checkConnection(value, done, counter) {
 
     states.getState('mysensors.0.info.connection', function (err, state) {
         if (err) console.error(err);
-        if (state && typeof state.val == 'string' && ((value && state.val) || (!value && !state.val))) {
+        if (state && typeof state.val === 'string' && ((value && state.val) || (!value && !state.val))) {
             connected = state.val;
             done();
         } else {

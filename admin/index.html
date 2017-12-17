@@ -1,18 +1,13 @@
 <html>
 
-<script src="../../../ioBroker.admin/admin.js"></script>
 <link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
-<link rel="stylesheet" type="text/css" href="../../lib/css/jqGrid/ui.jqgrid-4.5.4.css"/>
-<link rel="stylesheet" type="text/css" href="../../lib/css/jquery.multiselect-1.13.css"/>
-<script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
-<script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
-<script type="text/javascript" src="../../lib/js/jqGrid/jquery.jqGrid-4.5.4.min.js"></script>
-<script type="text/javascript" src="../../lib/js/jqGrid/grid.locale-all.js"></script>
-
 <link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+
+<script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../lib/js/jquery-ui-1.10.3.full.min.js"></script>
 <script type="text/javascript" src="../../js/translate.js"></script>
 <script type="text/javascript" src="../../js/adapter-settings.js"></script>
+<script type="text/javascript" src="words.js"></script>
 
 <style>
     .oneWidth {
@@ -21,55 +16,7 @@
 
 </style>
 <script type="text/javascript">
-    // Dictionary (systemDictionary is global variable from adapter-settings.js)
-    systemDictionary = {
-        "mysensors adapter settings": {"ru": "Настройки"},
-        "Select port":          {"en": "Select port",   "de": "Select port",            "ru": "COM порт"},
-        "Bind":                 {"en": "Bind",          "de": "Bind",                   "ru": "IP сервера:"},
-        "mySensors adapter settings": {
-            "en": "mySensors adapter settings",
-            "de": "mySensors Einstellungen",
-            "ru": "Настройки mySensors драйвера"
-        },
-        "Type:":                {"en": "Type:",             "de": "Typ:",               "ru": "Тип:"},
-        "serial":               {"en": "serial",            "de": "serial",             "ru": "COM порт"},
-        "tcp server":           {"en": "TCP server",        "de": "TCP Server",         "ru": "TCP сервер"},
-        "udp server":           {"en": "UDP server",        "de": "UDP Server",         "ru": "UDP сервер"},
-        "Not available":        {"en": "Not available",     "de": "Nicht möglich",      "ru": "недоступно"},
-        "Listen on all IPs":    {"en": "Listen on all IPs", "de": "Auf allen IP Adressen hören",  "ru": "Слушать на всех IP адресах"},
-        "Com port:":            {"en": "Com port:",         "de": "Serialport:",        "ru": "Имя порта:"},
-        "Baud rate:":           {"en": "Baud rate:",        "de": "Baudrate:",          "ru": "Скорость порта:"},
-        "Bind:":                {"en": "Bind:",             "de": "Eigene IP Adresse:", "ru": "Свой IP aдрес:"},
-        "Port:":                {"en": "Port:",             "de": "Port:",              "ru": "Порт:"},
-        "Connection timeout:":  {"en": "Connection timeout:", "de": "Verbindungs-Timeout:", "ru": "Таймаут соединения:"},
-        "ms":                   {"en": "ms",                "de": "ms",                 "ru": "мс"},
-        "inclusion help":       {
-            "en": "ms (Set to 0 for manually control)",
-            "de": "ms (Setzte auf 0 um manuell zu steuern)",
-            "ru": "мс (Установите в ноль для ручного вкл./выключения"
-        },
-        "Inclusion mode timeout:": {"en": "Inclusion mode timeout:", "de": "Anlernen-Timeout:", "ru": "Время для присваивания адресов:"},
-        "Enable inclusion mode": {"en": "Enable inclusion mode", "de": "Anlernen-Modus aktivieren", "ru": "Включить режим присваивания адресов"},
-        "Disable inclusion mode": {"en": "Disable inclusion mode", "de": "Anlernen-Modus deaktivieren", "ru": "Выключить режим присваивания адресов"},
-        "Inclusion mode is active": {
-            "en": "Inclusion mode is active",
-            "de": "Anlernen-Modus ist aktiv",
-            "ru": "Режим присваивания адресов активирован"
-        },
-        "Inclusion mode is inactive": {
-            "en": "Inclusion mode is inactive",
-            "de": "Anlernen-Modus ist nicht mehr aktiv",
-            "ru": "Режим присваивания адресов деактивирован"
-        },
-        "Ok":                   {"en": "Ok",                "de": "Ok",                 "ru": "Ok"}
-    };
     var devices;
-    //   getIPs(function(ips) {
-    //         for (var i = 0; i < ips.length; i++) {
-    //             $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
-    //         }
-    //       //  $('#bind.value').val(settings.bind);
-    //     });
 
     function addUnit(node) {
         try {
@@ -156,13 +103,13 @@
     }
 
     function setValue(id, value, onChange) {
-        // example: select elements with id=key and class=value and insert value
-        if ($('#' + id + '.value').attr('type') === 'checkbox') {
-            $('#' + id + '.value').prop('checked', value).change(function () {
+        var $value = $('#' + id + '.value');
+        if ($value.attr('type') === 'checkbox') {
+            $value.prop('checked', value).change(function () {
                 onChange();
             });
         } else {
-            $('#' + id + '.value').val(value).change(function () {
+            $value.val(value).change(function () {
                 onChange();
             }).keyup(function () {
                 // Check that only numbers entered
@@ -188,7 +135,9 @@
         if (!settings) return;
         devices = settings.devices || [];
         for (var key in settings) {
-            setValue(key, settings[key], onChange);
+            if (settings.hasOwnProperty(key)) {
+                setValue(key, settings[key], onChange);
+            }
         }
 
         $('#enableInclusion').button().hide();
@@ -221,8 +170,7 @@
                             }
                         });
                     });
-                });
-                $('#enableInclusion').button('option', 'label', state && state.val ? _('Disable inclusion mode') : _('Enable inclusion mode')).show();
+                }).button('option', 'label', state && state.val ? _('Disable inclusion mode') : _('Enable inclusion mode')).show();
             });
         }, 1000);
 
@@ -253,6 +201,7 @@
         $('.serial').hide();
         $('.tcp').hide();
         $('.udp').hide();
+        $('.tcpclient').hide();
         $('.' + $('#type').val()).show();
     }
     
@@ -288,9 +237,10 @@
         <table><tr><td><img src="mysensors.png"></td><td><h3 class="translate">mySensors adapter settings</h3></td></tr></table>
         <table>
             <tr><td class="translate" style="width: 150px">Type:</td><td><select id="type" class="value oneWidth">
-                <option value="serial"  class="translate">serial</option>
-                <option value="tcp"     class="translate">tcp server</option>
-                <option value="udp"     class="translate">udp server</option>
+                <option value="serial"    class="translate">serial</option>
+                <option value="tcp"       class="translate">tcp server</option>
+                <option value="udp"       class="translate">udp server</option>
+                <option value="tcpclient" class="translate">tcp client</option>
             </select></td><td></td></tr>
             <tr class="serial"><td class="translate">Com port:</td><td id="_comName"><select class="value oneWidth" id="comName"></select></td><td></td></tr>
             <tr class="serial"><td class="translate">Baud rate:</td><td><select class="value oneWidth" id="baudRate">
@@ -309,15 +259,11 @@
                 <option value="115200">115200</option>
             </select></td><td></td></tr>
             <tr class="tcp udp"><td class="translate">Bind:</td><td><select class="value" id="bind"></select></td><td></td></tr>
-            <tr class="tcp udp"><td class="translate">Port:</td><td><input class="value oneWidth" id="port" /></td><td></td></tr>
+            <tr class="tcpclient"><td class="translate">IP:</td><td><input class="value" id="ip"/></td><td></td></tr>
+            <tr class="tcp udp tcpclient"><td class="translate">Port:</td><td><input class="value oneWidth" id="port" /></td><td></td></tr>
             <tr class="udp serial"><td class="translate">Connection timeout:</td><td><input class="value oneWidth" id="connTimeout" /></td><td class="translate">ms</td></tr>
-            <tr class="tcp udp serial"><td class="translate">Inclusion mode timeout:</td><td><input class="value oneWidth" id="inclusionTimeout" /></td><td><span class="translate">inclusion help</span></td></tr>
-            <tr class="tcp udp serial"><td></td><td><button id="enableInclusion" class="translateB">Enable inclusion mode</button></td><td><div id="inclusionState"></div></td></tr>
+            <tr class="tcp udp tcpclient serial"><td class="translate">Inclusion mode timeout:</td><td><input class="value oneWidth" id="inclusionTimeout" /></td><td><span class="translate">inclusion help</span></td></tr>
+            <tr class="tcp udp tcpclient serial"><td></td><td><button id="enableInclusion" class="translateB">Enable inclusion mode</button></td><td><div id="inclusionState"></div></td></tr>
         </table>
-
-        <!--table class="tab1" id="comTbl" border="1" cellspacing="0"></table>
-    <div   id="pager-devices"></div>
-    <table id="devices"></table-->
     </div>
-
 </html>
