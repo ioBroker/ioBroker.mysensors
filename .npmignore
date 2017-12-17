@@ -7,3 +7,5 @@ node_modules
 test
 .travis.yml
 appveyor.yml
+gulpfile.js
+admin/i18n
