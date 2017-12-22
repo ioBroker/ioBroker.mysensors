@@ -359,6 +359,11 @@ function updateSketchName(id, name) {
 }
 
 function main() {
+	adapter.getState('info.connection', function (err, state) {
+        if (!state || state.val) {
+            adapter.setState('info.connection', false, true);
+        }
+    });
     adapter.config.inclusionTimeout = parseInt(adapter.config.inclusionTimeout, 10) || 0;
 
     adapter.getState('inclusionOn', function (err, state) {
