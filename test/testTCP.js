@@ -214,7 +214,7 @@ describe('mySensors TCP: Test TCP server', function() {
         lastMessage = '';
         states.setState(someObject._id, 15.5, function (err) {
             setTimeout(function () {
-                expect(lastMessage).to.be.equal(someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';15.5');
+                expect(lastMessage).to.be.equal(someObject.native.id + ';' + someObject.native.childId + ';1;1;' + someObject.native.varTypeNum +';15.5');
                 done();
             }, 1000);
         });
@@ -263,7 +263,7 @@ describe('mySensors TCP: Test TCP server', function() {
         lastMessage = '';
         states.setState(someObject._id, true, function (err) {
             setTimeout(function () {
-                expect(lastMessage).to.be.equal(someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';1');
+                expect(lastMessage).to.be.equal(someObject.native.id + ';' + someObject.native.childId + ';1;1;' + someObject.native.varTypeNum +';1');
                 done();
             }, 1000);
         });
