@@ -156,6 +156,8 @@ describe('mySensors UDP: Test UDP server', function() {
                             expect(err).to.be.not.ok;
                             expect(obj).to.be.ok;
 
+                            obj.from = undefined;
+                            obj.ts = undefined;
                             expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                             someObject = obj;
                             done();
@@ -165,6 +167,8 @@ describe('mySensors UDP: Test UDP server', function() {
                     expect(err).to.be.not.ok;
                     expect(obj).to.be.ok;
 
+                    obj.from = undefined;
+                    obj.ts = undefined;
                     expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                     someObject = obj;
                     done();
@@ -329,6 +333,8 @@ describe('mySensors UDP: Test UDP server', function() {
                             expect(obj).to.be.ok;
                             expect(obj.common.unit).to.be.equal('°F');
 
+                            obj.from = undefined;
+                            obj.ts = undefined;
                             expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                             someObject = obj;
                             done();
@@ -339,6 +345,8 @@ describe('mySensors UDP: Test UDP server', function() {
                     expect(obj).to.be.ok;
                     expect(obj.common.unit).to.be.equal('°F');
 
+                    obj.from = undefined;
+                    obj.ts = undefined;
                     expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                     someObject = obj;
                     done();
