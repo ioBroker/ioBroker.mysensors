@@ -1,10 +1,46 @@
 {
-  "name": "iobroker.mysensors",
-  "version": "1.2.0",
-  "description": "ioBroker mysensors Adapter",
+  "_args": [
+    [
+      {
+        "raw": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+        "scope": null,
+        "escapedName": null,
+        "name": null,
+        "rawSpec": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+        "spec": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+        "type": "remote"
+      },
+      "/opt"
+    ]
+  ],
+  "_from": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+  "_id": "iobroker.mysensors@1.2.0",
+  "_inCache": true,
+  "_location": "/iobroker.mysensors",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+    "scope": null,
+    "escapedName": null,
+    "name": null,
+    "rawSpec": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+    "spec": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+    "type": "remote"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+  "_shasum": "4f070ddc542ffdf7ee6e30c89ce6e27e713b8b19",
+  "_shrinkwrap": null,
+  "_spec": "https://github.com/ioBroker/ioBroker.mysensors/tarball/master",
+  "_where": "/opt",
   "author": {
     "name": "bluefox",
     "email": "dogafox@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/ioBroker/ioBroker.mysensors/issues"
   },
   "contributors": [
     {
@@ -16,36 +52,38 @@
       "email": "gstar-tools@rambler.ru"
     }
   ],
+  "dependencies": {
+    "sensors": "^1.0.0",
+    "serialport": "^6.0.4"
+  },
+  "description": "ioBroker mysensors Adapter",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "gulp": "^3.9.1",
+    "mocha": "^4.1.0",
+    "nan": "2.4.0"
+  },
   "homepage": "https://github.com/ioBroker/ioBroker.mysensors",
-  "license": "MIT",
   "keywords": [
     "ioBroker",
     "mysensors",
     "Smart Home",
     "home automation"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ioBroker/ioBroker.mysensors"
-  },
+  "license": "MIT",
+  "main": "main.js",
+  "name": "iobroker.mysensors",
   "optionalDependencies": {
     "serialport": "^6.0.4"
   },
-  "dependencies": {
-    "sensors": "^1.0.0"
+  "readme": "![Logo](admin/mysensors.png)\r\n# ioBroker.mysensors\r\n=================\r\n\r\n[![NPM version](http://img.shields.io/npm/v/iobroker.mysensors.svg)](https://www.npmjs.com/package/iobroker.mysensors)\r\n[![Downloads](https://img.shields.io/npm/dm/iobroker.mysensors.svg)](https://www.npmjs.com/package/iobroker.mysensors)\r\n[![Tests](https://travis-ci.org/ioBroker/ioBroker.mysensors.svg?branch=master)](https://travis-ci.org/ioBroker/ioBroker.mysensors)\r\n\r\n[![NPM](https://nodei.co/npm/iobroker.mysensors.png?downloads=true)](https://nodei.co/npm/iobroker.mysensors/)\r\n\r\nThis adapter communicates with [mysensors](http://www.mysensors.org) serial or ethernet gateway (TCP or UDP).\r\nIt ethernet gateway selected in this case ioBroker is server, that expects connections.\r\n\r\n## TCP Client\r\nThis option works only together with TCP<=>Serial bridge, like [esp-link](https://github.com/jeelabs/esp-link).\r\n\r\n## Prerequires\r\nTo use serial port on Windows it is VS required to build the binary.\r\nTo use serial port on linux it is build-essential an python2.7 required. To install them just write:\r\n\r\n```\r\nsudo apt-get update\r\nsudo apt-get install build-essential\r\nsudo apt-get install python2.7\r\n```\r\n\r\n## Changelog\r\n### 1.2.0 (2018-01-23)\r\n* (Apollon77) Upgrade Serialport Library\r\n\r\n### 1.1.0 (2017-12-17)\r\n* (bluefox) TCP client added\r\n\r\n### 1.0.10 (2017-10-24)\r\n* (jangatzke) Fixed wrong data type for scene controller, enabled ack flag on set command\r\n\r\n### 1.0.8 (2017-04-18)\r\n* (Qube2org) adjust log level for I_LOG_MESSAGE\r\n\r\n### 1.0.7 (2017-04-10)\r\n* (bluefox) fix I_TIME request\r\n\r\n### 1.0.6 (2016-12-17)\r\n* (bluefox) show extended list of serial ports\r\n\r\n### 1.0.5 (2016-12-15)\r\n* (Apollon77) update serialport library for node 6.x compatibility\r\n\r\n### 1.0.4 (2016-07-01)\r\n* (bluefox) add comment in configuration\r\n* (bluefox) fix inclusion mode control\r\n\r\n### 1.0.2 (2016-07-06)\r\n* (soef) fix id usage\r\n\r\n### 1.0.1 (2016-07-01)\r\n* (soef) necessary version of sensor module increased\r\n\r\n### 1.0.0 (2016-06-28)\r\n* (soef) some value corrections and enlargement\r\n\r\n### 0.2.6 (2016-06-16)\r\n* (bluefox) do not switch off inclusion mode by stop\r\n\r\n### 0.2.5 (2016-06-14)\r\n* (bluefox) remove debug outputs\r\n\r\n### 0.2.4 (2016-06-10)\r\n* (bluefox) try/catch parse of messages\r\n\r\n### 0.2.3 (2016-04-13)\r\n* fix boolean values\r\n\r\n### 0.2.2 (2016-04-10)\r\n* (bluefox) implement inclusion mode\r\n\r\n### 0.2.1 (2016-03-21)\r\n* (bluefox) translates\r\n* (bluefox) connection timeout for serial connection\r\n\r\n### 0.2.0 (2016-03-21)\r\n* (bluefox) wait till serial port is opened\r\n* (bluefox) configurable baud rate\r\n\r\n### 0.1.10 (2016-03-21)\r\n* (bluefox) set role of dimmer as level.dimmer\r\n\r\n### 0.1.9 (2016-03-15)\r\n* (bluefox) fix typo\r\n\r\n### 0.1.8 (2016-03-02)\r\n* (bluefox) fix connection indicator for serial\r\n\r\n### 0.1.7 (2016-03-02)\r\n* (bluefox) do not send any data on disconnect\r\n\r\n### 0.1.6 (2016-03-02)\r\n* (bluefox) set UDP as default settings\r\n\r\n### 0.1.5 (2016-03-02)\r\n* (bluefox) change tree\r\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ioBroker/ioBroker.mysensors.git"
   },
-  "devDependencies": {
-    "gulp": "^3.9.1",
-    "mocha": "^4.1.0",
-    "chai": "^4.1.2",
-    "nan": "2.4.0"
-  },
-  "bugs": {
-    "url": "https://github.com/ioBroker/ioBroker.mysensors/issues"
-  },
-  "main": "main.js",
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha --exit"
   },
-  "readmeFilename": "README.md"
+  "version": "1.2.0"
 }

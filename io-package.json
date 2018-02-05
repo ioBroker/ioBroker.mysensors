@@ -6,7 +6,13 @@
             "1.2.0": {
                 "en": "Upgrade Serialport Library",
                 "de": "Serialport Bibliothek aktualisiert",
-                "ru": "Upgrade Serialport Library"
+                "ru": "Upgrade Serialport Library",
+                "pt": "Upgrade Serialport Library",
+                "nl": "Upgrade Serialport-bibliotheek",
+                "fr": "Mettre à niveau la bibliothèque Serialport",
+                "it": "Aggiorna la libreria Serialport",
+                "es": "Actualizar la biblioteca de Serialport",
+                "pl": "Uaktualnij bibliotekę Serialport"
             },
 			"1.1.0": {
                 "en": "TCP client added",
@@ -14,7 +20,11 @@
                 "ru": "Добавлен клиент TCP",
                 "pt": "Cliente TCP adicionado",
                 "fr": "Client TCP ajouté",
-                "nl": "TCP-client toegevoegd"
+                "nl": "TCP-client toegevoegd",
+                "fr": "Client TCP ajouté",
+                "it": "Client TCP aggiunto",
+                "es": "Cliente TCP agregado",
+                "pl": "Dodano klienta TCP"
             },
 			"1.0.10": {
                 "en": "Fixed wrong data type for scene controller, enabled ack flag on set command",
@@ -42,13 +52,17 @@
             "en": "mysensors Adapter",
             "de": "mysensors Adapter",
             "ru": "Драйвер mysensors",
+            "pt": "adaptador de mysensors",
             "nl": "mysensors Adapter",
             "fr": "mysensors Adaptateur",
-            "pt": "adaptador de mysensors"
+            "it": "Adattatore mysensors",
+            "es": "Adaptador de misensores",
+            "pl": "Adapter mysensors"
         },
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "mysensors.png",
+        "materialize": true,
         "enabled": true,
         "messagebox": true,
         "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.mysensors/master/admin//mysensors.png",
