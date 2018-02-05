@@ -71,40 +71,30 @@
     var timeout;
 
     function getComPorts(actualValue) {
-        //alert("tut 2");
         timeout = setTimeout(function () {
             getComPorts(actualValue);
         }, 2000);
-
         sendTo(null, 'listUart', null, function (list) {
-            //alert("tut 3");
             if (timeout) {
                 clearTimeout(timeout);
                 timeout = null;
             }
             if (!list || !list.length) {
-                //alert("tut");
                 setTimeout(function () {
                     getComPorts(actualValue);
                 }, 1000);
                 return;
-            }  //<select class="value" id="_comName" id="comName"></select>
-            //<td id="_comName"><select class="value oneWidth" id="comName"></select></td>
-            //<option value="110">110</option>
-            alert(actualValue);
-            var text = '';//'<option value="">' + _('Select port') + '</option>';
+            }
             for (var j = 0; j < list.length; j++) {
                 if (list[j].comName === 'Not available') {
-                    text += '<option value="" selected>' + _('Not available') + '</option>';
-                    $('#comName').prop('disabled', true);
-                    break;
+                    //text += '<option value="" selected>' + _('Not available') + '</option>';
+                    //$('#comName').prop('disabled', true);
+                    break;                    
                 } else {
-                    //text += '<option value="' + list[j].comName + '" ' + ((actualValue === list[j].comName) ? 'selected' : '') + '>' + list[j].comName + '</option>';
-                    text += '<option value="' + j + '"' + '>' + j + '</option>';
-                }
+                    $('#comName').append('<option value="' + list[j].comName + '">' + list[j].comName + '</option>');                    
+                }               
             }
-            alert(text);
-            $('#comName').html(text);
+            $('#comName.value').val('').select();
         });
     }
 /*
@@ -218,6 +208,7 @@
         $('#type').change(onTypeChange);
         onTypeChange();
         onChange(false);
+        if (M) M.updateTextFields();
     }
 
     function onTypeChange() {
@@ -247,34 +238,31 @@
 </script>
 </head>
 <body>
-<!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
+    <!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
     <div class="m adapter-container">
         <div class="row">
             <div class="row">
-                <div class="col s12 m4 l2">
+                <div class="col s6">
                     <img src="mysensors.png" class="logo">
                 </div>
             </div>
             <div class="row">
-                <div class="col s12 m5 l6">
+                <div class="input-field col s12 m6 l4">
                     <select class="value" id="type">
                         <option value="serial"    class="translate">serial</option>
                         <option value="tcp"       class="translate">tcp server</option>
                         <option value="udp"       class="translate">udp server</option>
                         <option value="tcpclient" class="translate">tcp client</option>
                     </select>
-                    <label class="translate" for="type"></label>
-                    <label><i class="translate">Type:</i></label>
+                    <label class="translate" for="type">Type:</label>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col s12 m5 l6" id="_comName">
-                    <select class="value" id="comName"></select>
+                <div class="input-field col s12 m6 l4">
+                    <select class="value" id="comName">
+                        <option value="" disabled >Select port</option>
+                    </select>
                     <label class="translate" for="comName">Com port:</label>
                 </div>
-            </div>
-            <div class="row serial">
-                <div class="col s12 m5 l6">
+                <div class="input-field col s12 m6 l4 serial">
                     <select class="value" id="baudRate">
                         <option value="110">110</option>
                         <option value="150">150</option>
@@ -292,41 +280,31 @@
                     </select>
                     <label class="translate" for="baudRate">Baud rate:</label>
                 </div>
-            </div>
-            <div class="row tcp udp">
-                <div class="col s12 m5 l6">
+                <div class="input-field col s12 m6 l4 tcp udp">
                     <select class="value" id="bind"></select>
                     <label class="translate" for="bind">Bind:</label>
                 </div>
-            </div>
-            <div class="row tcpclient">
-                <div class="col s12 m5 l6">
+                <div class="input-field col s12 m6 l4 tcpclient">
                     <select class="value" id="ip"></select>
                     <label class="translate" for="ip">IP:</label>
                 </div>
-            </div>
-            <div class="row tcp udp tcpclient">
-                <div class="col s12 m5 l6">
+                <div class="input-field col s12 m6 l4 tcp udp tcpclient">
                     <select class="value" id="port"></select>
                     <label class="translate" for="port">Port:</label>
                 </div>
-            </div>
-            <div class="row udp serial">
-                <div class="col s12 m5 l6">
-                    <input class="value" id="connTimeout"/>
+                <div class="input-field col s12 m6 l4 udp serial">
+                    <input class="value" type="text" id="connTimeout" />
                     <label class="translate" for="connTimeout">Connection timeout:</label>
-                    <label><i class="translate">ms</i></label>
+                    <span class="translate">ms</span>
                 </div>
-            </div>
-            <div class="row tcp udp tcpclient serial">
-                <div class="col s12 m5 l6">
-                    <input class="value" id="inclusionTimeout"/>
+                <div class="input-field col s12 m6 l4 tcp udp tcpclient serial">
+                    <input class="value" type="text" id="inclusionTimeout" />
                     <label class="translate" for="inclusionTimeout">Inclusion mode timeout:</label>
-                    <label><i class="translate">inclusion help</i></label>
+                    <span class="translate">inclusion help</span>
                 </div>
             </div>
-            <div class="row tcp udp tcpclient serial">
-                <div class="col s12 m5 l8">
+            <div class="row">
+                <div class="col s12 m6 l4 tcp udp tcpclient serial">
                     <a id="enableInclusion" class="btn"><span class="translate">Enable inclusion mode</span></a>
                     <div id="inclusionState"></div>
                 </div>
@@ -334,4 +312,5 @@
         </div>
     </div>
 </body>
+
 </html>
