@@ -25,7 +25,7 @@ sudo apt-get install python2.7
 ```
 
 ## Changelog
-### 1.2.0 (2018-01-23)
+### 1.2.1 (2018-01-23)
 * (Haba1234) Update for Admin v3
 
 ### 1.2.0 (2018-01-23)
