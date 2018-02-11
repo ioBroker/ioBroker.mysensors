@@ -1,8 +1,19 @@
 {
     "common": {
         "name": "mysensors",
-        "version": "1.2.0",
+        "version": "1.2.1",
         "news": {
+            "1.2.1": {
+                "en": "Updating for Admin v3",
+                "de": "Aktualisierung für Admin v3",
+                "ru": "Обновление для Admin v3",
+                "pt": "Atualizando para Admin v3",
+                "nl": "Updaten voor Admin v3",
+                "fr": "Mise à jour pour Admin v3",
+                "it": "Aggiornamento per Admin v3",
+                "es": "Actualizando para Admin v3",
+                "pl": "Aktualizowanie dla administratora v3"
+            },
             "1.2.0": {
                 "en": "Upgrade Serialport Library",
                 "de": "Serialport Bibliothek aktualisiert",

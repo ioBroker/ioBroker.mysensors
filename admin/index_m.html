@@ -14,60 +14,6 @@
 <script type="text/javascript" src="words.js"></script>
 
 <script type="text/javascript">
-    var devices;
-
-    function addUnit(node) {
-        try {
-            node.name = node.subType + '_' + node.id + '_' + node.childId;
-            node.room = '';
-            var devices = getTableResult('devices', ['name', 'id', 'childId', 'subType', 'room']);
-            for (var i = 0; i < devices.length; i++) {
-                if (devices[i].id      === node.id      &&
-                    devices[i].childId === node.childId &&
-                    devices[i].subType === node.subType) {
-                    showMessage(_('Device yet exists in the table'));
-                    return;
-                }
-            }
-            if (node.type)    delete node.type;
-            if (node.payload) delete node.payload;
-            if (node.raw)     delete node.raw;
-
-            addToTable('devices', node);
-        } catch (e) {
-
-        }
-    }
-
-    function getUnit() {
-/*        $('#getUnit').prop('disabled', true);
-        sendTo(null, 'listUnits', null, function (units) {
-            $('#getUnit').prop('disabled', false);
-
-            var text = '<tr bgcolor="#808080"><td>' + _('id') +
-                    '</td><td>' + _('childId') +
-                    '</td><td>' + _('type') +
-                    '</td><td>' + _('ack') +
-                    '</td><td>' + _('subType') +
-                    '</td><td>' + _('payload') +
-                    '</td><td>' + _('Bind') +
-                    '</td></tr>';
-
-             for (var j = 0; j < units.length; j++) {
-                text += '<tr><td>'  + units[j].id +
-                        '</td><td>' + units[j].childId +
-                        '</td><td>' + (units[j].type  || '') +
-                        '</td><td>' + units[j].ack +
-                        '</td><td>' + (units[j].subType || '') +
-                        '</td><td>' + (units[j].payload || '') +
-                        '</td><td><button onclick=\'addUnit(' + JSON.stringify(units[j]) + ');\'>' + _('bind') + '</button>' +
-                        '</td></tr>';
-            }
-
-            $('#comTbl').html(text);
-        });*/
-    }
-
     var timeout;
 
     function getComPorts(actualValue) {
@@ -85,19 +31,20 @@
                 }, 1000);
                 return;
             }
+            $('#comName').append('<option value="">' + _('Select port') + '</option>');
             for (var j = 0; j < list.length; j++) {
                 if (list[j].comName === 'Not available') {
-                    //text += '<option value="" selected>' + _('Not available') + '</option>';
-                    //$('#comName').prop('disabled', true);
+                    $('#comName').append('<option value="" selected>' + _('Not available') + '</option>');
+                    $('#comName').addClass('disabled');
                     break;                    
                 } else {
-                    $('#comName').append('<option value="' + list[j].comName + '">' + list[j].comName + '</option>');                    
+                    $('#comName').append('<option value="' + list[j].comName + '">' + list[j].comName + '</option>');
                 }               
             }
-            $('#comName.value').val('').select();
+            $('#comName.value').val(actualValue).select();
         });
     }
-/*
+
     function setValue(id, value, onChange) {
         var $value = $('#' + id + '.value');
         if ($value.attr('type') === 'checkbox') {
@@ -125,34 +72,17 @@
             });
         }
     }
-*/
+
     // the function loadSettings has to exist ...
     function load(settings, onChange) {
         if (!settings) return;
         devices = settings.devices || [];
-        //for (var key in settings) {
-        //    if (settings.hasOwnProperty(key)) {
-        //        setValue(key, settings[key], onChange);
-        //    }
-        //}
-        $('.value').each(function () {
-            var key = $(this).attr('id');
-            var $value = $('#' + key + '.value');
-            if ($value.attr('type') === 'checkbox') {
-                $value.prop('checked', settings[key]).on('change', function() {
-                    //showHideSettings();
-                    onChange();
-                });
-            } else {
-                $value.val(settings[key])
-                    .on('change', onChange)
-                    .on('keyup', function() {
-                        onChange();
-                    });
+        for (var key in settings) {
+            if (settings.hasOwnProperty(key)) {
+                setValue(key, settings[key], onChange);
             }
-        });
+        }
         
-        //$('#enableInclusion').addClass('disabled');
         setInterval(function () {
             socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
                 $("#enableInclusion").text( state && state.val ? _("Disable inclusion mode") : _("Enable inclusion mode"));
@@ -162,14 +92,11 @@
         setTimeout(function () {
             socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
                 if (err) window.alert(err);
-
                 $('#enableInclusion').click(function () {
                     socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
                         state = state || {val: false};
                         state.val = !state.val;
-
                         $('#enableInclusion').text( state && state.val ? _("Disable inclusion mode") : _("Enable inclusion mode"));
-
                         socket.emit('setState', adapter + '.' + instance + '.inclusionOn', {
                             val: state.val,
                             ack: false
@@ -181,18 +108,15 @@
                             }
                         });
                     });
-                }).text(state && state.val ? _('Disable inclusion mode') : _('Enable inclusion mode')).addClass('enabled');//.show();
+                }).text(state && state.val ? _('Disable inclusion mode') : _('Enable inclusion mode'));
             });
         }, 1000);
 
         getIsAdapterAlive(function (isAlive) {
             if (isAlive || common.enabled) {
-                getComPorts(settings.comName);
-                
+                getComPorts(settings.comName);               
             } else {
-                alert("123");
-                $('#getUnit').prop('disabled', true);
-                //$('#_comName').html('<input id="comName" class="value" value="' + settings.comName + '"/>');
+                $('#_comName').html('<input id="comName" class="value" value="' + settings.comName + '"/>');
                 $('#comName').change(onChange).keyup(onChange);
             }
         });
@@ -231,14 +155,11 @@
                 obj[$this.attr('id')] = $this.val();
             }
         });
-        // Get edited table  name;node_id;child-sensor-id;message-type;ack;sub_type;payload\n
-        //obj.devices = getTableResult('devices', ['name', 'id', 'childId', 'subType', 'room']);
         callback(obj);
     }
 </script>
 </head>
 <body>
-    <!-- you have to put your config page in a div with id adapter-container<button id="addunit" onclick="test()">bind</button> -->
     <div class="m adapter-container">
         <div class="row">
             <div class="row">
@@ -256,10 +177,8 @@
                     </select>
                     <label class="translate" for="type">Type:</label>
                 </div>
-                <div class="input-field col s12 m6 l4">
-                    <select class="value" id="comName">
-                        <option value="" disabled >Select port</option>
-                    </select>
+                <div class="input-field col s12 m6 l4 serial" id="_comName">
+                    <select class="value" id="comName"></select>
                     <label class="translate" for="comName">Com port:</label>
                 </div>
                 <div class="input-field col s12 m6 l4 serial">
@@ -285,11 +204,11 @@
                     <label class="translate" for="bind">Bind:</label>
                 </div>
                 <div class="input-field col s12 m6 l4 tcpclient">
-                    <select class="value" id="ip"></select>
+                    <input class="value" type="text" id="ip"/>
                     <label class="translate" for="ip">IP:</label>
                 </div>
                 <div class="input-field col s12 m6 l4 tcp udp tcpclient">
-                    <select class="value" id="port"></select>
+                    <input class="value" type="text" id="port"/>
                     <label class="translate" for="port">Port:</label>
                 </div>
                 <div class="input-field col s12 m6 l4 udp serial">
@@ -305,8 +224,7 @@
             </div>
             <div class="row">
                 <div class="col s12 m6 l4 tcp udp tcpclient serial">
-                    <a id="enableInclusion" class="btn"><span class="translate">Enable inclusion mode</span></a>
-                    <div id="inclusionState"></div>
+                    <a id="enableInclusion" class="waves-effect waves-light btn"><span class="translate">Enable inclusion mode</span></a>
                 </div>
             </div>
         </div>
