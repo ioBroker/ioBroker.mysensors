@@ -1,0 +1,234 @@
+<html>
+<head>
+<!-- these 4 files always have to be included -->
+<link rel="stylesheet" type="text/css" href="../../css/adapter.css"/>
+<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+
+<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+
+<!-- these files always have to be included -->
+<script type="text/javascript" src="../../js/translate.js"></script>
+<script type="text/javascript" src="../../lib/js/materialize.js"></script>
+<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+<script type="text/javascript" src="words.js"></script>
+
+<script type="text/javascript">
+    var timeout;
+
+    function getComPorts(actualValue) {
+        timeout = setTimeout(function () {
+            getComPorts(actualValue);
+        }, 2000);
+        sendTo(null, 'listUart', null, function (list) {
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+            }
+            if (!list || !list.length) {
+                setTimeout(function () {
+                    getComPorts(actualValue);
+                }, 1000);
+                return;
+            }
+            $('#comName').append('<option value="">' + _('Select port') + '</option>');
+            for (var j = 0; j < list.length; j++) {
+                if (list[j].comName === 'Not available') {
+                    $('#comName').append('<option value="" selected>' + _('Not available') + '</option>');
+                    $('#comName').addClass('disabled');
+                    break;                    
+                } else {
+                    $('#comName').append('<option value="' + list[j].comName + '">' + list[j].comName + '</option>');
+                }               
+            }
+            $('#comName.value').val(actualValue).select();
+        });
+    }
+
+    function setValue(id, value, onChange) {
+        var $value = $('#' + id + '.value');
+        if ($value.attr('type') === 'checkbox') {
+            $value.prop('checked', value).change(function () {
+                onChange();
+            });
+        } else {
+            $value.val(value).change(function () {
+                onChange();
+            }).keyup(function () {
+                // Check that only numbers entered
+                if ($(this).hasClass('number')) {
+                    var val = $(this).val();
+                    if (val) {
+                        var newVal = '';
+                        for (var i = 0; i < val.length; i++) {
+                            if (val[i] >= '0' && val[i] <= '9') {
+                                newVal += val[i];
+                            }
+                        }
+                        if (val != newVal) $(this).val(newVal);
+                    }
+                }
+                onChange();
+            });
+        }
+    }
+
+    // the function loadSettings has to exist ...
+    function load(settings, onChange) {
+        if (!settings) return;
+        devices = settings.devices || [];
+        for (var key in settings) {
+            if (settings.hasOwnProperty(key)) {
+                setValue(key, settings[key], onChange);
+            }
+        }
+        
+        setInterval(function () {
+            socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
+                $("#enableInclusion").text( state && state.val ? _("Disable inclusion mode") : _("Enable inclusion mode"));
+            });
+        }, 5000);
+
+        setTimeout(function () {
+            socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
+                if (err) window.alert(err);
+                $('#enableInclusion').click(function () {
+                    socket.emit('getState', adapter + '.' + instance + '.inclusionOn', function (err, state) {
+                        state = state || {val: false};
+                        state.val = !state.val;
+                        $('#enableInclusion').text( state && state.val ? _("Disable inclusion mode") : _("Enable inclusion mode"));
+                        socket.emit('setState', adapter + '.' + instance + '.inclusionOn', {
+                            val: state.val,
+                            ack: false
+                        }, function (err) {
+                            if (!err) {
+                                showMessage(state.val ? _('Inclusion mode is active') : _('Inclusion mode is inactive'));
+                            } else {
+                                showError(err);
+                            }
+                        });
+                    });
+                }).text(state && state.val ? _('Disable inclusion mode') : _('Enable inclusion mode'));
+            });
+        }, 1000);
+
+        getIsAdapterAlive(function (isAlive) {
+            if (isAlive || common.enabled) {
+                getComPorts(settings.comName);               
+            } else {
+                $('#_comName').html('<input id="comName" class="value" value="' + settings.comName + '"/>');
+                $('#comName').change(onChange).keyup(onChange);
+            }
+        });
+
+        getIPs(function(ips) {
+            for (var i = 0; i < ips.length; i++) {
+                $('#bind').append('<option value="' + ips[i].address + '">' + ips[i].name + '</option>');
+            }
+            $('#bind.value').val(settings.bind).select();
+        });
+
+        //editTable('devices', ['name', 'id', 'childId', 'subType', 'room'], devices, 350);
+        $('#type').change(onTypeChange);
+        onTypeChange();
+        onChange(false);
+        if (M) M.updateTextFields();
+    }
+
+    function onTypeChange() {
+        $('.serial').hide();
+        $('.tcp').hide();
+        $('.udp').hide();
+        $('.tcpclient').hide();
+        $('.' + $('#type').val()).show();
+    }
+    
+    // ... and the function save has to exist.
+    // you have to make sure the callback is called with the settings object as first param!
+    function save(callback) {
+        var obj = {};
+        $('.value').each(function () {
+            var $this = $(this);
+            if ($this.attr('type') === 'checkbox') {
+                obj[$this.attr('id')] = $this.prop('checked');
+            } else {
+                obj[$this.attr('id')] = $this.val();
+            }
+        });
+        callback(obj);
+    }
+</script>
+</head>
+<body>
+    <div class="m adapter-container">
+        <div class="row">
+            <div class="row">
+                <div class="col s6">
+                    <img src="mysensors.png" class="logo">
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s12 m6 l4">
+                    <select class="value" id="type">
+                        <option value="serial"    class="translate">serial</option>
+                        <option value="tcp"       class="translate">tcp server</option>
+                        <option value="udp"       class="translate">udp server</option>
+                        <option value="tcpclient" class="translate">tcp client</option>
+                    </select>
+                    <label class="translate" for="type">Type:</label>
+                </div>
+                <div class="input-field col s12 m6 l4 serial" id="_comName">
+                    <select class="value" id="comName"></select>
+                    <label class="translate" for="comName">Com port:</label>
+                </div>
+                <div class="input-field col s12 m6 l4 serial">
+                    <select class="value" id="baudRate">
+                        <option value="110">110</option>
+                        <option value="150">150</option>
+                        <option value="300">300</option>
+                        <option value="600">600</option>
+                        <option value="1200">1200</option>
+                        <option value="2400">2400</option>
+                        <option value="4800">4800</option>
+                        <option value="9600">9600</option>
+                        <option value="19200">19200</option>
+                        <option value="38400">38400</option>
+                        <option value="56000">56000</option>
+                        <option value="57600">57600</option>
+                        <option value="115200">115200</option>
+                    </select>
+                    <label class="translate" for="baudRate">Baud rate:</label>
+                </div>
+                <div class="input-field col s12 m6 l4 tcp udp">
+                    <select class="value" id="bind"></select>
+                    <label class="translate" for="bind">Bind:</label>
+                </div>
+                <div class="input-field col s12 m6 l4 tcpclient">
+                    <input class="value" type="text" id="ip"/>
+                    <label class="translate" for="ip">IP:</label>
+                </div>
+                <div class="input-field col s12 m6 l4 tcp udp tcpclient">
+                    <input class="value" type="text" id="port"/>
+                    <label class="translate" for="port">Port:</label>
+                </div>
+                <div class="input-field col s12 m6 l4 udp serial">
+                    <input class="value" type="text" id="connTimeout" />
+                    <label class="translate" for="connTimeout">Connection timeout:</label>
+                    <span class="translate">ms</span>
+                </div>
+                <div class="input-field col s12 m6 l4 tcp udp tcpclient serial">
+                    <input class="value" type="text" id="inclusionTimeout" />
+                    <label class="translate" for="inclusionTimeout">Inclusion mode timeout:</label>
+                    <span class="translate">inclusion help</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m6 l4 tcp udp tcpclient serial">
+                    <a id="enableInclusion" class="waves-effect waves-light btn"><span class="translate">Enable inclusion mode</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
