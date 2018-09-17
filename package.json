@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mysensors",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "ioBroker mysensors Adapter",
   "author": {
     "name": "bluefox",
@@ -32,7 +32,7 @@
     "serialport": "^6.0.4"
   },
   "dependencies": {
-    "sensors": "^1.0.0"
+    "sensors": "^1.1.1"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
