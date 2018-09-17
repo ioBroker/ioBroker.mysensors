@@ -107,13 +107,44 @@ adapter.on('unload', function (callback) {
     }
 });
 
+function send_message(obj_id, state){
+    if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
+    if (state.val === 'true')  state.val = 1;
+    if (state.val === 'false') state.val = 0;
+
+    mySensorsInterface.write(
+        devices[obj_id].native.id           + ';' +
+        //JG: Changed. Always request an ack when sending command 'set' to a node
+        //devices[id].native.childId      + ';1;0;' +
+        devices[obj_id].native.childId      + ';1;1;' +
+        devices[obj_id].native.varTypeNum   + ';' +
+        state.val, devices[obj_id].native.ip);
+}
+
+function findObjAckFalse(ip, node_id) {
+    for (let id in devices) {
+        if (devices[id].native &&
+            (!ip || ip === devices[id].native.ip) &&
+            devices[id].native.id == node_id &&
+            devices[id].native.childId !== 255 &&
+            devices[id].common.write === true) {
+            adapter.getState(id, function (err, state) {
+                if (err) adapter.log.error(err);
+                if (state && state.val && state.val !== null && state.ack === false) {
+                    adapter.log.debug('Obj.ack = false. Send state (' + id + ') to node ' + node_id);
+                    send_message(id, state);
+                }
+            });
+        }
+    }
+}
+
 // is called if a subscribed state changes
 adapter.on('stateChange', function (id, state) {
     if (!state || state.ack || !mySensorsInterface) return;
 
     // Warning, state can be null if it was deleted
     adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
-
     if (id === adapter.namespace + '.inclusionOn') {
         setInclusionState(state.val);
         setTimeout(function (val) {
@@ -122,17 +153,26 @@ adapter.on('stateChange', function (id, state) {
     } else
     // output to mysensors
     if (devices[id] && devices[id].type === 'state') {
-        if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
-        if (state.val === 'true')  state.val = 1;
-        if (state.val === 'false') state.val = 0;
-
-        mySensorsInterface.write(
-            devices[id].native.id           + ';' +
-            //JG: Changed. Always request an ack when sending command 'set' to a node
-			//devices[id].native.childId      + ';1;0;' +
-			devices[id].native.childId      + ';1;1;' +
-            devices[id].native.varTypeNum   + ';' +
-            state.val, devices[id].native.ip);
+        var arr_id = id.split('.');
+        adapter.getState(arr_id[2] + '.' + arr_id[3] + '.255_ARDUINO_NODE.I_PRE_SLEEP_NOTIFICATION', function (err, state1) {
+            if (err) adapter.log.error(err);
+            if (state1 && state1.val &&
+                typeof state1.val === 'number' &&
+                state1.val > 0) {   // determined that node can sleep
+                adapter.getState(arr_id[2] + '.' + arr_id[3] + '.255_ARDUINO_NODE.I_HEARTBEAT_RESPONSE', function (err, state2) {
+                    if (err) adapter.log.error(err);
+                    if (state2 && state2.val && state2.val !== null) {  // received hearbeat
+                        if ((Date.now() - state2.lc) < state1.val){
+                            adapter.log.debug('Node not sleepping. Send data');
+                            send_message(id, state);    // node is still awake, sending data
+                        } else adapter.log.debug('Node sleepping. Not send data');
+                    }
+                });
+            } else {
+                adapter.log.debug('Node real time.');
+                send_message(id, state);
+            }
+        });
     }
 });
 
@@ -212,7 +252,8 @@ function reqGetSend(id, result, ip, subType) {
                     adapter.log.debug('Get value ' + result.id + ' ' + result.childId + ': ' + state.val);
                     mySensorsInterface.write(
                         result.id           + ';' +
-                        result.childId      + ';1;0;' +
+                        //result.childId      + ';1;0;' +   // Changed. Always request an ack when sending command 'REQ' to a node
+                        result.childId      + ';1;1;' +
                         devices[id].native.varTypeNum   + ';' +
                         state.val, devices[id].native.ip);
                 } catch (err) {
@@ -229,7 +270,6 @@ function reqGetSend(id, result, ip, subType) {
 
 function processPresentation(data, ip, port) {
     data = data.toString();
-
     var result;
     try {
         result = Parses.parse(data);
@@ -441,6 +481,21 @@ function main() {
                     } else if (result[i].type === 'internal') {
                         var saveValue = false;
                         switch (result[i].subType) {
+                            case 'I_PRE_SLEEP_NOTIFICATION':     //   32   Message sent before node is going to sleep
+                                adapter.log.info('Timeout pre sleep ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                saveValue = true;
+                                break;
+                            
+                            case 'I_POST_SLEEP_NOTIFICATION':     //   33   Message sent after node woke up (if enabled)
+                                adapter.log.info('Timeout post sleep ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                saveValue = true;
+                                break;
+                                
+                            case 'I_HEARTBEAT_RESPONSE':     //   22   Heartbeat response
+                                adapter.log.info('Hearbeat ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                saveValue = true;
+                                break;
+                                
                             case 'I_BATTERY_LEVEL':     //   0   Use this to report the battery level (in percent 0-100).
                                 adapter.log.info('Battery level ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
                                 saveValue = true;
@@ -514,6 +569,10 @@ function main() {
 
                         if (saveValue) {
                             saveResult(id, result[i], ip, true);
+                            if (result[i].subType === 'I_HEARTBEAT_RESPONSE'){
+                                adapter.log.debug('Send unsent values');
+                                findObjAckFalse(ip, result[i].id); 
+                            }
                         }
                     } else if (result[i].type === 'stream') {
                         switch (result[i].subType) {
