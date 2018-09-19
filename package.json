@@ -32,7 +32,7 @@
     "serialport": "^6.0.4"
   },
   "dependencies": {
-    "sensors": "^1.1.1"
+    "sensors": "https://github.com/Haba1234/sensors/tarball/a751633505706e980a03eb176177d5671ba9ff58"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
