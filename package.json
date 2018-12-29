@@ -32,7 +32,7 @@
     "serialport": "^6.0.4"
   },
   "dependencies": {
-    "sensors": "1.1.1"
+    "sensors": "2.0.0"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
