@@ -159,7 +159,8 @@ describe('mySensors TCP: Test TCP server', function() {
                 "varType":      "V_PERCENTAGE",
                 "varTypeNum":   3
             },
-            "type":             "state"
+            "type":             "state",
+            "user":"system.user.admin"
         };
 
         setTimeout(function () {
