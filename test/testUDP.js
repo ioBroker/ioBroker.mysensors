@@ -210,11 +210,11 @@ describe('mySensors UDP: Test UDP server', function() {
         this.timeout(5000);
         lastMessage = '';
         someObject = {
-            "_id": "mysensors.0.127_0_0_1.0.33_LIGHT.V_STATUS",
+            "_id": "mysensors.0.127_0_0_1.0.33_BINARY.V_STATUS",
             "common": {
                 "name": "RELAY D8.V_STATUS",
                 "type": "boolean",
-                "role": "state.light",
+                "role": "state.relay",
                 "def": false,
                 "read": true,
                 "write": true
@@ -223,7 +223,7 @@ describe('mySensors UDP: Test UDP server', function() {
                 "ip": "127.0.0.1",
                 "id": "0",
                 "childId": "33",
-                "subType": "S_LIGHT",
+                "subType": "S_BINARY",
                 "subTypeNum": 3,
                 "varType": "V_STATUS",
                 "varTypeNum": 2
