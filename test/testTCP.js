@@ -160,7 +160,7 @@ describe('mySensors TCP: Test TCP server', function() {
                 "varTypeNum":   3
             },
             "type":             "state",
-            "user":"system.user.admin"
+            "user":             "system.user.admin"
         };
 
         setTimeout(function () {
@@ -243,7 +243,8 @@ describe('mySensors TCP: Test TCP server', function() {
                 "varType": "V_STATUS",
                 "varTypeNum": 2
             },
-            "type": "state"
+            "type": "state",
+            "user": "system.user.admin"
         };
         var data = someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';1';
 
@@ -295,7 +296,8 @@ describe('mySensors TCP: Test TCP server', function() {
                 "varType": "I_BATTERY_LEVEL",
                 "varTypeNum": 0
             },
-            "type": "state"
+            "type": "state",
+            "user": "system.user.admin"
         };
         var data = someObject.native.id + ';255;3;0;0;50';
 
@@ -334,7 +336,8 @@ describe('mySensors TCP: Test TCP server', function() {
                 "varType": "V_TEMP",
                 "varTypeNum": 0
             },
-            "type": "state"
+            "type": "state",
+            "user": "system.user.admin"
         };
 
         setTimeout(function () {
