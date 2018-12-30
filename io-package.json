@@ -1,8 +1,19 @@
 {
     "common": {
         "name": "mysensors",
-        "version": "1.2.1",
+        "version": "1.2.2",
         "news": {
+	    "1.2.2": {
+                "en": "Added new objects (library 2.3.x). Added support for sleeping nodes",
+                "de": "Neue Objekte hinzugefügt (Bibliothek 2.3.x). Unterstützung für schlafende Knoten hinzugefügt",
+                "ru": "Добавлены новые объекты (библиотека 2.3.x). Добавлена поддержка спящих узлов",
+                "pt": "Adicionado novos objetos (biblioteca 2.3.x). Adicionado suporte para nós adormecidos",
+                "nl": "Nieuwe objecten toegevoegd (bibliotheek 2.3.x). Ondersteuning toegevoegd voor slapende knooppunten",
+                "fr": "Ajout de nouveaux objets (bibliothèque 2.3.x). Ajout du support pour les nœuds dormants",
+                "it": "Aggiunti nuovi oggetti (libreria 2.3.x). Aggiunto supporto per i nodi dormienti",
+                "es": "Se agregaron nuevos objetos (biblioteca 2.3.x). Se agregó soporte para nodos dormidos",
+                "pl": "Dodano nowe obiekty (biblioteka 2.3.x). Dodano obsługę węzłów do spania"
+            },
             "1.2.1": {
                 "en": "Updating for Admin v3",
                 "de": "Aktualisierung für Admin v3",

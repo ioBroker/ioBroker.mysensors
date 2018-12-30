@@ -145,7 +145,8 @@ describe('mySensors UDP: Test UDP server', function() {
                 "varType":      "V_PERCENTAGE",
                 "varTypeNum":   3
             },
-            "type":             "state"
+            "type":             "state",
+            "user":             "system.user.admin"
         };
 
         setTimeout(function () {
@@ -210,11 +211,11 @@ describe('mySensors UDP: Test UDP server', function() {
         this.timeout(5000);
         lastMessage = '';
         someObject = {
-            "_id": "mysensors.0.127_0_0_1.0.33_LIGHT.V_STATUS",
+            "_id": "mysensors.0.127_0_0_1.0.33_BINARY.V_STATUS",
             "common": {
                 "name": "RELAY D8.V_STATUS",
                 "type": "boolean",
-                "role": "state.light",
+                "role": "state.relay",
                 "def": false,
                 "read": true,
                 "write": true
@@ -223,12 +224,13 @@ describe('mySensors UDP: Test UDP server', function() {
                 "ip": "127.0.0.1",
                 "id": "0",
                 "childId": "33",
-                "subType": "S_LIGHT",
+                "subType": "S_BINARY",
                 "subTypeNum": 3,
                 "varType": "V_STATUS",
                 "varTypeNum": 2
             },
-            "type": "state"
+            "type": "state",
+            "user": "system.user.admin"
         };
         var data = someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';1';
 
@@ -281,7 +283,8 @@ describe('mySensors UDP: Test UDP server', function() {
                 "varType": "I_BATTERY_LEVEL",
                 "varTypeNum": 0
             },
-            "type": "state"
+            "type": "state",
+            "user": "system.user.admin"
         };
         var data = someObject.native.id + ';255;3;0;0;50';
 
@@ -321,7 +324,8 @@ describe('mySensors UDP: Test UDP server', function() {
                 "varType": "V_TEMP",
                 "varTypeNum": 0
             },
-            "type": "state"
+            "type": "state",
+            "user": "system.user.admin"
         };
 
         setTimeout(function () {
