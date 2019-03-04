@@ -81,6 +81,7 @@
             "es": "Adaptador de misensores",
             "pl": "Adapter mysensors"
         },
+        "license": "MIT",
         "platform": "Javascript/Node.js",
         "mode": "daemon",
         "icon": "mysensors.png",
