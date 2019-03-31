@@ -1,6 +1,5 @@
 ![Logo](admin/mysensors.png)
 # ioBroker.mysensors
-=================
 
 ![Number of Installations](http://iobroker.live/badges/mysensors-installed.svg) ![Number of Installations](http://iobroker.live/badges/mysensors-stable.svg) [![NPM version](http://img.shields.io/npm/v/iobroker.mysensors.svg)](https://www.npmjs.com/package/iobroker.mysensors)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.mysensors.svg)](https://www.npmjs.com/package/iobroker.mysensors)
