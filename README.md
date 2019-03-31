@@ -11,7 +11,7 @@ This adapter communicates with [mysensors](http://www.mysensors.org) serial or e
 It ethernet gateway selected in this case ioBroker is server, that expects connections.
 
 ## TCP Client
-This option works only together with TCP<=>Serial bridge, like [esp-link](https://github.com/jeelabs/esp-link).
+This option works only together with TCP&lt;=&gt;Serial bridge, like [esp-link](https://github.com/jeelabs/esp-link).
 
 ## Prerequires
 To use serial port on Windows it is VS required to build the binary.
