@@ -548,7 +548,7 @@ function main() {
                                     for (var _id in devices) {
                                         if (!devices.hasOwnProperty(_id)) continue;
                                         if (devices[_id].native && (!ip || ip === devices[_id].native.ip) &&
-                                            devices[_id].native.id > maxId) {
+                                            parseInt(devices[_id].native.id, 10) > parseInt(maxId, 10)) {
                                             maxId = devices[_id].native.id;
                                         }
                                     }
