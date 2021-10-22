@@ -569,7 +569,9 @@ function main() {
 
                         if (saveValue) {
                             saveResult(id, result[i], ip, true);
-                            if (result[i].subType === 'I_HEARTBEAT_RESPONSE'){
+                            if (result[i].subType === 'I_HEARTBEAT_RESPONSE'
+                            	|| result[i].subType === 'I_PRE_SLEEP_NOTIFICATION')
+			    {
                                 adapter.log.debug('Send unsent values');
                                 findObjAckFalse(ip, result[i].id); 
                             }
