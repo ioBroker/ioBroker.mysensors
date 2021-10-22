@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "mysensors",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "news": {
+            "2.0.1": {
+                "en": "compare integer values",
+                "de": "Vergleichen Sie ganzzahlige Werte",
+                "ru": "сравнить целочисленные значения",
+                "pt": "comparar valores inteiros",
+                "nl": "vergelijk gehele waarden",
+                "fr": "comparer des valeurs entières",
+                "it": "confrontare i valori interi",
+                "es": "comparar valores enteros",
+                "pl": "porównaj wartości całkowite",
+                "zh-cn": "比较整数值"
+            },
             "2.0.0": {
                 "en": "Support for nodejs 12 added, nodejs 4 is no longer supported!",
                 "de": "Unterstützung für NodeJS 12 hinzugefügt, NodeJS 4 wird nicht mehr unterstützt!",
