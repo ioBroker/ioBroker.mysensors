@@ -1,186 +1,178 @@
 {
-    "common": {
-        "name": "mysensors",
-        "version": "2.0.1",
-        "news": {
-            "2.0.1": {
-                "en": "compare integer values",
-                "de": "Vergleichen Sie ganzzahlige Werte",
-                "ru": "сравнить целочисленные значения",
-                "pt": "comparar valores inteiros",
-                "nl": "vergelijk gehele waarden",
-                "fr": "comparer des valeurs entières",
-                "it": "confrontare i valori interi",
-                "es": "comparar valores enteros",
-                "pl": "porównaj wartości całkowite",
-                "zh-cn": "比较整数值"
-            },
-            "2.0.0": {
-                "en": "Support for nodejs 12 added, nodejs 4 is no longer supported!",
-                "de": "Unterstützung für NodeJS 12 hinzugefügt, NodeJS 4 wird nicht mehr unterstützt!",
-                "ru": "Добавлена ​​поддержка nodejs 12, nodejs 4 больше не поддерживается!",
-                "pt": "Suporte para nodejs 12 adicionado, nodejs 4 não é mais suportado!",
-                "nl": "Ondersteuning voor nodejs 12 toegevoegd, nodejs 4 wordt niet langer ondersteund!",
-                "fr": "Prise en charge de nodejs 12 ajoutée, nodejs 4 n'est plus prise en charge!",
-                "it": "Supporto per nodejs 12 aggiunto, nodejs 4 non è più supportato!",
-                "es": "Se agregó soporte para nodejs 12, ¡nodejs 4 ya no es compatible!",
-                "pl": "Dodano wsparcie dla nodejs 12, nodejs 4 nie jest już obsługiwany!",
-                "zh-cn": "添加了对nodejs 12的支持，不再支持nodejs 4！"
-            },
-            "1.2.2": {
-                "en": "Added new objects (library 2.3.x). Added support for sleeping nodes",
-                "de": "Neue Objekte hinzugefügt (Bibliothek 2.3.x). Unterstützung für schlafende Knoten hinzugefügt",
-                "ru": "Добавлены новые объекты (библиотека 2.3.x). Добавлена поддержка спящих узлов",
-                "pt": "Adicionado novos objetos (biblioteca 2.3.x). Adicionado suporte para nós adormecidos",
-                "nl": "Nieuwe objecten toegevoegd (bibliotheek 2.3.x). Ondersteuning toegevoegd voor slapende knooppunten",
-                "fr": "Ajout de nouveaux objets (bibliothèque 2.3.x). Ajout du support pour les nœuds dormants",
-                "it": "Aggiunti nuovi oggetti (libreria 2.3.x). Aggiunto supporto per i nodi dormienti",
-                "es": "Se agregaron nuevos objetos (biblioteca 2.3.x). Se agregó soporte para nodos dormidos",
-                "pl": "Dodano nowe obiekty (biblioteka 2.3.x). Dodano obsługę węzłów do spania"
-            },
-            "1.2.1": {
-                "en": "Updating for Admin v3",
-                "de": "Aktualisierung für Admin v3",
-                "ru": "Обновление для Admin v3",
-                "pt": "Atualizando para Admin v3",
-                "nl": "Updaten voor Admin v3",
-                "fr": "Mise à jour pour Admin v3",
-                "it": "Aggiornamento per Admin v3",
-                "es": "Actualizando para Admin v3",
-                "pl": "Aktualizowanie dla administratora v3"
-            },
-            "1.2.0": {
-                "en": "Upgrade Serialport Library",
-                "de": "Serialport Bibliothek aktualisiert",
-                "ru": "Upgrade Serialport Library",
-                "pt": "Upgrade Serialport Library",
-                "nl": "Upgrade Serialport-bibliotheek",
-                "fr": "Mettre à niveau la bibliothèque Serialport",
-                "it": "Aggiorna la libreria Serialport",
-                "es": "Actualizar la biblioteca de Serialport",
-                "pl": "Uaktualnij bibliotekę Serialport"
-            },
-			"1.1.0": {
-                "en": "TCP client added",
-                "de": "TCP-Client hinzugefügt",
-                "ru": "Добавлен клиент TCP",
-                "pt": "Cliente TCP adicionado",
-                "fr": "Client TCP ajouté",
-                "nl": "TCP-client toegevoegd",
-                "it": "Client TCP aggiunto",
-                "es": "Cliente TCP agregado",
-                "pl": "Dodano klienta TCP"
-            },
-			"1.0.10": {
-                "en": "Fixed wrong data type for scene controller, enabled ack flag on set command",
-                "de": "Falschen Datentyp für Scene Controller korrigiert, Ack Flag aktiviert für set Befehl",
-                "ru": "Fixed wrong data type for scene controller, enabled ack flag on set command"
-            },
-            "1.0.9": {
-                "en": "Upgrade Serial Library",
-                "de": "Serial Library aktualisiert",
-                "ru": "Upgrade Serial Library"
-            },
-            "1.0.8": {
-                "en": "adjust log level for I_LOG_MESSAGE",
-                "de": "Log-Level für I_LOG_MESSAGE angepasst",
-                "ru": "adjust log level for I_LOG_MESSAGE"
-            },
-            "1.0.7": {
-                "en": "fix I_TIME request",
-                "de": "Korrigiere I_TIME Anfrage",
-                "ru": "Исправлен запрос I_TIME"
-            }
-        },
-        "title": "mysensors",
-        "titleLang": {
-            "en": "MySensors"
-        },
-        "desc": {
-            "en": "MySensors Adapter",
-            "de": "MySensors Adapter",
-            "ru": "Драйвер MySensors",
-            "pt": "adaptador de MySensors",
-            "nl": "MySensors Adapter",
-            "fr": "MySensors Adaptateur",
-            "it": "Adattatore MySensors",
-            "es": "Adaptador de MySensors",
-            "pl": "Adapter MySensors"
-        },
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "mode": "daemon",
-        "icon": "mysensors.png",
-        "materialize": true,
-        "enabled": true,
-        "messagebox": true,
-        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.mysensors/master/admin//mysensors.png",
-        "keywords": [
-            "mysensors",
-            "arduino"
-        ],
-        "readme": "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
-        "loglevel": "info",
-        "stopBeforeUpdate": true,
-        "type": "iot-systems",
-        "authors": [
-            {
-                "name": "bluefox",
-                "email": "dogafox@gmail.com"
-            }
-        ],
-        "connectionType": "local",
-        "dataSource": "push",
-        "tier": 3,
-        "compact": true
+  "common": {
+    "name": "mysensors",
+    "version": "2.0.2",
+    "news": {
+      "2.0.2": {
+        "en": "Added the support of deep sleep",
+        "de": "Unterstützung für Tiefschlaf hinzugefügt",
+        "ru": "Добавлена поддержка глубокого сна",
+        "pt": "Adicionado o suporte de sono profundo",
+        "nl": "De ondersteuning van diepe slaap toegevoegd",
+        "fr": "Ajout du support du sommeil profond",
+        "it": "Aggiunto il supporto del sonno profondo",
+        "es": "Se agregó el apoyo del sueño profundo.",
+        "pl": "Dodano wsparcie głębokiego snu",
+        "zh-cn": "增加了深度睡眠的支持"
+      },
+      "2.0.1": {
+        "en": "compare integer values",
+        "de": "Vergleichen Sie ganzzahlige Werte",
+        "ru": "сравнить целочисленные значения",
+        "pt": "comparar valores inteiros",
+        "nl": "vergelijk gehele waarden",
+        "fr": "comparer des valeurs entières",
+        "it": "confrontare i valori interi",
+        "es": "comparar valores enteros",
+        "pl": "porównaj wartości całkowite",
+        "zh-cn": "比较整数值"
+      },
+      "2.0.0": {
+        "en": "Support for nodejs 12 added, nodejs 4 is no longer supported!",
+        "de": "Unterstützung für NodeJS 12 hinzugefügt, NodeJS 4 wird nicht mehr unterstützt!",
+        "ru": "Добавлена ​​поддержка nodejs 12, nodejs 4 больше не поддерживается!",
+        "pt": "Suporte para nodejs 12 adicionado, nodejs 4 não é mais suportado!",
+        "nl": "Ondersteuning voor nodejs 12 toegevoegd, nodejs 4 wordt niet langer ondersteund!",
+        "fr": "Prise en charge de nodejs 12 ajoutée, nodejs 4 n'est plus prise en charge!",
+        "it": "Supporto per nodejs 12 aggiunto, nodejs 4 non è più supportato!",
+        "es": "Se agregó soporte para nodejs 12, ¡nodejs 4 ya no es compatible!",
+        "pl": "Dodano wsparcie dla nodejs 12, nodejs 4 nie jest już obsługiwany!",
+        "zh-cn": "添加了对nodejs 12的支持，不再支持nodejs 4！"
+      },
+      "1.2.2": {
+        "en": "Added new objects (library 2.3.x). Added support for sleeping nodes",
+        "de": "Neue Objekte hinzugefügt (Bibliothek 2.3.x). Unterstützung für schlafende Knoten hinzugefügt",
+        "ru": "Добавлены новые объекты (библиотека 2.3.x). Добавлена поддержка спящих узлов",
+        "pt": "Adicionado novos objetos (biblioteca 2.3.x). Adicionado suporte para nós adormecidos",
+        "nl": "Nieuwe objecten toegevoegd (bibliotheek 2.3.x). Ondersteuning toegevoegd voor slapende knooppunten",
+        "fr": "Ajout de nouveaux objets (bibliothèque 2.3.x). Ajout du support pour les nœuds dormants",
+        "it": "Aggiunti nuovi oggetti (libreria 2.3.x). Aggiunto supporto per i nodi dormienti",
+        "es": "Se agregaron nuevos objetos (biblioteca 2.3.x). Se agregó soporte para nodos dormidos",
+        "pl": "Dodano nowe obiekty (biblioteka 2.3.x). Dodano obsługę węzłów do spania"
+      },
+      "1.2.1": {
+        "en": "Updating for Admin v3",
+        "de": "Aktualisierung für Admin v3",
+        "ru": "Обновление для Admin v3",
+        "pt": "Atualizando para Admin v3",
+        "nl": "Updaten voor Admin v3",
+        "fr": "Mise à jour pour Admin v3",
+        "it": "Aggiornamento per Admin v3",
+        "es": "Actualizando para Admin v3",
+        "pl": "Aktualizowanie dla administratora v3"
+      },
+      "1.2.0": {
+        "en": "Upgrade Serialport Library",
+        "de": "Serialport Bibliothek aktualisiert",
+        "ru": "Upgrade Serialport Library",
+        "pt": "Upgrade Serialport Library",
+        "nl": "Upgrade Serialport-bibliotheek",
+        "fr": "Mettre à niveau la bibliothèque Serialport",
+        "it": "Aggiorna la libreria Serialport",
+        "es": "Actualizar la biblioteca de Serialport",
+        "pl": "Uaktualnij bibliotekę Serialport"
+      },
+      "1.1.0": {
+        "en": "TCP client added",
+        "de": "TCP-Client hinzugefügt",
+        "ru": "Добавлен клиент TCP",
+        "pt": "Cliente TCP adicionado",
+        "fr": "Client TCP ajouté",
+        "nl": "TCP-client toegevoegd",
+        "it": "Client TCP aggiunto",
+        "es": "Cliente TCP agregado",
+        "pl": "Dodano klienta TCP"
+      }
     },
-    "native": {
-        "comName": "",
-        "connTimeout": 60000,
-        "port": 5003,
-        "baudRate": 115200,
-        "mode": "server",
-        "type": "udp",
-        "bind": "0.0.0.0",
-        "broadcast": false,
-        "inclusionTimeout": 60000
+    "title": "mysensors",
+    "titleLang": {
+      "en": "MySensors"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": "Information"
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": "If connected to my sensors",
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "inclusionOn",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "Inclusion mode activated",
-                "desc": "If inclusion mode on or off",
-                "type": "boolean",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {}
-        }
-    ]
+    "desc": {
+      "en": "MySensors Adapter",
+      "de": "MySensors Adapter",
+      "ru": "Драйвер MySensors",
+      "pt": "adaptador de MySensors",
+      "nl": "MySensors Adapter",
+      "fr": "MySensors Adaptateur",
+      "it": "Adattatore MySensors",
+      "es": "Adaptador de MySensors",
+      "pl": "Adapter MySensors"
+    },
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "mode": "daemon",
+    "icon": "mysensors.png",
+    "materialize": true,
+    "enabled": true,
+    "messagebox": true,
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.mysensors/master/admin//mysensors.png",
+    "keywords": [
+      "mysensors",
+      "arduino"
+    ],
+    "readme": "https://github.com/ioBroker/ioBroker.mysensors/blob/master/README.md",
+    "loglevel": "info",
+    "stopBeforeUpdate": true,
+    "type": "iot-systems",
+    "authors": [
+      {
+        "name": "bluefox",
+        "email": "dogafox@gmail.com"
+      }
+    ],
+    "connectionType": "local",
+    "dataSource": "push",
+    "tier": 3,
+    "compact": true
+  },
+  "native": {
+    "comName": "",
+    "connTimeout": 60000,
+    "port": 5003,
+    "baudRate": 115200,
+    "mode": "server",
+    "type": "udp",
+    "bind": "0.0.0.0",
+    "broadcast": false,
+    "inclusionTimeout": 60000
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "If connected to my sensors",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "inclusionOn",
+      "type": "state",
+      "common": {
+        "role": "state",
+        "name": "Inclusion mode activated",
+        "desc": "If inclusion mode on or off",
+        "type": "boolean",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }
