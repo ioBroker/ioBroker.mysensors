@@ -1,29 +1,131 @@
-/* jshint -W097 */// jshint strict:false
-/*jslint node: true */
+/* jshint -W097 */
+/* jshint strict: false */
+/* jslint node: true */
 'use strict';
 
 // you have to require the utils module and call adapter function
-var utils = require('@iobroker/adapter-core'); // Get common adapter utils
-var serialport;
-var Parses     = require('sensors');
-var MySensors  = require(__dirname + '/lib/mysensors');
-var getMeta    = require(__dirname + '/lib/getmeta').getMetaInfo;
-var getMeta2   = require(__dirname + '/lib/getmeta').getMetaInfo2;
+const utils       = require('@iobroker/adapter-core'); // Get common adapter utils
+const Parses      = require('sensors');
+const MySensors   = require('./lib/mysensors');
+const getMeta     = require('./lib/getmeta').getMetaInfo;
+const getMeta2    = require('./lib/getmeta').getMetaInfo2;
+const adapterName = require('./package.json').name.split('.').pop();
 
-var adapter   = new utils.Adapter('mysensors');
-var devices   = {};
-var mySensorsInterface;
-var floatRegEx = /^[+-]?\d+(\.\d*)$/;
-var inclusionOn = false;
-var inclusionTimeout = false;
-var path;
-var fs;
-var config = {};
+const floatRegEx = /^[+-]?\d+(\.\d*)$/;
+const config = {};
+let serialport;
+let adapter;
+let devices = {};
+let inclusionOn = false;
+let inclusionTimeout = false;
+let presentationDone = false;
+let path;
+let fs;
+let mySensorsInterface;
 
 try {
-    serialport = require('serialport');//.SerialPort;
+    serialport = require('serialport'); // .SerialPort;
 } catch (e) {
     console.warn('Serial port is not available');
+}
+
+function startAdapter(options) {
+    options = options || {};
+
+    Object.assign(options, {name: adapterName});
+    adapter = new utils.Adapter(options);
+
+    // принимаем и обрабатываем сообщения
+    adapter.on('message', obj => {
+        if (obj) {
+            switch (obj.command) {
+                case 'listUart':
+                    if (obj.callback) {
+                        if (serialport) {
+                            // read all found serial ports
+                            serialport.list((err, ports) => {
+                                adapter.log.info(`List of port: ${JSON.stringify(ports)}`);
+                                listSerial(ports);
+                                adapter.sendTo(obj.from, obj.command, ports, obj.callback);
+                            });
+                        } else {
+                            adapter.log.warn('Module serialport is not available');
+                            adapter.sendTo(obj.from, obj.command, [{comName: 'Not available'}], obj.callback);
+                        }
+                    }
+
+                    break;
+            }
+        }
+    });
+
+    // is called when adapter shuts down - callback has to be called under any circumstances!
+    adapter.on('unload', callback => {
+        adapter.setState('info.connection', false, true);
+        try {
+            mySensorsInterface && mySensorsInterface.destroy();
+            mySensorsInterface = null;
+            callback();
+        } catch (e) {
+            callback();
+        }
+    });
+
+    // is called if a subscribed state changes
+    adapter.on('stateChange', (id, state) => {
+        if (!state || state.ack || !mySensorsInterface) {
+            return;
+        }
+
+        // Warning, state can be null if it was deleted
+        adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
+
+        if (id === adapter.namespace + '.inclusionOn') {
+            setInclusionState(state.val);
+            setTimeout(val => adapter.setState('inclusionOn', val, true), 200, state.val);
+        } else
+            // output to mysensors
+        if (devices[id] && devices[id].type === 'state') {
+            const arr_id = id.split('.');
+            adapter.getState(arr_id[2] + '.' + arr_id[3] + '.255_ARDUINO_NODE.I_PRE_SLEEP_NOTIFICATION', (err, state1) => {
+                if (err) adapter.log.error(err);
+                if (state1 && state1.val &&
+                    typeof state1.val === 'number' &&
+                    state1.val > 0) {   // determined that node can sleep
+                    adapter.getState(arr_id[2] + '.' + arr_id[3] + '.255_ARDUINO_NODE.I_HEARTBEAT_RESPONSE', (err, state2) => {
+                        if (err) adapter.log.error(err);
+                        if (state2 && state2.val) {  // received hearbeat
+                            if (Date.now() - state2.lc < state1.val){
+                                adapter.log.debug('Node not sleepping. Send data');
+                                sendMessage(id, state);    // node is still awake, sending data
+                            } else {
+                                adapter.log.debug('Node sleepping. Not send data');
+                            }
+                        }
+                    });
+                } else {
+                    adapter.log.debug('Node real time.');
+                    sendMessage(id, state);
+                }
+            });
+        }
+    });
+
+    adapter.on('objectChange', (id, obj) => {
+        if (!obj) {
+            if (devices[id]) {
+                delete devices[id];
+            }
+        } else {
+            if (obj.native.id !== undefined && obj.native.childId !== undefined && obj.native.subType !== undefined) {
+                devices[id] = obj;
+            }
+        }
+    });
+
+    adapter.on('ready', () => main());
+
+    return adapter;
 }
 
 function filterSerialPorts(path) {
@@ -37,80 +139,48 @@ function filterSerialPorts(path) {
 
 function listSerial(ports) {
     ports = ports || [];
-    path  = path || require('path');
-    fs    = fs   || require('fs');
+    path  = path  || require('path');
+    fs    = fs    || require('fs');
 
     // Filter out the devices that aren't serial ports
-    var devDirName = '/dev';
+    const devDirName = '/dev';
 
-    var result;
+    let result;
     try {
         result = fs
             .readdirSync(devDirName)
-            .map(function (file) {
-                return path.join(devDirName, file);
-            })
+            .map(file => path.join(devDirName, file))
             .filter(filterSerialPorts)
-            .map(function (port) {
-                var found = false;
-                for (var v = 0; v < ports.length; v++) {
+            .map(port => {
+                let found = false;
+                for (let v = 0; v < ports.length; v++) {
                     if (ports[v].comName === port) {
                         found = true;
                         break;
                     }
                 }
-                if (!found) ports.push({comName: port});
+                if (!found) {
+                    ports.push({comName: port});
+                }
                 return {comName: port};
             });
     } catch (e) {
         if (require('os').platform() !== 'win32') {
-            adapter.log.error('Cannot read "' + devDirName + '": ' + e);
+            adapter.log.error(`Cannot read "${devDirName}": ${e}`);
         }
         result = [];
     }
     return result;
 }
 
-//принимаем и обрабатываем сообщения
-adapter.on('message', function (obj) {
-    if (obj) {
-        switch (obj.command) {
-            case 'listUart':
-                if (obj.callback) {
-                    if (serialport) {
-                        // read all found serial ports
-                        serialport.list(function (err, ports) {
-                            adapter.log.info('List of port: ' + JSON.stringify(ports));
-                            listSerial(ports);
-                            adapter.sendTo(obj.from, obj.command, ports, obj.callback);
-                        });
-                    } else {
-                        adapter.log.warn('Module serialport is not available');
-                        adapter.sendTo(obj.from, obj.command, [{comName: 'Not available'}], obj.callback);
-                    }
-                }
-
-                break;
-        }
-    }
-});
-
-// is called when adapter shuts down - callback has to be called under any circumstances!
-adapter.on('unload', function (callback) {
-    adapter.setState('info.connection', false, true);
-    try {
-        if (mySensorsInterface) mySensorsInterface.destroy();
-        mySensorsInterface = null;
-        callback();
-    } catch (e) {
-        callback();
-    }
-});
-
-function send_message(obj_id, state){
+function sendMessage(obj_id, state){
     if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
-    if (state.val === 'true')  state.val = 1;
-    if (state.val === 'false') state.val = 0;
+    if (state.val === 'true') {
+        state.val = 1;
+    }
+    if (state.val === 'false') {
+        state.val = 0;
+    }
 
     mySensorsInterface.write(
         devices[obj_id].native.id           + ';' +
@@ -128,81 +198,32 @@ function findObjAckFalse(ip, node_id) {
             devices[id].native.id == node_id &&
             devices[id].native.childId !== 255 &&
             devices[id].common.write === true) {
-            adapter.getState(id, function (err, state) {
+            adapter.getState(id, (err, state) => {
                 if (err) adapter.log.error(err);
-                if (state && state.val && state.val !== null && state.ack === false) {
-                    adapter.log.debug('Obj.ack = false. Send state (' + id + ') to node ' + node_id);
-                    send_message(id, state);
+                if (state && state.val && state.ack === false) {
+                    adapter.log.debug(`Obj.ack = false. Send state (${id}) to node ${node_id}`);
+                    sendMessage(id, state);
                 }
             });
         }
     }
 }
 
-// is called if a subscribed state changes
-adapter.on('stateChange', function (id, state) {
-    if (!state || state.ack || !mySensorsInterface) return;
-
-    // Warning, state can be null if it was deleted
-    adapter.log.debug('stateChange ' + id + ' ' + JSON.stringify(state));
-    if (id === adapter.namespace + '.inclusionOn') {
-        setInclusionState(state.val);
-        setTimeout(function (val) {
-            adapter.setState('inclusionOn', val, true);
-        }, 200, state.val);
-    } else
-    // output to mysensors
-    if (devices[id] && devices[id].type === 'state') {
-        var arr_id = id.split('.');
-        adapter.getState(arr_id[2] + '.' + arr_id[3] + '.255_ARDUINO_NODE.I_PRE_SLEEP_NOTIFICATION', function (err, state1) {
-            if (err) adapter.log.error(err);
-            if (state1 && state1.val &&
-                typeof state1.val === 'number' &&
-                state1.val > 0) {   // determined that node can sleep
-                adapter.getState(arr_id[2] + '.' + arr_id[3] + '.255_ARDUINO_NODE.I_HEARTBEAT_RESPONSE', function (err, state2) {
-                    if (err) adapter.log.error(err);
-                    if (state2 && state2.val && state2.val !== null) {  // received hearbeat
-                        if ((Date.now() - state2.lc) < state1.val){
-                            adapter.log.debug('Node not sleepping. Send data');
-                            send_message(id, state);    // node is still awake, sending data
-                        } else adapter.log.debug('Node sleepping. Not send data');
-                    }
-                });
-            } else {
-                adapter.log.debug('Node real time.');
-                send_message(id, state);
-            }
-        });
-    }
-});
-
-adapter.on('objectChange', function (id, obj) {
-    if (!obj) {
-        if (devices[id]) delete devices[id];
-    } else {
-        if (obj.native.id !== undefined && obj.native.childId !== undefined && obj.native.subType !== undefined) {
-            devices[id] = obj;
-        }
-    }
-});
-
-adapter.on('ready', function () {
-    main();
-});
-
-var presentationDone = false;
-
 function setInclusionState(val) {
     val = val === 'true' || val === true || val === 1 || val === '1';
     inclusionOn = val;
 
-    if (inclusionTimeout) clearTimeout(inclusionTimeout);
+    if (inclusionTimeout) {
+        clearTimeout(inclusionTimeout);
+    }
     inclusionTimeout = null;
 
-    if (inclusionOn) presentationDone = false;
+    if (inclusionOn) {
+        presentationDone = false;
+    }
 
     if (inclusionOn && adapter.config.inclusionTimeout) {
-        inclusionTimeout = setTimeout(function () {
+        inclusionTimeout = setTimeout(() => {
             inclusionOn = false;
             adapter.setState('inclusionOn', false, true);
         }, adapter.config.inclusionTimeout);
@@ -210,7 +231,7 @@ function setInclusionState(val) {
 }
 
 function findDevice(result, ip, subType) {
-    for (var id in devices) {
+    for (const id in devices) {
         if (devices[id].native &&
             (!ip || ip === devices[id].native.ip) &&
             devices[id].native.id == result.id &&
@@ -223,33 +244,41 @@ function findDevice(result, ip, subType) {
 }
 
 function saveResult(id, result, ip, subType) {
-    if (id === -1) id = findDevice(result, ip, subType);
+    if (id === -1) {
+        id = findDevice(result, ip, subType);
+    }
+
     if (id !== -1 && devices[id]) {
         if (devices[id].common.type === 'boolean') {
             result.payload = result.payload === 'true' || result.payload === true || result.payload === '1' || result.payload === 1;
             //result.payload = !!result[i].payload;
         }
-        if (devices[id].common.type === 'number')  result.payload = parseFloat(result.payload);
+        if (devices[id].common.type === 'number')  {
+            result.payload = parseFloat(result.payload);
+        }
 
-        adapter.log.debug('Set value ' + (devices[id].common.name || id) + ' ' + result.childId + ': ' + result.payload + ' ' + typeof result.payload);
+        adapter.log.debug(`Set value ${devices[id].common.name || id} ${result.childId}: ${result.payload} ${typeof result.payload}`);
         adapter.setState(id, result.payload, true);
 
         return id;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 function reqGetSend(id, result, ip, subType) {
-    if (id === -1) id = findDevice(result, ip, subType);
+    if (id === -1) {
+        id = findDevice(result, ip, subType);
+    }
     if (id !== -1 && devices[id]) {
-        adapter.getState(id, function (err, state) {
-            if (err) adapter.log.error(err);
+        adapter.getState(id, (err, state) => {
+            err && adapter.log.error(err);
             if (state && state.val) {
                 try {
                     if (typeof state.val === 'boolean') state.val = state.val ? 1 : 0;
                     if (state.val === 'true')  state.val = 1;
                     if (state.val === 'false') state.val = 0;
-                    adapter.log.debug('Get value ' + result.id + ' ' + result.childId + ': ' + state.val);
+                    adapter.log.debug(`Get value ${result.id} ${result.childId}: ${state.val}`);
                     mySensorsInterface.write(
                         result.id           + ';' +
                         //result.childId      + ';1;0;' +   // Changed. Always request an ack when sending command 'REQ' to a node
@@ -257,20 +286,21 @@ function reqGetSend(id, result, ip, subType) {
                         devices[id].native.varTypeNum   + ';' +
                         state.val, devices[id].native.ip);
                 } catch (err) {
-                    if (err) adapter.log.error(err);
+                    err && adapter.log.error(err);
                     adapter.log.error('Cannot sending!');
                 }
             }
         });
-        
+
         return id;
+    } else {
+        return 0;
     }
-    return 0;
 }
 
 function processPresentation(data, ip, port) {
     data = data.toString();
-    var result;
+    let result;
     try {
         result = Parses.parse(data);
     } catch (e) {
@@ -278,14 +308,12 @@ function processPresentation(data, ip, port) {
         return null;
     }
 
-    
-
     if (!result || !result.length) {
         adapter.log.warn('Cannot parse data: ' + data);
         return null;
     }
 
-    for (var i = 0; i < result.length; i++) {
+    for (let i = 0; i < result.length; i++) {
         adapter.log.debug('Got: ' + JSON.stringify(result[i]));
 
         if (result[i].type === 'presentation' && result[i].subType) {
@@ -293,18 +321,16 @@ function processPresentation(data, ip, port) {
             presentationDone = true;
             // Add new node
             if (inclusionOn) {
-                var found = findDevice(result[i], ip) !== -1;
+                const found = findDevice(result[i], ip) !== -1;
                 if (!found) {
                     adapter.log.debug('ID not found. Try to add to to DB');
-                    var objs = getMeta(result[i], ip, port, config[ip || 'serial']);
-                    for (var j = 0; j < objs.length; j++) {
-                        adapter.log.debug('Check ' + JSON.stringify(devices[adapter.namespace + '.' + objs[j]._id]));
+                    const objs = getMeta(result[i], ip, port, config[ip || 'serial']);
+                    for (let j = 0; j < objs.length; j++) {
+                        adapter.log.debug(`Check ${JSON.stringify(devices[adapter.namespace + '.' + objs[j]._id])}`);
                         if (!devices[adapter.namespace + '.' + objs[j]._id]) {
                             devices[adapter.namespace + '.' + objs[j]._id] = objs[j];
-                            adapter.log.info('Add new object: ' + objs[j]._id + ' - ' + objs[j].common.name);
-                            adapter.setObject(objs[j]._id, objs[j], function (err) {
-                                if (err) adapter.log.error(err);
-                            });
+                            adapter.log.info(`Add new object: ${objs[j]._id} - ${objs[j].common.name}`);
+                            adapter.setObject(objs[j]._id, objs[j], err => err && adapter.log.error(err));
                         }
                     }
                 }
@@ -315,10 +341,10 @@ function processPresentation(data, ip, port) {
         } else if (result[i].type === 'set' && result[i].subType) {
             if (0) {
                 adapter.log.debug('Message type is "set". Try to find it in DB...');
-                var found = false;
-                var foundObjID; // store here ID that suit with parameters to id and childId
+                let found = false;
+                let foundObjID; // store here ID that suit with parameters to id and childId
 
-                for (var id in devices) {
+                for (const id in devices) {
                     if ((!ip || ip === devices[id].native.ip) &&
                         devices[id].native.id      == result[i].id      &&
                         devices[id].native.childId == result[i].childId &&
@@ -338,38 +364,40 @@ function processPresentation(data, ip, port) {
 
                 // add new value to existing object
                 if (!found && foundObjID) {
-                    adapter.log.debug('Object ID: ' + result[i].id + ', childId: ' + result[i].childId + ', subType: ' + result[i].subType + ' not found!');
+                    adapter.log.debug(`Object ID: ${result[i].id}, childId: ${result[i].childId}, subType: ${result[i].subType} not found!`);
                     if (inclusionOn) {
                         adapter.log.debug('ID not found. Try to add to to DB');
-                        var common_name = devices[foundObjID].common.name.split('.');
-                        var objs = getMeta2(result[i], ip, port, config[ip || 'serial'], devices[foundObjID].native.subType, common_name[0]);
+                        const common_name = devices[foundObjID].common.name.split('.');
+                        const objs = getMeta2(result[i], ip, port, config[ip || 'serial'], devices[foundObjID].native.subType, common_name[0]);
                         if (!devices[adapter.namespace + '.' + objs[0]._id]) {
                             devices[adapter.namespace + '.' + objs[0]._id] = objs[0];
                             adapter.log.info('Add new object: ' + objs[0]._id + ' - ' + objs[0].common.name);
-                            adapter.setObject(objs[0]._id, objs[0], function (err) {
-                                if (err) adapter.log.error(err);
-                            });
+                            adapter.setObject(objs[0]._id, objs[0], err => err && adapter.log.error(err));
                         }
                     } else {
                         adapter.log.warn('ID ignored by presentation, because inclusion mode OFF: ' + JSON.stringify(result[i]));
                     }
                 } else {
                     if (!found && !foundObjID) {
-                        adapter.log.debug('Object ID: ' + result[i].id + ', childId: ' + result[i].childId + ' not found!');
+                        adapter.log.debug(`Object ID: ${result[i].id}, childId: ${result[i].childId} not found!`);
                     }
                 }
             }
             // try to convert value
-            var val = result[i].payload;
-            if (floatRegEx.test(val)) val = parseFloat(val);
+            let val = result[i].payload;
+            if (floatRegEx.test(val)) {
+                val = parseFloat(val);
+            }
             if (val === 'true')  val = true;
             if (val === 'false') val = false;
             result[i].payload = val;
 
         } else {
             // try to convert value
-            var _val = result[i].payload;
-            if (floatRegEx.test(_val)) _val = parseFloat(_val);
+            let _val = result[i].payload;
+            if (floatRegEx.test(_val)) {
+                _val = parseFloat(_val);
+            }
             if (_val === 'true')  _val = true;
             if (_val === 'false') _val = false;
             result[i].payload = _val;
@@ -378,40 +406,36 @@ function processPresentation(data, ip, port) {
     return result;
 }
 
-
 function updateSketchName(id, name) {
-    adapter.getObject(id, function (err, obj) {
+    adapter.getObject(id, (err, obj) => {
         if (!obj) {
             obj = {
                 type: 'device',
-                common: {
-                    name: name
-                }
+                common: {name}
             };
         } else if (obj.common.name === name) {
             name = null;
             return;
         }
         obj.common.name = name;
-        adapter.setObject(adapter.namespace + '.' + id, obj, function (err) {
-        });
+        adapter.setObject(adapter.namespace + '.' + id, obj, err => {});
     });
 }
 
 function main() {
-	adapter.getState('info.connection', function (err, state) {
+	adapter.getState('info.connection', (err, state) => {
         if (!state || state.val) {
             adapter.setState('info.connection', false, true);
         }
     });
+
     adapter.config.inclusionTimeout = parseInt(adapter.config.inclusionTimeout, 10) || 0;
 
-    adapter.getState('inclusionOn', function (err, state) {
-        setInclusionState(state ? state.val : false);
-    });
+    adapter.getState('inclusionOn', (err, state) =>
+        setInclusionState(state ? state.val : false));
 
     // read current existing objects (прочитать текущие существующие объекты)
-    adapter.getForeignObjects(adapter.namespace + '.*', 'state', function (err, states) {
+    adapter.getForeignObjects(adapter.namespace + '.*', 'state', (err, states) => {
         // subscribe on changes
         adapter.subscribeStates('*');
         adapter.subscribeObjects('*');
@@ -434,119 +458,129 @@ function main() {
                 native: {
 
                 }
-            }, function (err) {
-                if (err) adapter.log.error(err);
-            });
+            }, err => err && adapter.log.error(err));
         }
 
-        mySensorsInterface = new MySensors(adapter.config, adapter.log, function (error) {
+        mySensorsInterface = new MySensors(adapter.config, adapter.log, error => {
             // if object created
             mySensorsInterface.write('0;0;3;0;14;Gateway startup complete');
 
             // process received data
-            mySensorsInterface.on('data', function (data, ip, port) {
-                var result = processPresentation(data, ip, port); // update configuration if presentation received
+            mySensorsInterface.on('data', (data, ip, port) => {
+                const result = processPresentation(data, ip, port); // update configuration if presentation received
 
-                if (!result) return; 
-                
-                for (var i = 0; i < result.length; i++) {
+                if (!result) {
+                    return;
+                }
+
+                for (let i = 0; i < result.length; i++) {
                     adapter.log.debug('Message type: ' + result[i].type);
                     if (result[i].subType.indexOf('S_') === 0) {
                         adapter.log.debug('Value type of S_... Out of the loop');
                         return;
                     }
-                    var id = findDevice(result[i], ip);
+
+                    const id = findDevice(result[i], ip);
+
                     if (result[i].type === 'set') {
                         // If set quality
                         if (result[i].subType == 77) {
                             adapter.log.debug('subType = 77');
-                            for (var id in devices) {
+                            for (const id in devices) {
                                 if (devices[id].native &&
                                     (!ip || ip === devices[id].native.ip) &&
                                     devices[id].native.id      == result[i].id &&
                                     devices[id].native.childId == result[i].childId) {
-                                    adapter.log.debug('Set quality of ' + (devices[id].common.name || id) + ' ' + result[i].childId + ': ' + result[i].payload + ' ' + typeof result[i].payload);
+                                    adapter.log.debug(`Set quality of ${devices[id].common.name || id} ${result[i].childId}: ${result[i].payload} ${typeof result[i].payload}`);
                                     adapter.setState(id, {q: typeof result[i].payload}, true);
                                 }
                             }
                         } else {
-                            if (result[i].subType === 'V_LIGHT')  result[i].subType = 'V_STATUS';
-                            if (result[i].subType === 'V_DIMMER') result[i].subType = 'V_PERCENTAGE';
-                            if (result[i].subType === 'V_DUST_LEVEL') result[i].subType = 'V_LEVEL';
+                            if (result[i].subType === 'V_LIGHT')  {
+                                result[i].subType = 'V_STATUS';
+                            }
+                            if (result[i].subType === 'V_DIMMER') {
+                                result[i].subType = 'V_PERCENTAGE';
+                            }
+                            if (result[i].subType === 'V_DUST_LEVEL') {
+                                result[i].subType = 'V_LEVEL';
+                            }
 
                             saveResult(id, result[i], ip, true);
                         }
                     } else if (result[i].type === 'req') {
                         reqGetSend(id, result[i], ip, true);
                     } else if (result[i].type === 'internal') {
-                        var saveValue = false;
+                        let saveValue = false;
                         switch (result[i].subType) {
                             case 'I_PRE_SLEEP_NOTIFICATION':     //   32   Message sent before node is going to sleep
-                                adapter.log.info('Timeout pre sleep ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.info(`Timeout pre sleep ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 saveValue = true;
                                 break;
-                            
+
                             case 'I_POST_SLEEP_NOTIFICATION':     //   33   Message sent after node woke up (if enabled)
-                                adapter.log.info('Timeout post sleep ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.info(`Timeout post sleep ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 saveValue = true;
                                 break;
-                                
+
                             case 'I_HEARTBEAT_RESPONSE':     //   22   Heartbeat response
-                                adapter.log.info('Hearbeat ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.info(`Heartbeat ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 saveValue = true;
                                 break;
-                                
+
                             case 'I_BATTERY_LEVEL':     //   0   Use this to report the battery level (in percent 0-100).
-                                adapter.log.info('Battery level ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.info(`Battery level ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 saveValue = true;
                                 break;
 
                             case 'I_TIME':              //   1   Sensors can request the current time from the Controller using this message. The time will be reported as the seconds since 1970
-                                adapter.log.info('Time ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.info(`Time ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 if (!result[i].ack) {
                                     // send response: internal, ack=1
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;1;' + Math.round(new Date().getTime() / 1000), ip);
+                                    mySensorsInterface.write(`${result[i].id};${result[i].childId};3;1;1;${Math.round(new Date().getTime() / 1000)}`, ip);
                                 }
                                 break;
 
                             case 'I_SKETCH_VERSION':
                             case 'I_VERSION':           //   2   Used to request gateway version from controller.
-                                adapter.log.info('Version ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.info(`Version ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 saveValue = true;
                                 if (!result[i].ack && result[i].subType === 'I_VERSION') {
                                     // send response: internal, ack=1
-                                    mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;1;2;' + (adapter.version || 0), ip);
+                                    mySensorsInterface.write(`${result[i].id};${result[i].childId};3;1;2;${adapter.version || 0}`, ip);
                                 }
                                 break;
 
                             case 'I_SKETCH_NAME':           //   2   Used to request gateway version from controller.
-                                adapter.log.info('Name  ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.info(`Name ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 updateSketchName(result[i].id, result[i].payload);
                                 saveValue = true;
                                 break;
 
                             case 'I_INCLUSION_MODE':    //   5   Start/stop inclusion mode of the Controller (1=start, 0=stop).
-                                adapter.log.info('inclusion mode ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload ? 'STARTED' : 'STOPPED');
+                                adapter.log.info(`inclusion mode ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}` ? 'STARTED' : 'STOPPED');
                                 break;
 
                             case 'I_CONFIG':            //   6   Config request from node. Reply with (M)etric or (I)mperal back to sensor.
-                                result[i].payload = (result[i].payload === 'I') ? 'Imperial' : 'Metric';
-                                adapter.log.info('Config ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                result[i].payload = result[i].payload === 'I' ? 'Imperial' : 'Metric';
+                                adapter.log.info(`Config ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 config[ip || 'serial'] = config[ip || 'serial'] || {};
                                 config[ip || 'serial'].metric = result[i].payload;
                                 saveValue = true;
                                 break;
 
                             case 'I_LOG_MESSAGE':       //   9   Sent by the gateway to the Controller to trace-log a message
-                                adapter.log.debug('Log ' + (ip ? ' from ' + ip + ' ' : '') + ':' + result[i].payload);
+                                adapter.log.debug(`Log ${ip ? ' from ' + ip + ' ' : ''}:${result[i].payload}`);
                                 break;
 
                             case 'I_ID_REQUEST':
                                 if (inclusionOn) {
                                     // find maximal index
-                                    var maxId = 0;
-                                    for (var _id in devices) {
-                                        if (!devices.hasOwnProperty(_id)) continue;
+                                    let maxId = 0;
+                                    for (const _id in devices) {
+                                        if (!devices.hasOwnProperty(_id)) {
+                                            continue;
+                                        }
                                         if (devices[_id].native && (!ip || ip === devices[_id].native.ip) &&
                                             parseInt(devices[_id].native.id, 10) > parseInt(maxId, 10)) {
                                             maxId = devices[_id].native.id;
@@ -555,7 +589,7 @@ function main() {
                                     maxId++;
                                     if (!result[i].ack) {
                                         // send response: internal, ack=0, I_ID_RESPONSE
-                                        mySensorsInterface.write(result[i].id + ';' + result[i].childId + ';3;0;4;' + maxId, ip);
+                                        mySensorsInterface.write(`${result[i].id};${result[i].childId};3;0;4;${maxId}`, ip);
                                     }
                                 } else {
                                     adapter.log.warn('Received I_ID_REQUEST, but inclusion mode is disabled');
@@ -563,17 +597,15 @@ function main() {
                                 break;
 
                             default:
-                                adapter.log.info('Received INTERNAL message: ' + result[i].subType + ': ' + result[i].payload);
+                                adapter.log.info(`Received INTERNAL message: ${result[i].subType}: ${result[i].payload}`);
 
                         }
 
                         if (saveValue) {
                             saveResult(id, result[i], ip, true);
-                            if (result[i].subType === 'I_HEARTBEAT_RESPONSE'
-                            	|| result[i].subType === 'I_PRE_SLEEP_NOTIFICATION')
-			    {
+                            if (result[i].subType === 'I_HEARTBEAT_RESPONSE' || result[i].subType === 'I_PRE_SLEEP_NOTIFICATION') {
                                 adapter.log.debug('Send unsent values');
-                                findObjAckFalse(ip, result[i].id); 
+                                findObjAckFalse(ip, result[i].id);
                             }
                         }
                     } else if (result[i].type === 'stream') {
@@ -595,14 +627,14 @@ function main() {
                 }
             });
 
-            mySensorsInterface.on('connectionChange', function (isConn, ip, port) {
+            mySensorsInterface.on('connectionChange', (isConn, ip, port) => {
                 adapter.setState('info.connection', isConn, true);
                 // try soft request
                 if (!presentationDone && isConn) {
                     // request metric system
                     mySensorsInterface.write('0;0;3;0;6;get metric', ip, port);
                     mySensorsInterface.write('0;0;3;0;19;force presentation', ip, port);
-                    setTimeout(function () {
+                    setTimeout(() => {
                         // send reboot command if still no presentation
                         if (!presentationDone) {
                             mySensorsInterface.write('0;0;3;0;13;force restart', ip, port);
@@ -612,4 +644,13 @@ function main() {
             });
         });
     });
+}
+
+// If started as allInOne mode => return function to create instance
+// @ts-ignore
+if (module.parent) {
+    module.exports = startAdapter;
+} else {
+    // or start the instance directly
+    startAdapter();
 }

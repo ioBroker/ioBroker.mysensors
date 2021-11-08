@@ -92,17 +92,20 @@
                 "ru": "Исправлен запрос I_TIME"
             }
         },
-        "title": "mysensors adapter",
+        "title": "mysensors",
+        "titleLang": {
+            "en": "MySensors"
+        },
         "desc": {
-            "en": "mysensors Adapter",
-            "de": "mysensors Adapter",
-            "ru": "Драйвер mysensors",
-            "pt": "adaptador de mysensors",
-            "nl": "mysensors Adapter",
-            "fr": "mysensors Adaptateur",
-            "it": "Adattatore mysensors",
-            "es": "Adaptador de misensores",
-            "pl": "Adapter mysensors"
+            "en": "MySensors Adapter",
+            "de": "MySensors Adapter",
+            "ru": "Драйвер MySensors",
+            "pt": "adaptador de MySensors",
+            "nl": "MySensors Adapter",
+            "fr": "MySensors Adaptateur",
+            "it": "Adattatore MySensors",
+            "es": "Adaptador de MySensors",
+            "pl": "Adapter MySensors"
         },
         "license": "MIT",
         "platform": "Javascript/Node.js",
@@ -125,7 +128,11 @@
                 "name": "bluefox",
                 "email": "dogafox@gmail.com"
             }
-        ]
+        ],
+        "connectionType": "local",
+        "dataSource": "push",
+        "tier": 3,
+        "compact": true
     },
     "native": {
         "comName": "",
