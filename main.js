@@ -22,7 +22,6 @@ let presentationDone = false;
 let path;
 let fs;
 let mySensorsInterface;
-
 try {
     serialport = require('serialport'); // .SerialPort;
 } catch (e) {
@@ -31,7 +30,6 @@ try {
 
 function startAdapter(options) {
     options = options || {};
-
     Object.assign(options, {name: adapterName});
     adapter = new utils.Adapter(options);
 
@@ -423,7 +421,9 @@ function updateSketchName(id, name) {
 }
 
 function main() {
-	adapter.getState('info.connection', (err, state) => {
+    console.log('1 OPEN SOCKET!');
+
+    adapter.getState('info.connection', (err, state) => {
         if (!state || state.val) {
             adapter.setState('info.connection', false, true);
         }
@@ -492,7 +492,7 @@ function main() {
                                     devices[id].native.id      == result[i].id &&
                                     devices[id].native.childId == result[i].childId) {
                                     adapter.log.debug(`Set quality of ${devices[id].common.name || id} ${result[i].childId}: ${result[i].payload} ${typeof result[i].payload}`);
-                                    adapter.setState(id, {q: typeof result[i].payload}, true);
+                                    adapter.setState(id, {q: result[i].payload ? 0x40 : 0}, true);
                                 }
                             }
                         } else {

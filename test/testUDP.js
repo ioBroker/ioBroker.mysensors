@@ -1,15 +1,15 @@
-var expect = require('chai').expect;
-var setup  = require(__dirname + '/lib/setup');
-var dgram  = require('dgram');
-var fs     = require('fs');
+const expect = require('chai').expect;
+const setup  = require('./lib/setup');
+const dgram  = require('dgram');
+const fs     = require('fs');
 
-var objects     = null;
-var states      = null;
-var connected   = false;
-var port        = 15003;
-var udpClient;
-var lastMessage;
-var someObject;
+let objects     = null;
+let states      = null;
+let connected   = false;
+const port      = 15003;
+let udpClient;
+let lastMessage;
+let someObject;
 
 function checkConnection(value, done, counter) {
     counter = counter || 0;
@@ -18,15 +18,13 @@ function checkConnection(value, done, counter) {
         return;
     }
 
-    states.getState('mysensors.0.info.connection', function (err, state) {
+    states.getState('mysensors.0.info.connection', (err, state) => {
         if (err) console.error(err);
         if (state && typeof state.val === 'string' && ((value && state.val) || (!value && !state.val))) {
             connected = state.val;
             done();
         } else {
-            setTimeout(function () {
-                checkConnection(value, done, counter + 1);
-            }, 500);
+            setTimeout(() => checkConnection(value, done, counter + 1), 500);
         }
     });
 }
@@ -34,47 +32,41 @@ function checkConnection(value, done, counter) {
 function checkValue(id, value, cb, counter) {
     counter = counter || 0;
     if (counter > 20) {
-        done && done('Cannot check ' + value);
-        return;
+        return done && done('Cannot check ' + value);
     }
 
-    states.getState(id, function (err, state) {
+    states.getState(id, (err, state) => {
         if (err) console.error(err);
         if (state && value == state.val) {
             cb(err, state);
         } else {
-            setTimeout(function () {
-                checkValue(id, value, cb, counter + 1);
-            }, 500);
+            setTimeout(() => checkValue(id, value, cb, counter + 1), 500);
         }
     });
 }
 
 function sendMessage(message, callback) {
-    udpClient.send(new Buffer(message), 0, message.length, port, '127.0.0.1', function(err, bytes) {
-        callback && callback(err);
-    });
+    udpClient.send(Buffer.from(message), 0, message.length, port, '127.0.0.1', (err, bytes) =>
+        callback && callback(err));
 }
 
 function sendMessages(list, interval, callback) {
     if (!list || !list.length) {
         callback && callback();
     } else {
-        sendMessage(list.pop(), function (err) {
-            setTimeout(function() {
-                sendMessages(list, interval, callback);
-            }, interval || 100);
-        });
+        sendMessage(list.pop(), err =>
+            setTimeout(() =>
+                sendMessages(list, interval, callback), interval || 100));
     }
 }
 
-describe('mySensors UDP: Test UDP server', function() {
+describe('mySensors UDP: Test UDP server', function () {
     before('mySensors UDP: Start js-controller', function (_done) {
         this.timeout(600000); // because of first install from npm
         setup.adapterStarted = false;
 
-        setup.setupController(function () {
-            var config = setup.getAdapterConfig();
+        setup.setupController(() => {
+            const config = setup.getAdapterConfig();
             // enable adapter
             config.common.enabled   = true;
             config.common.loglevel  = 'debug';
@@ -85,17 +77,18 @@ describe('mySensors UDP: Test UDP server', function() {
             config.native.connTimeout = 5000;
             config.native.port      = port;
 
-            setup.setAdapterConfig(config.common, config.native);
-
-            setup.startController(function (_objects, _states) {
+            setup.startController(async (_objects, _states) => {
                 objects = _objects;
                 states  = _states;
+                //await states.setStateAsync(`${config._id}.alive`, false, true);
+                await objects.setObjectAsync(config._id, config);
+
                 setTimeout(_done, 1000);
             });
         });
 
         udpClient = dgram.createSocket('udp4');
-        udpClient.on('message', function (data) {
+        udpClient.on('message', data => {
             console.log('Received ' + data);
             lastMessage = data.toString();
         });
@@ -103,12 +96,12 @@ describe('mySensors UDP: Test UDP server', function() {
 
     it('mySensors UDP: Check if sensor connected to ioBroker', function (done) {
         this.timeout(4000);
-        var commands = fs.readFileSync(__dirname + '/lib/commands.txt').toString().split(/[\r\n|\n|\r]/g);
-        states.setState('mysensors.0.inclusionOn', true, function () {
-            setTimeout(function () {
-                sendMessages(commands, 10, function () {
+        const commands = fs.readFileSync(__dirname + '/lib/commands.txt').toString().split(/[\r\n|\n|\r]/g);
+        states.setState('mysensors.0.inclusionOn', true, () =>
+            setTimeout(() =>
+                sendMessages(commands, 10, () => {
                     if (!connected) {
-                        checkConnection(true, function () {
+                        checkConnection(true, () => {
                             expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
                             done();
                         });
@@ -116,49 +109,48 @@ describe('mySensors UDP: Test UDP server', function() {
                         expect(lastMessage).to.be.equal('0;0;3;0;19;force presentation');
                         done();
                     }
-                });
-            }, 1000);
-        });
+                }), 1000));
     });
 
     it('mySensors UDP: check created objects', function (done) {
         this.timeout(10000);
-        var expected = {
+        const expected = {
             "_id": "mysensors.0.127_0_0_1.0.59_DIMMER.V_PERCENTAGE",
             "common": {
-                "def":          0,
-                "type":         "number",
-                "read":         true,
-                "write":        true,
-                "min":          0,
-                "max":          100,
-                "unit":         "%",
-                "name":         "Test7 PWM 5V.V_PERCENTAGE",
-                "role":         "level.dimmer"
+                "type": "number",
+                "read": true,
+                "write": true,
+                "min": 0,
+                "max": 100,
+                "unit": "%",
+                "name": "Test7 PWM 5V.V_PERCENTAGE",
+                "role": "level.dimmer",
+                "def": 0
             },
             "native": {
-                "ip":           "127.0.0.1",
-                "id":           "0",
-                "childId":      "59",
-                "subType":      "S_DIMMER",
-                "subTypeNum":   4,
-                "varType":      "V_PERCENTAGE",
-                "varTypeNum":   3
+                "ip": "127.0.0.1",
+                "id": "0",
+                "childId": "59",
+                "subType": "S_DIMMER",
+                "subTypeNum": 4,
+                "varType": "V_PERCENTAGE",
+                "varTypeNum": 3
             },
-            "type":             "state",
-            "user":             "system.user.admin"
+            "type": "state"
         };
 
-        setTimeout(function () {
-            objects.getObject(expected._id, function (err, obj) {
+        setTimeout(() => {
+            objects.getObject(expected._id, (err, obj) => {
                 if (!obj) {
-                    setTimeout(function () {
-                        objects.getObject(expected._id, function (err, obj) {
+                    setTimeout(() => {
+                        objects.getObject(expected._id, (err, obj) => {
                             expect(err).to.be.not.ok;
                             expect(obj).to.be.ok;
+                            delete obj.user;
+                            delete obj.acl;
+                            delete obj.from;
+                            delete obj.ts;
 
-                            obj.from = undefined;
-                            obj.ts = undefined;
                             expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                             someObject = obj;
                             done();
@@ -167,9 +159,10 @@ describe('mySensors UDP: Test UDP server', function() {
                 } else {
                     expect(err).to.be.not.ok;
                     expect(obj).to.be.ok;
-
-                    obj.from = undefined;
-                    obj.ts = undefined;
+                    delete obj.user;
+                    delete obj.acl;
+                    delete obj.from;
+                    delete obj.ts;
                     expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                     someObject = obj;
                     done();
@@ -181,12 +174,12 @@ describe('mySensors UDP: Test UDP server', function() {
     it('mySensors UDP: it must receive numeric data', function (done) {
         this.timeout(5000);
         lastMessage = '';
-        var data = someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';58.7';
+        const data = `${someObject.native.id};${someObject.native.childId};1;0;${someObject.native.varTypeNum};58.7`;
 
-        udpClient.send(new Buffer(data), 0, data.length, port, '127.0.0.1', function(err, bytes) {
+        udpClient.send(Buffer.from(data), 0, data.length, port, '127.0.0.1', (err, bytes) => {
             expect(err).to.be.not.ok;
             expect(bytes).to.be.equal(data.length);
-            checkValue(someObject._id, 58.7, function (err, state) {
+            checkValue(someObject._id, 58.7, (err, state) => {
                 expect(err).to.be.not.ok;
                 expect(state).to.be.ok;
                 expect(state.val).to.be.equal(58.7);
@@ -199,9 +192,9 @@ describe('mySensors UDP: Test UDP server', function() {
     it('mySensors UDP: it must control numeric', function (done) {
         this.timeout(5000);
         lastMessage = '';
-        states.setState(someObject._id, 15.5, function (err) {
-            setTimeout(function () {
-                expect(lastMessage).to.be.equal(someObject.native.id + ';' + someObject.native.childId + ';1;1;' + someObject.native.varTypeNum +';15.5');
+        states.setState(someObject._id, 15.5, err => {
+            setTimeout(() => {
+                expect(lastMessage).to.be.equal(`${someObject.native.id};${someObject.native.childId};1;1;${someObject.native.varTypeNum};15.5`);
                 done();
             }, 1000);
         });
@@ -232,12 +225,12 @@ describe('mySensors UDP: Test UDP server', function() {
             "type": "state",
             "user": "system.user.admin"
         };
-        var data = someObject.native.id + ';' + someObject.native.childId + ';1;0;' + someObject.native.varTypeNum +';1';
+        const data = `${someObject.native.id};${someObject.native.childId};1;0;${someObject.native.varTypeNum};1`;
 
-        udpClient.send(new Buffer(data), 0, data.length, port, '127.0.0.1', function(err, bytes) {
+        udpClient.send(Buffer.from(data), 0, data.length, port, '127.0.0.1', (err, bytes) => {
             expect(err).to.be.not.ok;
             expect(bytes).to.be.equal(data.length);
-            checkValue(someObject._id, true, function (err, state) {
+            checkValue(someObject._id, true, (err, state) => {
                 expect(err).to.be.not.ok;
                 expect(state).to.be.ok;
                 expect(state.val).to.be.equal(true);
@@ -250,8 +243,8 @@ describe('mySensors UDP: Test UDP server', function() {
     it('mySensors UDP: it must control boolean', function (done) {
         this.timeout(5000);
         lastMessage = '';
-        states.setState(someObject._id, true, function (err) {
-            setTimeout(function () {
+        states.setState(someObject._id, true, err => {
+            setTimeout(() => {
                 expect(lastMessage).to.be.equal(someObject.native.id + ';' + someObject.native.childId + ';1;1;' + someObject.native.varTypeNum +';1');
                 done();
             }, 1000);
@@ -286,12 +279,12 @@ describe('mySensors UDP: Test UDP server', function() {
             "type": "state",
             "user": "system.user.admin"
         };
-        var data = someObject.native.id + ';255;3;0;0;50';
+        const data = someObject.native.id + ';255;3;0;0;50';
 
-        udpClient.send(new Buffer(data), 0, data.length, port, '127.0.0.1', function(err, bytes) {
+        udpClient.send(Buffer.from(data), 0, data.length, port, '127.0.0.1', (err, bytes) => {
             expect(err).to.be.not.ok;
             expect(bytes).to.be.equal(data.length);
-            checkValue(someObject._id, 50, function (err, state) {
+            checkValue(someObject._id, 50, (err, state) => {
                 expect(err).to.be.not.ok;
                 expect(state).to.be.ok;
                 expect(state.val).to.be.equal(50);
@@ -303,7 +296,7 @@ describe('mySensors UDP: Test UDP server', function() {
 
     it('mySensors UDP: check metrics', function (done) {
         this.timeout(5000);
-        var expected = {
+        const expected = {
             "_id": "mysensors.0.127_0_0_1.0.42_TEMP.V_TEMP",
             "common": {
                 "name": "dallas.V_TEMP",
@@ -324,33 +317,37 @@ describe('mySensors UDP: Test UDP server', function() {
                 "varType": "V_TEMP",
                 "varTypeNum": 0
             },
-            "type": "state",
-            "user": "system.user.admin"
+            "type": "state"
         };
 
-        setTimeout(function () {
-            objects.getObject(expected._id, function (err, obj) {
+        setTimeout(() => {
+            objects.getObject(expected._id, (err, obj) => {
                 if (!obj) {
-                    setTimeout(function () {
-                        objects.getObject(expected._id, function (err, obj) {
+                    setTimeout(() =>
+                        objects.getObject(expected._id, (err, obj) => {
                             expect(err).to.be.not.ok;
                             expect(obj).to.be.ok;
                             expect(obj.common.unit).to.be.equal('°F');
 
-                            obj.from = undefined;
-                            obj.ts = undefined;
+                            delete obj.user;
+                            delete obj.acl;
+                            delete obj.from;
+                            delete obj.ts;
+
                             expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                             someObject = obj;
                             done();
-                        });
-                    }, 1000);
+                        }), 1000);
                 } else {
                     expect(err).to.be.not.ok;
                     expect(obj).to.be.ok;
                     expect(obj.common.unit).to.be.equal('°F');
 
-                    obj.from = undefined;
-                    obj.ts = undefined;
+                    delete obj.user;
+                    delete obj.acl;
+                    delete obj.from;
+                    delete obj.ts;
+
                     expect(JSON.stringify(expected)).to.be.equal(JSON.stringify(obj));
                     someObject = obj;
                     done();
@@ -362,19 +359,17 @@ describe('mySensors UDP: Test UDP server', function() {
     it('mySensors UDP: check disconnection', function (done) {
         this.timeout(6000);
 
-        setTimeout(function () {
-            checkConnection(false, function (err) {
+        setTimeout(() =>
+            checkConnection(false, err => {
                 expect(connected).to.be.equal('');
                 done();
-            });
-        }, 5000);
+            }), 5000);
     });
 
     after('mySensors UDP: Stop js-controller', function (done) {
         this.timeout(5000);
-        if (udpClient) udpClient.close();
-        setup.stopController(function () {
-            done();
-        });
+        udpClient && udpClient.close();
+        setup.stopController(() =>
+            setTimeout(() => done(), 4000));
     });
 });
