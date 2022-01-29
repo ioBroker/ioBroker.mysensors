@@ -65,7 +65,7 @@ describe('mySensors UDP: Test UDP server', function () {
         this.timeout(600000); // because of first install from npm
         setup.adapterStarted = false;
 
-        setup.setupController(() => {
+        setup.setupController(async () => {
             const config = await setup.getAdapterConfig();
             // enable adapter
             config.common.enabled   = true;
