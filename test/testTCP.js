@@ -67,7 +67,7 @@ describe('mySensors TCP: Test TCP server', function () {
         setup.adapterStarted = false;
 
         setup.setupController(() => {
-            const config = setup.getAdapterConfig();
+            const config = await setup.getAdapterConfig();
             // enable adapter
             config.common.enabled   = true;
             config.common.loglevel  = 'debug';
