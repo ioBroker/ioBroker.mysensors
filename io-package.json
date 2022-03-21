@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "mysensors",
-    "version": "2.0.3",
+    "version": "3.0.0",
     "news": {
+      "3.0.0": {
+        "en": "Updated serialport package",
+        "de": "Serialport-Paket aktualisiert",
+        "ru": "Обновленный пакет последовательного порта",
+        "pt": "Pacote de porta serial atualizado",
+        "nl": "Bijgewerkt serialport-pakket",
+        "fr": "Paquet de port série mis à jour",
+        "it": "Pacchetto porta seriale aggiornato",
+        "es": "Paquete de puerto serie actualizado",
+        "pl": "Zaktualizowany pakiet portu szeregowego",
+        "zh-cn": "更新了串口包"
+      },
       "2.0.3": {
         "en": "Added the support of deep sleep",
         "de": "Unterstützung für Tiefschlaf hinzugefügt",
@@ -72,17 +84,6 @@
         "it": "Aggiornamento per Admin v3",
         "es": "Actualizando para Admin v3",
         "pl": "Aktualizowanie dla administratora v3"
-      },
-      "1.2.0": {
-        "en": "Upgrade Serialport Library",
-        "de": "Serialport Bibliothek aktualisiert",
-        "ru": "Upgrade Serialport Library",
-        "pt": "Upgrade Serialport Library",
-        "nl": "Upgrade Serialport-bibliotheek",
-        "fr": "Mettre à niveau la bibliothèque Serialport",
-        "it": "Aggiorna la libreria Serialport",
-        "es": "Actualizar la biblioteca de Serialport",
-        "pl": "Uaktualnij bibliotekę Serialport"
       }
     },
     "title": "mysensors",

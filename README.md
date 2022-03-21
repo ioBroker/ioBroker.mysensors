@@ -29,7 +29,7 @@ sudo apt-get install python2.7
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 3.0.0 (2022-03-21)
 * (bluefox) Updated serialport package
 
 ### 2.0.3 (2021-11-10)

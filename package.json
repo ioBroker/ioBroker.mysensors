@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mysensors",
-  "version": "2.0.3",
+  "version": "3.0.0",
   "description": "ioBroker mysensors Adapter",
   "author": {
     "name": "bluefox",
