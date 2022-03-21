@@ -25,10 +25,13 @@ sudo apt-get install python2.7
 
 <!--
 	Placeholder for the next version (at the beginning of the line):
-	### __WORK IN PROGRESS__
+	### **WORK IN PROGRESS**
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (bluefox) Updated serialport package
+
 ### 2.0.3 (2021-11-10)
 * (sergeyksv) Added the support of deep sleep
 
