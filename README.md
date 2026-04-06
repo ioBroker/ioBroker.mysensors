@@ -29,6 +29,9 @@ sudo apt-get install python2.7
 -->
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+- (iobroker-bot) Adapter requires node.js >= 20 now.
 ### 3.0.0 (2022-03-21)
 * (bluefox) Updated serialport package
 
