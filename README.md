@@ -29,6 +29,9 @@ sudo apt-get install python2.7
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
+
 ### 3.0.0 (2022-03-21)
 * (bluefox) Updated serialport package
 
