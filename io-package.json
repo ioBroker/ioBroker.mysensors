@@ -105,7 +105,6 @@
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "icon": "mysensors.png",
-    "materialize": true,
     "enabled": true,
     "messagebox": true,
     "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.mysensors/master/admin//mysensors.png",
@@ -126,7 +125,15 @@
     "connectionType": "local",
     "dataSource": "push",
     "tier": 3,
-    "compact": true
+    "compact": true,
+    "adminUI": {
+      "config": "materialize"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ]
   },
   "native": {
     "comName": "",
