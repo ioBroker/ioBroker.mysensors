@@ -101,7 +101,10 @@
       "es": "Adaptador de MySensors",
       "pl": "Adapter MySensors"
     },
-    "license": "MIT",
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
     "platform": "Javascript/Node.js",
     "mode": "daemon",
     "icon": "mysensors.png",
