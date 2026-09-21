@@ -137,8 +137,8 @@ function filterSerialPorts(path) {
 
 function listSerial(ports) {
     ports = ports || [];
-    path  = path  || require('path');
-    fs    = fs    || require('fs');
+    path  = path  || require('node:path');
+    fs    = fs    || require('node:fs');
 
     // Filter out the devices that aren't serial ports
     const devDirName = '/dev';
@@ -163,7 +163,7 @@ function listSerial(ports) {
                 return {comName: port};
             });
     } catch (e) {
-        if (require('os').platform() !== 'win32') {
+        if (require('node:os').platform() !== 'win32') {
             adapter.log.error(`Cannot read "${devDirName}": ${e}`);
         }
         result = [];
