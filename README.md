@@ -31,6 +31,7 @@ sudo apt-get install python2.7
 ## Changelog
 
 ### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22.19.0 now
 - (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
 
 ### 3.0.0 (2022-03-21)
