@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "sensors": "2.0.0",
-    "@iobroker/adapter-core": "^2.6.7"
+    "@iobroker/adapter-core": "^3.4.3"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.9",
@@ -58,7 +58,7 @@
     "main.js"
   ],
   "engines": {
-    "node": ">=12.17.0 <13.0 || >=14.0.0"
+    "node": ">=20"
   },
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha --exit",

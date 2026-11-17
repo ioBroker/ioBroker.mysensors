@@ -133,7 +133,7 @@
     "compact": true,
     "dependencies": [
       {
-        "js-controller": ">=6.0.11"
+        "js-controller": ">=7.0.0"
       }
     ]
   },

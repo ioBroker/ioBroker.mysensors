@@ -32,6 +32,8 @@ sudo apt-get install python2.7
 
 ### **WORK IN PROGRESS**
 - (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
+* (GermanBluefox) Updated @iobroker/adapter-core to 3.x (#70)
+* (GermanBluefox) js-controller 7 or newer is required (#70)
 
 ### 3.0.0 (2022-03-21)
 * (bluefox) Updated serialport package
